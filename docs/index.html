@@ -553,6 +553,9 @@
   .sproj.late{background:repeating-linear-gradient(45deg,var(--late-a) 0 5px,var(--late-b) 5px 10px)}
   .stoday{position:absolute;top:0;height:20px;border-left:2px dashed var(--today)}
   .srow.late .strack{animation:latepulse 1.1s ease-in-out infinite;border-color:var(--bad)}
+  .levychip{display:inline-block;font-size:9px;font-weight:800;border:1.5px solid var(--cta);color:var(--cta);border-radius:9px;padding:0 6px;margin-left:5px;vertical-align:1px;white-space:nowrap}
+  .levybtns{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+  .levybtns .mini{justify-content:flex-start;text-align:left}
   @keyframes latepulse{
     0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--bad) 0%,transparent)}
     50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--bad) 45%,transparent)}
@@ -1110,7 +1113,7 @@
   }
   /* セリフ履歴（バックログ）：会話の上に重ねて開き、閉じれば現在位置に戻る */
   .dlglog{
-    position:absolute;left:8px;right:8px;bottom:8px;top:48px;z-index:40;display:flex;flex-direction:column;
+    position:absolute;left:8px;right:8px;bottom:8px;top:132px;z-index:40;display:flex;flex-direction:column;
     pointer-events:auto;
     background:var(--card);border:2.5px solid var(--card-border);border-radius:10px;
     box-shadow:0 10px 30px rgba(0,0,0,.4);overflow:hidden;
@@ -1138,8 +1141,10 @@
   .ll-row.tip{background:color-mix(in srgb,var(--gold) 12%,transparent);border-left:6px solid var(--gold);padding-left:8px}
   .ll-row.tip .ll-name{color:var(--gold)}
   .ll-empty{color:var(--ink-soft);font-size:12.5px;padding:10px 0}
+  /* イベント種別（タイトル）はセリフ窓の中に置く：以前はステージ左上に
+     浮かせていたため、左上のQCDSE常時表示と重なっていた */
   .dlg-kind{
-    position:absolute;top:8px;left:8px;z-index:3;
+    display:inline-block;margin:0 0 6px;
     background:var(--tag-bg);color:var(--tag-ink);font-size:11px;font-weight:700;
     border-radius:12px;padding:3px 10px;
   }
@@ -1149,6 +1154,10 @@
     padding:16px 14px 10px;min-height:118px;cursor:pointer;
     box-shadow:0 4px 0 rgba(0,0,0,.25);
     pointer-events:auto;
+    /* セリフ・選択肢が最大まで大きい状態でも、窓の上端がステージ左上の
+       QCDSE常時表示（下端 ≒ 120px）の領域まで上がってこないよう高さを
+       抑え、中はスクロールさせる */
+    max-height:58%;overflow-y:auto;scrollbar-width:thin;
   }
   /* イベントUIの枠の発光：重要度・種類で色を一貫させる。
      calm＝通常（大人しい色）／warn＝注意（橙）／danger＝重大（赤・点滅）。
@@ -2042,6 +2051,9 @@
   #gl3dCanvas{position:absolute;left:0;right:0;top:46px;bottom:0;width:100%;height:calc(100% - 46px);display:none;z-index:3;touch-action:none;cursor:grab}
   #gl3dCanvas:active{cursor:grabbing}
   .stage.zoom-3d #gl3dCanvas{display:block}
+  /* 3D上の会話吹き出し専用の透明2Dレイヤー（WebGLの上に重ね、入力は透過） */
+  #gl3dBub{position:absolute;left:0;right:0;top:46px;bottom:0;width:100%;height:calc(100% - 46px);display:none;z-index:4;pointer-events:none}
+  .stage.zoom-3d #gl3dBub{display:block}
   .stage.zoom-3d #world{visibility:hidden}
   .stage.zoom-3d #gl3dLegend{display:flex}
   #gl3dLegend{display:none;position:absolute;left:8px;bottom:8px;z-index:4;gap:5px;flex-wrap:wrap;max-width:94%;
@@ -2051,17 +2063,21 @@
     align-items:center;justify-content:center;text-align:center;padding:20px;background:var(--card);color:var(--ink)}
   #gl3dFallback.show{display:flex}
   /* QCDSEステータスの常時表示（図面エリア左上・全ビュー共通・会話中も表示。
-     入力は透過させ、図面操作の邪魔をしない） */
-  #qcdHud{position:absolute;top:6px;left:6px;z-index:34;pointer-events:none;width:146px;
+     入力は透過させ、図面操作の邪魔をしない）。数値表示はせず、バーの上に
+     5段階の目安（最悪／悪い／順調／良い／最高）を置く。バー自体は段階に
+     カクつかず、内部値の連続変化をそのまま位置に反映して滑らかに動く。
+     色は項目ごとの色（ラベル・バー共通）。横幅は従来の約2倍の横長 */
+  #qcdHud{position:absolute;top:6px;left:6px;z-index:34;pointer-events:none;width:min(296px,84%);
     background:color-mix(in srgb,var(--card) 84%,transparent);border:1px solid var(--line);
-    border-radius:8px;padding:5px 8px 6px;box-shadow:0 1px 5px rgba(0,0,0,.16)}
-  #qcdHud .qcdrow{display:flex;align-items:center;gap:5px;font-size:10.5px;line-height:1.55}
-  #qcdHud .qcdlab{flex:none;width:37px;font-weight:800;white-space:nowrap}
-  #qcdHud .qcdbar{flex:1;height:5px;border-radius:3px;background:var(--seg-off);overflow:hidden}
-  #qcdHud .qcdbar i{display:block;height:100%;border-radius:3px;background:#35a06f;transition:width .3s}
-  #qcdHud .qcdbar i.warn{background:#e08a1e}
-  #qcdHud .qcdbar i.bad{background:#d92c2c}
-  #qcdHud .qcdnum{flex:none;width:22px;text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+    border-radius:8px;padding:5px 9px 7px;box-shadow:0 1px 5px rgba(0,0,0,.16)}
+  #qcdHud .qcdticks{position:relative;height:12px;margin:0 0 1px 46px;font-size:9px;color:var(--ink-soft)}
+  #qcdHud .qcdticks span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;font-weight:700}
+  #qcdHud .qcdrow{display:flex;align-items:center;gap:6px;font-size:11px;line-height:1.5}
+  #qcdHud .qcdlab{flex:none;width:40px;font-weight:800;white-space:nowrap}
+  #qcdHud .qcdbar{flex:1;height:7px;border-radius:4px;background-color:var(--seg-off);
+    background-image:linear-gradient(to right, color-mix(in srgb,var(--ink) 22%,transparent) 1px, transparent 1px);
+    background-size:20% 100%;overflow:hidden}
+  #qcdHud .qcdbar i{display:block;height:100%;border-radius:4px;transition:width .6s ease}
   #gl3dCap{display:none;position:absolute;right:8px;bottom:8px;z-index:32;width:min(330px,86%);
     background:var(--card);border:2px solid var(--card-border);border-radius:8px;padding:10px 30px 10px 12px;
     font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.25)}
@@ -2099,7 +2115,7 @@
     .epiLine.head{font-size:16.5px}
     .epiLines{bottom:7%;padding:0 12px}
   }
-  @media (max-width:560px){ #gl3dCanvas{top:40px;height:calc(100% - 40px)} #gl3dLegend{font-size:9.5px;bottom:5px;left:5px} #gl3dFallback{top:40px} }
+  @media (max-width:560px){ #gl3dCanvas,#gl3dBub{top:40px;height:calc(100% - 40px)} #gl3dLegend{font-size:9.5px;bottom:5px;left:5px} #gl3dFallback{top:40px} }
   /* ===== レイアウト再構成：図面は最上段に全幅・固定高で常時表示／
      その下に 監督｜工程表｜記録と情報 の3列／アクションは下部オーバーレイ =====
      図面エリアの高さは他の領域（工程表・アクション）の内容量に連動させない。
@@ -2446,7 +2462,7 @@
     .dlglog{top:70px}
     .stagebanner{top:70px}
     .planguide{top:70px;max-width:calc(100% - 12px)}
-    #isoCanvas,#gl3dCanvas,#gl3dFallback{top:62px;height:calc(100% - 62px)}
+    #isoCanvas,#gl3dCanvas,#gl3dBub,#gl3dFallback{top:62px;height:calc(100% - 62px)}
     /* 3Dの凡例は下端に小さく、場所キャプションはレーン直下に出して
        凡例と重ねない。キャプションは幅いっぱいで読みやすくする */
     #gl3dLegend{font-size:9.5px;bottom:5px;left:5px;max-width:calc(100% - 10px)}
@@ -2531,7 +2547,7 @@
   .lanelab{display:none}
   .world{top:0}
   #isoCanvas{top:0;height:100%}
-  #gl3dCanvas{top:0;height:100%}
+  #gl3dCanvas,#gl3dBub{top:0;height:100%}
   #gl3dFallback{top:0}
   #isoLegend,#gl3dLegend{display:none !important}
   .stagebanner{top:50px}
@@ -2569,7 +2585,7 @@
   @media (max-width:560px){
     .world{top:0}
     #isoCanvas{top:0;height:100%}
-    #gl3dCanvas{top:0;height:100%}
+    #gl3dCanvas,#gl3dBub{top:0;height:100%}
     #gl3dFallback{top:0}
     .stagelane{padding:4px}
     .stagelane .zoomctl{max-width:60%}
@@ -2734,17 +2750,14 @@
       <canvas id="isoCanvas" aria-label="アイソメ現場ビュー"></canvas>
       <div id="isoLegend"><span class="ghost">■ 青ゴースト＝計画済み・未施工（遅れ）</span><span>⚑ 検査ゲート待ち</span><span>階タブ＝フォーカス階（上階・屋根は透過）</span><span>南西から見る</span></div>
       <canvas id="gl3dCanvas" aria-label="3D現場ビュー"></canvas>
+      <canvas id="gl3dBub" aria-hidden="true"></canvas>
       <div id="gl3dLegend"></div>
       <div id="gl3dFallback"><div><b>3Dを表示できません</b><br><span class="small">この端末・ブラウザでは WebGL が使えないため、3Dビューは表示できません。アイソメ図／平面図はそのまま使えます。</span></div></div>
       <div id="gl3dCap" role="status"></div>
       <div class="g3ctl" id="g3Ctl" role="group" aria-label="3Dの表示操作">
         <button type="button" data-g3z="in" title="3Dを拡大" aria-label="3Dを拡大">＋</button>
         <button type="button" data-g3z="out" title="3Dを縮小" aria-label="3Dを縮小">−</button>
-        <button type="button" data-g3z="reset" class="g3mbtn" title="初期視点に戻る（南西・少し低い角度・建物全体・透過なし全体表示）" aria-label="初期視点に戻る">全体</button>
-        <div class="g3sep" aria-hidden="true"></div>
-        <button type="button" data-g3mode="all" class="g3mbtn on" title="全体表示：全階を不透明で描く（既定）" aria-label="3D表示モード：全体">全体</button>
-        <button type="button" data-g3mode="floor" class="g3mbtn" title="フロア単独表示：階タブで選んだ階だけを描く（試作同様）" aria-label="3D表示モード：フロア単独">単独</button>
-        <button type="button" data-g3mode="xray" class="g3mbtn" title="透かし表示：フォーカス階より上を半透明にして中を見る" aria-label="3D表示モード：透かし">透かし</button>
+        <button type="button" data-g3z="reset" class="g3mbtn" title="全体表示に戻る（初期視点・階フォーカスも表示モードも全体へ）" aria-label="全体表示に戻る">全体</button>
       </div>
       <div id="epiOv" aria-label="エピローグ">
         <p class="epiKind">エピローグ — 開業した建物</p>
@@ -2757,11 +2770,11 @@
       <div class="stagebanner" id="stageBanner"></div>
       <div class="dlg" id="dlgOverlay" role="dialog" aria-label="対話画面">
         <div class="dlg-top">
-          <span class="dlg-kind" id="dlgKind">電話</span>
           <div class="dlg-portrait" id="dlgPortrait"></div>
         </div>
         <div class="dlg-window" id="dlgWindow">
           <span class="dlg-name" id="dlgName">相手</span>
+          <div><span class="dlg-kind" id="dlgKind">電話</span></div>
           <div class="dlg-text" id="dlgText"></div>
           <div class="dlg-choices" id="dlgChoices"></div>
           <div class="dlg-foot">
@@ -3730,6 +3743,13 @@ function accLaxity(c, t){
   if(S.senkou && S.senkou[t.id]) s += 1;
   if(!plan1Fresh()) s += 0.8;
   if(k && effEntry(k) === S.day && !S.eduDone[k]) s += 1;
+  /* HUDの安全バーと事故判定を同じ物差し（safetyScore）でつなぐ：安全が
+     「悪い」帯域（40未満）に入ると甘さが増え、「最悪」（20未満）では大きく増えて
+     事故が現実に起き得る側へ寄る。「良い」以上（70超）では差し引かれて、
+     入口（rollAccidents の 2.2）にほぼ届かなくなる */
+  var sf = (typeof safetyScore === 'function') ? safetyScore() : 55;
+  if(sf < 40) s += (40 - sf) * 0.07;
+  else if(sf > 70) s -= Math.min(1.2, (sf - 70) * 0.04);
   if(c.wind && WIND[S.day]) s += 2;
   if(c.rain && (RAIN[S.day] || RAIN[S.day - 1])) s += 1.5;
   if(c.nopower && t.zone && /^F[123]/.test(t.zone) && !(S.powerZones && S.powerZones[t.zone])) s += 1.5;
@@ -3777,6 +3797,10 @@ function rollAccidents(active){
      候補ごとに読む。週の確率は日次確率の5作業日分に換算して1回だけ引く */
   var skipAccident = (S._accLastFireWeek === wk - 1); /* 前週に事故があった週の翌週は事故判定を休む */
   var bestA = null, bestH = null;
+  /* 安全バーの帯域と発生確率の対応：「悪い」以下でヒヤリ・ハット（前兆）が
+     体感できる頻度に、「最悪」では事故確率も上がる。「良い」以上ではほぼ起きない */
+  var sfR = (typeof safetyScore === 'function') ? safetyScore() : 55;
+  var accMul = sfR < 20 ? 1.9 : sfR < 40 ? 1.4 : sfR > 70 ? 0.45 : 1;
   active.forEach(function(t){
     ACC_CASES.forEach(function(c){
       if(S.accDone[c.id]) return;
@@ -3789,12 +3813,12 @@ function rollAccidents(active){
       var warned = !!(S.accWarn[c.id] && S.day - S.accWarn[c.id] <= 7);
       var over = lax - 2.2;
       if(!skipAccident){
-        var apD = Math.min(0.03, 0.004 + 0.004 * over) * (warned ? 3 : 1);
+        var apD = Math.min(0.055, (0.004 + 0.004 * over) * accMul) * (warned ? 3 : 1);
         var apW = 1 - Math.pow(1 - apD, 5);
         if(!bestA || apW > bestA.p) bestA = {p:apW, c:c, t:t};
       }
       if(!S.accHiyariDay[c.id] || S.day - S.accHiyariDay[c.id] >= 3){
-        var hpD = Math.min(0.06, 0.015 + 0.009 * over) * (warned ? 0.6 : 1);
+        var hpD = Math.min(0.11, (0.015 + 0.009 * over) * accMul) * (warned ? 0.6 : 1);
         var hpW = 1 - Math.pow(1 - hpD, 5);
         if(!bestH || hpW > bestH.p) bestH = {p:hpW, c:c, t:t};
       }
@@ -4018,7 +4042,7 @@ function resetGame(){
   clearTimers();
   S = {day:1, phase:'morning', money:180, moneyStart:180, fatigue:0, debt:0, debtTotal:0,
     claimCount:0, claimByCause:{}, claimGuard:{}, claimPending:false, claimKey:null, claimConductTrade:null, kinrinTrust:3, storyShown:{}, storyPending:'prologue', storyOpen:false,
-    ot:false, otUsedYesterday:false, boost:{}, boostStart:{}, towerCrane:false, spotPlan:{}, spotMarked:{}, powerZones:{}, carts:1, scafPlan:{N:true, S:true, E:true, W:true}, senkou:{}, pourBooked:PLAN['foundP'][0], pourMoved:false,
+    ot:false, otUsedYesterday:false, boost:{}, boostStart:{}, levy:{}, towerCrane:false, spotPlan:{}, spotMarked:{}, powerZones:{}, carts:1, scafPlan:{N:true, S:true, E:true, W:true}, senkou:{}, pourBooked:PLAN['foundP'][0], pourMoved:false,
     shortage:false, shortageHard:false, deliverySlow:false, deliverySoft:false, consult:null, slowDay:0,
     findingsDone:false, hiyariDone:false, changeAccepted:false, sel:null,
     work:{}, started:{}, finished:{}, shock:null, _panelActs:[],
@@ -4184,6 +4208,8 @@ function projDates(){
         s = S.started[t.id];
         var rem = t.dur - S.work[t.id];
         if(EST_BOOST && EST_BOOST[t.id]) rem = Math.max(0.1, rem - Math.min(rem, 3 * (EST_BOOST[t.id] - 1)));
+        var _lr = (typeof levySpeedRate === 'function') ? levySpeedRate(t.id) : 1;
+        if(_lr > 1) rem = rem / _lr; /* 継続的な手（人員追加／急かす／残業依頼）は完了見込みにも反映する */
         fO = baseOrd + Math.ceil(rem - 1e-9) - 1;
         f = calOfWork(fO);
       } else {
@@ -5644,6 +5670,7 @@ function causeReviewHTML(){
 function simulateDay(){
   var d = S.day;
   if(isClosedDay(d)) return; /* 閉所日は工事が進まない（安全側のガード） */
+  levyDaily(); /* 継続的な手（人員追加／急かす／残業依頼）の維持費・疲労・安全と自然解消 */
   if(RAIN[d]) log('小雨 — 屋外は進みが落ちる');
   if(patrolDay(d)) log((patrolKind(d) === 'quality' ? '品質パトロール（監理者）' : '本社安全パトロール') + ' — 作業は通常どおり進み、巡回で指摘 ' + (S.patrolToday ? S.patrolToday.findings.length : 0) + '件');
   if(d === S.pourBooked && !S.started['foundP'] && !isDone('foundP')){
@@ -5756,6 +5783,11 @@ function simulateDay(){
     var cTier = claimTierOf('conduct');
     if(cTier){ v *= cTier === 1 ? 0.97 : 0.94; if(cTier >= 2 && S.claimConductTrade && foremanOf(t) === S.claimConductTrade) v *= cTier === 2 ? 0.92 : 0.85; }
     if(boostActive(t.id, d)) v *= boostFactor(t);
+    var _lv = S.levy && S.levy[t.id];
+    if(_lv && _lv.level > 0){ /* 継続的な手：人員追加と急かしは進み倍率、残業依頼は下で加算 */
+      if(_lv.mode === 'crew') v *= 1 + (_lv.fac || 0.4) * _lv.level;
+      else if(_lv.mode === 'rush') v *= 1 + 0.15 * _lv.level;
+    }
     if(S.evOpen && t.buff) v *= 1.25;
     /* 外構の段取り：舗装が済んだ面の上は重量車両・大型重機が通れない。
        土間打設とサイン建込みは、舗装より先に済ませておくのが段取り */
@@ -5775,6 +5807,7 @@ function simulateDay(){
     /* 仮設電源：コードドラムが届いていない工区では電動工具・溶接が鈍る */
     if(needsPower(t) && t.zone && /^F[123]/.test(t.zone) && !(S.powerZones && S.powerZones[t.zone])) v *= 0.5;
     if(otUsed && t.id === otTid) v += 0.5;
+    if(_lv && _lv.mode === 'ot' && _lv.level > 0) v += 0.5 * _lv.level; /* 残業を依頼する（継続）：遅れている間は毎日積み増す */
     if(S.fatigue >= 3) v *= 0.85;
     S.work[t.id] += v;
     /* 引渡しのゲート：検査未完了・未確認先行・写真漏れが残るままでは引き渡せない。
@@ -5889,6 +5922,166 @@ function simulateDay(){
     log('ヒヤリ・ハット — 明日は安全確認で半分に');
   }
   if(isDone('finish')) finishGame();
+}
+/* ===== 工程表バーから打つ継続的な手（人員追加／急かす／残業を依頼する） =====
+   工程表の行を選ぶと出るパネル／夕礼の行チップから使う。いずれも「その作業への
+   継続的な働きかけ」として S.levy[tid] に持ち、毎日の作業計算（simulateDay）に
+   効く。共通の終わり方：その作業が遅れている間は効き目がフルに続く。遅れを
+   取り戻した（遅れていない）状態になると、約1ヶ月（30日）かけて効き目が
+   直線的に弱まり、ゼロになった時点で手当は自然に解消する（勝手に戻る）。
+   作業が完了すれば即終了。1作業につき同時に持てるのは1つだけ */
+var LEVY_DECAY_DAYS = 30;
+var LEVY_LABEL = {crew:'人員追加', rush:'急かす', ot:'残業を依頼する'};
+function levyOf(tid){ return (S && S.levy) ? (S.levy[tid] || null) : null; }
+function levyEligible(t){ return !!t && !t.ins && !isDone(t.id) && (S.started[t.id] || predDone(t.id)); }
+function levyDelayed(t, proj){
+  var g = barGeom(t, proj || projDates());
+  return !!(g.lateNow || g.fcLate);
+}
+/* 見込み計算（projDates）用の速度倍率：継続中の手は完了見込みにも反映する。
+   遅れ判定（levyDaily）がこの見込みで回るため、効いている間は「遅れが縮む」
+   方向に見込みが動き、取り戻せば自然解消のカウントが始まる */
+function levySpeedRate(tid){
+  var lv = levyOf(tid);
+  if(!lv || !(lv.level > 0)) return 1;
+  if(lv.mode === 'crew') return 1 + (lv.fac || 0.4) * lv.level;
+  if(lv.mode === 'rush') return 1 + 0.15 * lv.level;
+  if(lv.mode === 'ot') return 1 + 0.5 * lv.level;
+  return 1;
+}
+function levyStatusLine(t){
+  var lv = levyOf(t.id); if(!lv) return '';
+  var delayed = levyDelayed(t);
+  if(delayed) return '継続中 — 遅れている間はこのまま続く';
+  return '取り戻し済み — あと約 ' + Math.max(0, Math.ceil(lv.level * LEVY_DECAY_DAYS)) + '日で元の体制に自然に戻る';
+}
+function levyStart(tid, mode){
+  var t = T(tid); if(!t) return;
+  if(levyOf(tid)){ setTicker('alert', 'この作業には既に「' + LEVY_LABEL[levyOf(tid).mode] + '」が入っている — 先にやめると切り替えられる'); return; }
+  if(!levyEligible(t)){ setTicker('alert', 'まだ着手していない作業には使えない（前工程の完了が見えてから）'); return; }
+  var k = foremanOf(t), f = FM(t);
+  if(mode === 'crew'){
+    /* 人員追加は費用が動く手配 — 担当者の権限では決められず、課長の許可が要る。
+       既存の応援と同じ相談ライン（S.consult）に type:'crew' で上げる */
+    if(f && (f.grudge || 0) >= 5){ setTicker('users', '職長が言うことを聞かない — 人が増えても効かない（まず関係修復を）'); return; }
+    if(S.consult){ setTicker('users', '課長への相談が回答待ち — 先にそちらの決着を待つ'); return; }
+    if(!DLG) openCrewDialog(tid);
+    return;
+  }
+  if(mode === 'rush'){
+    if(f && (f.grudge || 0) >= 5){ setTicker('users', '職長が言うことを聞かない — 急かしても効かない（まず関係修復を）'); return; }
+    S.levy[tid] = {mode:'rush', since:S.day, level:1, decayFrom:0};
+    if(k){ addTrust(k, -1); f.grudge = Math.min(6, (f.grudge || 0) + 0.5); }
+    log('急かした — 「' + t.name + '」は速くなるが、安全と信頼が削れる');
+    setTicker('mega', '急かした — 「' + t.name + '」速度 +15%／安全↓↓・信頼 −1・班疲労が少し増える');
+    render(); return;
+  }
+  if(mode === 'ot'){
+    var o = otOutlook(t);
+    if(o.deaf){ setTicker('users', '不満が限界 — 残業は聞いてもらえない（まず関係修復を）'); return; }
+    if(o.hard){ setTicker('moon', '今の状態では残業を引き受けてもらえない — 班疲労・不満が重すぎる'); return; }
+    if(Math.random() >= o.p){ setTicker('moon', '残業は断られた — 受諾見込み ' + o.icon + '（' + o.reason + '）。今夜の単発残業なら夕礼で粘れる'); return; }
+    S.levy[tid] = {mode:'ot', since:S.day, level:1, decayFrom:0};
+    if(k && f){
+      addTrust(k, -1);
+      f.grudge = Math.min(6, (f.grudge || 0) + (o.hate >= 4 ? 1 : o.hate >= 2 ? 0.5 : 0));
+    }
+    log('残業を依頼した — 「' + t.name + '」は遅れがなくなるまで残業で積み増す');
+    setTicker('moon', '残業を依頼した — 「' + t.name + '」は遅れている間 毎日 +0.5・予算 −4／安全↓・信頼 −1・班疲労が増える');
+    render(); return;
+  }
+}
+function levyCancel(tid){
+  var lv = levyOf(tid); if(!lv) return;
+  delete S.levy[tid];
+  log('「' + T(tid).name + '」への「' + LEVY_LABEL[lv.mode] + '」をやめた — 元の体制に戻る');
+  setTicker('check', '「' + T(tid).name + '」への「' + LEVY_LABEL[lv.mode] + '」をやめた');
+  render();
+}
+/* 毎日の維持費・疲労・安全リスクと、遅れ解消後の自然解消（約1ヶ月で元に戻る）。
+   simulateDay の冒頭（閉所日ガードの後）で1日1回だけ呼ばれる */
+function levyDaily(){
+  if(!S.levy) return;
+  var proj = null;
+  Object.keys(S.levy).forEach(function(tid){
+    var lv = S.levy[tid], t = T(tid);
+    if(!t || isDone(tid)){ delete S.levy[tid]; return; }
+    if(!proj) proj = projDates();
+    if(levyDelayed(t, proj)){ lv.level = 1; lv.decayFrom = 0; }
+    else {
+      if(!lv.decayFrom) lv.decayFrom = S.day;
+      lv.level = Math.max(0, 1 - (S.day - lv.decayFrom) / LEVY_DECAY_DAYS);
+      if(lv.level <= 0){
+        delete S.levy[tid];
+        log('「' + t.name + '」は元の体制に戻った — 「' + LEVY_LABEL[lv.mode] + '」は自然に解消');
+        return;
+      }
+    }
+    if(!S.started[tid]) return;
+    var k = foremanOf(t);
+    if(lv.mode === 'crew'){
+      if(S.money < 2){ delete S.levy[tid]; log('予算不足で人員追加は打ち切り — 「' + t.name + '」は元の人員に戻る'); return; }
+      S.money -= 2;
+      if(Math.random() < 0.10 * lv.level){ S.hiyari += 1; log('ヒヤリ・ハット — 増員した不慣れな作業員の動きで危ない場面（「' + t.name + '」）'); }
+    } else if(lv.mode === 'ot'){
+      if(S.money < 4){ delete S.levy[tid]; log('予算不足で残業依頼は打ち切り — 「' + t.name + '」'); return; }
+      S.money -= 4;
+      if(k && S.crewFatigue) S.crewFatigue[k] = Math.min(5, (S.crewFatigue[k] || 0) + 0.5 * lv.level);
+      if(Math.random() < 0.10 * lv.level){ S.hiyari += 1; log('ヒヤリ・ハット — 残業続きの疲れで注意力が落ちた（「' + t.name + '」）'); }
+    } else if(lv.mode === 'rush'){
+      if(k && S.crewFatigue) S.crewFatigue[k] = Math.min(5, (S.crewFatigue[k] || 0) + 0.3 * lv.level);
+      if(Math.random() < 0.18 * lv.level){ S.hiyari += 1; log('ヒヤリ・ハット — 急かした作業で確認が漏れた（「' + t.name + '」）'); }
+    }
+  });
+}
+/* 人員追加の相談（職長に人を出せるか聞き、課長へ上げる — 応援の相談と同型） */
+function openCrewDialog(tid){
+  var t = T(tid);
+  var k = foremanOf(t);
+  var pt = k ? foremanPt(k) : {name:'業者代理人', body:'#5b7a99', hat:'#f5c518', hair:null, cid:'dairinin'};
+  openDialog({kind:'人員追加の相談', partner:pt, lines:[
+    {who:'me', expr:'normal', text:'「' + t.name + '」に人を足したい。増員は出せる？'},
+    {who:'p', expr:'troubled', text:foremanToneLine(pt, '増員か…簡単じゃねえぞ。', '増員か。段取り次第だな。', '増員、回すよ。信頼には応えるっす。', '増員ですか。簡単ではありませんが、段取り次第で検討いたします。')},
+    {who:'p', expr:'normal', text:(k && isSubcon(k))
+      ? '人は出せます。ただ増員の費用は担当者さまの権限ではお決めになれません。課長さまの許可をいただければ、遅れがなくなるまで増員を続けます。遅れが解消したら、1ヶ月ほどかけて元の人員に自然に戻します。'
+      : '人は出せる。だが増員の費用はあんた（担当者）の権限じゃ決められないだろ。課長の許可が下りれば、遅れがなくなるまで増員を続ける。遅れが解消したら、1ヶ月ほどかけて元の人員に自然に戻す。'}
+  ], choices:[
+    {label:'課長に相談して許可を取る（要相談）', fx:'回答は夕方か翌朝／承認：予算 −8・速度 ×1.4（継続中は1日 −2）／一部承認：予算 −5・速度 ×1.2', f:function(){ fileConsult({type:'crew', tid:tid}); log('人員追加は課長に相談 — 許可が出れば増員できる'); }, reaction:[{who:'me', expr:'normal', text:'分かった、課長に上げる。許可が出たらすぐ伝える。'}, {who:'p', expr:'smile', text:'頼む。許可さえ下りれば、人は回す。'}]},
+    {label:'やめておく', fx:'変動なし', f:function(){ S._boostCancel = true; }, reaction:[{who:'p', expr:'normal', text:'分かった。また声かけてくれ。'}]}
+  ], onDone:function(){ if(S._boostCancel){ S._boostCancel = false; } render(); }});
+}
+/* 選択中の作業へのパネル（工程表のバーをクリック → この作業への手） */
+function levyPanelHTML(){
+  if(!S.sel) return '';
+  var t = T(S.sel); if(!t || t.ins || isDone(t.id)) return '';
+  var proj = projDates();
+  var g = barGeom(t, proj);
+  var k = foremanOf(t);
+  var lv = levyOf(t.id);
+  var delayed = g.lateNow || g.fcLate;
+  var stat = delayed
+    ? '<span class="evstat bad">遅れ +' + (g.af - g.pe) + '日（見込み ' + g.af + '日／計画 ' + g.pe + '日）</span>'
+    : '<span class="evstat">計画内（見込み ' + g.af + '日／計画 ' + g.pe + '日）</span>';
+  var h = '<div class="card"><p class="caption">' + icon('users', 17) + ' <b>' + t.name + '</b> <span class="small">' + (k ? TRADES[k].name : t.crew) + '／進捗 ' + g.pct + '%</span> ' + stat + '</p>';
+  if(lv){
+    h += '<p class="small" style="margin:2px 0"><b>「' + LEVY_LABEL[lv.mode] + '」実施中</b> — ' + levyStatusLine(t) +
+      (lv.mode === 'crew' ? '（速度 ×' + (1 + (lv.fac || 0.4) * lv.level).toFixed(2) + '・予算 −2／日）' : lv.mode === 'ot' ? '（毎日 +0.5・予算 −4／日）' : '（速度 ×' + (1 + 0.15 * lv.level).toFixed(2) + '）') + '</p>' +
+      '<div class="levybtns"><button type="button" class="mini" data-levy="cancel" data-tid="' + t.id + '">' + icon('check', 14) + ' 「' + LEVY_LABEL[lv.mode] + '」をやめる<span class="fxline">手当を解いて元の体制に戻す</span></button></div>';
+  } else if(!levyEligible(t)){
+    h += '<p class="small">まだ着手していない作業です — 前工程の完了が見えてくると、人員追加・急かす・残業の依頼が使えます。</p>';
+  } else {
+    var crewOff = '', crewFx = '課長に相談 → 許可が出れば増員／承認 −8・速度 ×1.4（継続中 −2／日）／一部承認 −5・×1.2 — 工程↑・安全↓（不慣れな手が増える）';
+    if(S.consult && S.consult.tid === t.id && S.consult.type === 'crew'){ crewOff = ' disabled'; crewFx = '課長に相談中 — 回答は' + (S.consult.duePhase === 'eve' ? '夕方の段取り' : '翌朝'); }
+    else if(S.consult){ crewOff = ' disabled'; crewFx = '課長への相談が回答待ち — 先にそちらの決着を待つ'; }
+    var f = FM(t), deaf = f && (f.grudge || 0) >= 5;
+    h += '<p class="small" style="margin:2px 0">この作業への手（遅れている間は続き、取り戻したら約1ヶ月かけて自然に元へ戻る）：</p><div class="levybtns">' +
+      '<button type="button" class="mini" data-levy="crew" data-tid="' + t.id + '"' + crewOff + '>' + icon('userplus', 14) + ' 人員追加（課長の許可が要る）<span class="fxline">' + crewFx + '</span></button>' +
+      '<button type="button" class="mini" data-levy="rush" data-tid="' + t.id + '"' + (deaf ? ' disabled' : '') + '>' + icon('mega', 14) + ' 急かす<span class="fxline">' + (deaf ? '職長が言うことを聞かない — まず関係修復を' : '速度 ×1.15 — 安全↓↓・信頼 −1・班疲労が少し増える') + '</span></button>' +
+      '<button type="button" class="mini" data-levy="ot" data-tid="' + t.id + '"' + (deaf ? ' disabled' : '') + '>' + icon('moon', 14) + ' 残業を依頼する<span class="fxline">' + (deaf ? '職長が言うことを聞かない — まず関係修復を' : '遅れがなくなるまで毎日 +0.5・予算 −4／日 — 工程↑・安全↓・信頼 −1・班疲労が増える') + '</span></button>' +
+      '</div>';
+  }
+  h += '<div class="levybtns"><button type="button" class="mini" data-act="back">' + icon('eye', 14) + ' 選択を解除する</button></div></div>';
+  return h;
 }
 function taskActions(t){
   var acts = [];
@@ -6246,6 +6439,15 @@ function convBuild(kind, ctx2){
   var pair = convPick(CONV_WORK_LINES[fk] || CONV_WORK_LINES.tekko);
   return {prio:1, lines:[{who:'work', text:pair[0]},{who:'work', text:pair[1]}]};
 }
+/* 話者がそのビューに居るか：3Dでは G3.spk（3D人物のアンカー）で判定する。
+   課長・監理者は3Dの人物としては居ないため、担当者の位置で受ける（電話・事務所越しの会話） */
+function spkHas(k){
+  if(typeof ZOOM !== 'undefined' && ZOOM === '3d' && typeof G3 !== 'undefined' && G3.spk){
+    if(k === 'mgr' || k === 'insp') return !!G3.spk.sup;
+    return !!G3.spk[k];
+  }
+  return !!ISO_SPK[k];
+}
 function convSpawnTry(now){
   if(!CONV.on || S.phase === 'done' || S.storyOpen || DLG) return;
   if(CONV.active.length >= 3 || now < CONV.next) return;
@@ -6255,11 +6457,11 @@ function convSpawnTry(now){
   else if(ISO_GATE_TODAY && CONV.gateKey !== S.day + ':' + ISO_GATE_TODAY){ kind = 'gate'; CONV.gateKey = S.day + ':' + ISO_GATE_TODAY; }
   else if(S.phase === 'work' && (RAIN[S.day] || WIND[S.day]) && Math.random() < .5) kind = 'weather';
   else if(S.phase === 'work' && CONV.phoneDay !== S.day && Math.random() < .30){ kind = 'phone'; CONV.phoneDay = S.day; }
-  else if(ISO_SPK.mgr && ISO_SPK.sup && Math.random() < .4) kind = 'mgr';
+  else if(spkHas('mgr') && spkHas('sup') && Math.random() < .4) kind = 'mgr';
   else if(S.phase === 'work' && S.debt > 0 && Math.random() < .35) kind = 'find';
-  else if(ISO_SPK.sup && ISO_SPK.fore && Math.random() < .45) kind = 'sup';
-  else if(S.phase === 'work' && ISO_SPK.fore && ISO_SPK.work && Math.random() < .5) kind = 'fore';
-  else if(S.phase === 'work' && ISO_SPK.work) kind = 'work';
+  else if(spkHas('sup') && spkHas('fore') && Math.random() < .45) kind = 'sup';
+  else if(S.phase === 'work' && spkHas('fore') && spkHas('work') && Math.random() < .5) kind = 'fore';
+  else if(S.phase === 'work' && spkHas('work')) kind = 'work';
   if(!kind) return;
   var conv = convBuild(kind);
   /* 重複防止：同じ文が表示中・直近30秒以内に出ていたら見送る。同種の会話も間隔を空ける */
@@ -6273,7 +6475,13 @@ function convSpawnTry(now){
   CONV.kindAt[kind] = now;
   conv.li = 0; conv.t0 = now; conv.kind = kind;
   conv.pos = {};
-  ['sup','insp','mgr','fore','work'].forEach(function(k){ if(ISO_SPK[k]) conv.pos[k] = {x:ISO_SPK[k].x, y:ISO_SPK[k].y}; });
+  if(typeof ZOOM !== 'undefined' && ZOOM === '3d' && typeof G3 !== 'undefined' && G3.spk){
+    /* 3Dではワールド座標アンカーを持つ（描画時に毎フレーム投影し直すので人物に追随する） */
+    conv.pos3 = {};
+    ['sup','insp','mgr','fore','work'].forEach(function(k){ if(G3.spk[k]) conv.pos3[k] = G3.spk[k]; });
+  } else {
+    ['sup','insp','mgr','fore','work'].forEach(function(k){ if(ISO_SPK[k]) conv.pos[k] = {x:ISO_SPK[k].x, y:ISO_SPK[k].y}; });
+  }
   CONV.active.push(conv);
   CONV.next = Math.max(CONV.next, now + 1600); /* 会話が一斉に湧かないよう間隔を空ける */
 }
@@ -6297,6 +6505,11 @@ function convDraw(ctx, W, H, now){
     var ln = cv.lines[cv.li]; if(!ln) return;
     var isPhone = !!cv.phone;
     var sp = isPhone && ln.who === 'phone' ? {x:W - 60, y:64} : (cv.pos[ln.who] || cv.pos.sup || {x:W / 2, y:H / 2});
+    if(!isPhone && typeof ZOOM !== 'undefined' && ZOOM === '3d' && typeof g3ProjectPt === 'function'){
+      /* 3D：話者の現在位置（G3.spkは毎フレーム更新）を投影して吹き出しを追随させる */
+      var anc3 = (typeof G3 !== 'undefined' && G3.spk && (G3.spk[ln.who] || G3.spk.sup)) || (cv.pos3 && (cv.pos3[ln.who] || cv.pos3.sup));
+      if(anc3){ var pr3 = g3ProjectPt(anc3, W, H); if(pr3) sp = pr3; }
+    }
     var label = ln.who === 'phone' ? '📞 ' + cv.phone : (CONV_NAMES[ln.who] || '');
     ctx.font = '600 10.5px sans-serif';
     var fullW = ctx.measureText(ln.text).width;
@@ -8935,7 +9148,14 @@ function g3AppEl(el){ return Math.atan(G3VS * Math.tan(el)); }
    以前の約30°からさらに浅くした（ユーザ指定：初期角度はもっと浅くてよい）。
    G3VS を 2.4→2.6 に上げた際も見かけの初期角度が変わらないよう el を逆算し直した */
 function g3DefaultCam(){ return {az:-Math.PI/4, el:0.139, zoom:1, tx:0, tz:0, fit:true}; }
-function g3ResetCam(){ G3.cam = g3DefaultCam(); if(G3.view !== 'all'){ G3.view = 'all'; g3SyncModeBtns(); } G3.sig = ''; }
+/* 「全体」ボタン一本化：初期視点に戻し、表示モードも階フォーカスも全体表示へ戻す。
+   表示モードの「単独」「透かし」は撤去済み（G3.view は常に 'all'） */
+function g3ResetCam(){
+  G3.cam = g3DefaultCam();
+  if(G3.view !== 'all'){ G3.view = 'all'; g3SyncModeBtns(); }
+  if(typeof VF !== 'undefined' && typeof NF !== 'undefined' && VF !== NF){ VF = NF; if(typeof renderFloorTabs === 'function') renderFloorTabs(); }
+  G3.sig = '';
+}
 /* 建物全体（敷地＋高さ強調ぶん）が画面にちょうど収まるズーム。
    対地の対角と高さの投影寸法から必要な span を出し、横はアスペクトで割る：
    縦長の電話画面では自動で引いた画角になる */
@@ -9832,8 +10052,17 @@ function g3BuildStatic(){
       for(var bq = 0; bq < 6; bq++){ var bt0 = bx0 + (bx1 - bx0) * bq / 6, bt1 = bx0 + (bx1 - bx0) * (bq + 1) / 6;
         g3Box(a, bt0, z0 + 0.1, bz1 - 0.15, bt1, z0 + 1.0, bz1, bq % 2 ? G3C.white : G3C.barrier); }
     }
-    if(proj && zoneTasks.some(function(id){ var t = T(id); return t && !g3Done(id) && proj[id] && PLAN[id] && proj[id][1] > PLAN[id][1]; }))
-      g3Box(a, g3X(Z.x0), z0 + 0.05, g3Z(Z.y1), g3X(Z.x1), z0 + 0.3, g3Z(Z.y0), G3C.red);
+    /* 遅延工区の赤表示：以前は床面すれすれに薄い箱を埋めていたため、スラブや
+       仕上げに隠れて「フロアの一部だけ赤い」中途半端な出方をしていた。
+       工区の四辺を一周する赤い枠（高さ1.0m）に変え、どの角度からでも
+       工区全体の遅れとして一貫して読める形にする */
+    if(proj && zoneTasks.some(function(id){ var t = T(id); return t && !g3Done(id) && proj[id] && PLAN[id] && proj[id][1] > PLAN[id][1]; })){
+      var rx0 = g3X(Z.x0), rx1 = g3X(Z.x1), rz0 = g3Z(Z.y1), rz1 = g3Z(Z.y0), rb = 0.22;
+      g3Box(a, rx0, z0 + 0.05, rz0, rx1, z0 + 1.05, rz0 + rb, G3C.red);
+      g3Box(a, rx0, z0 + 0.05, rz1 - rb, rx1, z0 + 1.05, rz1, G3C.red);
+      g3Box(a, rx0, z0 + 0.05, rz0, rx0 + rb, z0 + 1.05, rz1, G3C.red);
+      g3Box(a, rx1 - rb, z0 + 0.05, rz0, rx1, z0 + 1.05, rz1, G3C.red);
+    }
     /* 工区の用途色（D-03：部屋名ではなく工事の色分けを地に薄く）。全体表示では全階に出さない（色面が重なって読みにくくなるため、フォーカス系モードの時だけ） */
     if(f === VF && !EPI && G3.view !== 'all') g3Box(a, g3X(Z.x0), z0 + 0.02, g3Z(Z.y1), g3X(Z.x1), z0 + 0.06, g3Z(Z.y0), zo.area === 'W' ? G3C.zoneW : zo.area === 'C' ? G3C.zoneC : G3C.zoneE);
     G3.zoneInfo[zk] = info;
@@ -10097,14 +10326,14 @@ function g3BuildStatic(){
       }
       if(stBrd > 0.04){ /* ボード・LGS の平積み（内装の搬入在庫）：山ごとに種類を分ける */
         var nB = Math.max(1, Math.round(stBrd * 7)), xb = yardX(0.34);
-        for(var ib = 0; ib < nB; ib++){ var bx2 = xb + ib * 4.4;
+        for(var ib = 0; ib < nB; ib++){ var bx2 = xb + ib * 5.8;
           sleepers(bx2, yardZ, 3.6);
           if(ib % 2 === 0) g3MatBoard(a, bx2, G3GY + 0.14, yardZ, 3.4, 4 + Math.round(stBrd * 8));
           else { g3MatLGS(a, bx2, G3GY + 0.14, yardZ, 3.4); g3MatLGS(a, bx2, G3GY + 0.48, yardZ, 3.4); } }
       }
       if(stDuct > 0.04){ /* ダクト・配管材の山（設備の搬入在庫）：山ごとに種類を分ける */
         var nD = Math.max(1, Math.round(stDuct * 9)), xd = yardX(0.55);
-        for(var id2 = 0; id2 < nD; id2++){ var dx2 = xd + (id2 % 3) * 3.6, dz2 = yardZ + Math.floor(id2 / 3) * 1.15 - 0.6;
+        for(var id2 = 0; id2 < nD; id2++){ var dx2 = xd + (id2 % 3) * 5.4, dz2 = yardZ + Math.floor(id2 / 3) * 1.7 - 0.85;
           if(id2 % 2) g3MatDuct(a, dx2, G3GY + 0.10, dz2, 3.2);
           else g3MatPipes(a, dx2, G3GY + 0.10, dz2, 3.2, G3C.pipeH); }
       }
@@ -10112,7 +10341,7 @@ function g3BuildStatic(){
     /* --- 受電：キュービクル（基礎→据付→配線→受電） --- */
     var pwX = g3X(foot.x1) + 15, pwZ = g3Z(foot.y1) - 8;
     if(g3Started('pwFound')) g3Box(a, pwX - 3.4, -3.0, pwZ - 2.6, pwX + 3.4, -2.55, pwZ + 2.6, G3C.conc);
-    if(g3Done('pwSet')) g3MatEquip(a, pwX, -2.55, pwZ, 6.4, 3.4, 4.8, G3C.cub); /* キュービクル（機器形状で） */
+    if(g3Done('pwSet')) g3MatEquip(a, pwX, -2.55, pwZ, 6.4, 3.4, 4.8, G3C.cub, true); /* キュービクル（機器形状で・実寸指定） */
     else if(g3Started('pwSet')) G3.transitPW = {x:pwX, z:pwZ, yardX:pwX + 17.2, yardZ:pwZ + 12.3, tl:g3TL('pwSet')}; /* 据付中は動的レイヤが台車で搬送する */
     if(g3Started('pwWire')) g3Box(a, pwX - 3.4, -2.9, pwZ, g3X(foot.x1) + (pwX - 3.4 - g3X(foot.x1)) * (1 - g3TL('pwWire')), -2.75, pwZ + 0.4, G3C.seal);
     if(g3Done('power')) g3Box(a, pwX - 0.4, 0.9, pwZ - 0.4, pwX + 0.4, 1.3, pwZ + 0.4, G3C.lit); /* 受電ランプ */
@@ -10602,15 +10831,15 @@ function g3Truck(a, x, y, z, kind, dir, load){
     B(3.28, 1.90, -1.50, 3.45, 3.10, 1.50, dk); /* 鳥居 */
     var lf = (load === undefined) ? 1 : Math.max(0, Math.min(1, load));
     var nb = Math.round(lf * 3);
-    for(var bi = 0; bi < nb; bi++) g3MatSteelH(a, x + (-1.2) * dr, y + 1.98 + bi * 0.52, z + (-0.2 + (bi % 2) * 0.55), 8.7, G3C.pSteelPre, 0.44, 0.44); /* 部材（H形鋼を寝かせ積み） */
+    for(var bi = 0; bi < nb; bi++) g3MatSteelH(a, x + (-1.2) * dr, y + 1.98 + bi * 0.72, z + (-0.2 + (bi % 2) * 0.55), 8.7, G3C.pSteelPre, 0.44, 0.44); /* 部材（H形鋼を寝かせ積み） */
     if(nb > 0){ B(-5.20, 1.90, -1.25, -4.80, 1.99, 1.25, [0.45,0.33,0.20]); B(2.60, 1.90, -1.25, 3.00, 1.99, 1.25, [0.45,0.33,0.20]); } /* 枕木（荷の下に敷く角材） */
   } else if(kind === 'rebar'){ /* 鉄筋搬入車：平ボディに鉄筋の束を長手に積む。load 0..1 で束の残量 */
     B(-5.8, 1.55, -1.50, 3.45, 1.90, 1.50, [0.55,0.57,0.60]); /* 荷台 */
     B(3.28, 1.90, -1.50, 3.45, 3.10, 1.50, dk); /* 鳥居 */
     var lf2 = (load === undefined) ? 1 : Math.max(0, Math.min(1, load));
     var nb2 = Math.round(lf2 * 3);
-    for(var bi2 = 0; bi2 < nb2; bi2++) /* 束：単材を結束した鉄筋の束（長手方向に寝かせる） */
-      g3MatRebarBundle(a, x + (-1.2) * dr, y + 1.98 + bi2 * 0.34, z + (-0.5 + (bi2 % 2) * 0.95), 8.7);
+    for(var bi2 = 0; bi2 < nb2; bi2++) /* 束：単材を結束した鉄筋の束（長手方向に寝かせる）。束が太くなった分、積み間隔を広げる */
+      g3MatRebarBundle(a, x + (-1.2) * dr, y + 1.98 + bi2 * 0.74, z + (-0.5 + (bi2 % 2) * 0.95), 5.8);
     if(nb2 > 0){ B(-5.20, 1.90, -1.25, -4.80, 1.99, 1.25, [0.45,0.33,0.20]); B(2.60, 1.90, -1.25, 3.00, 1.99, 1.25, [0.45,0.33,0.20]); } /* 枕木 */
   } else { /* 搬入車：平ボディ＋木箱・機器・木箱（形で中身が分かる積荷） */
     B(-5.8, 1.55, -1.50, 3.45, 1.90, 1.50, [0.55,0.57,0.60]);
@@ -10932,12 +11161,12 @@ function g3ErectDraw(a, now){
       var row = Math.floor(s2 / 4), lvl = s2 % 4;
       if(isCol){
         var sL = colH - 0.4;
-        g3MatSteelH(a, yardX, G3GY + 0.14 + lvl * 0.80, yardZ + row * 1.0, sL, G3C.pSteelPre, 0.6, 0.72);
-        if(lvl === 0) g3Box(a, yardX - sL / 2 + 1.2, G3GY + 0.02, yardZ - 0.55 + row * 1.0, yardX + sL / 2 - 1.2, G3GY + 0.14, yardZ + 0.55 + row * 1.0, [0.45,0.33,0.20]); /* 枕木 */
+        g3MatSteelH(a, yardX, G3GY + 0.14 + lvl * 0.98, yardZ + row * 1.15, sL, G3C.pSteelPre, 0.6, 0.72);
+        if(lvl === 0) g3Box(a, yardX - sL / 2 + 1.2, G3GY + 0.02, yardZ - 0.62 + row * 1.15, yardX + sL / 2 - 1.2, G3GY + 0.14, yardZ + 0.62 + row * 1.15, [0.45,0.33,0.20]); /* 枕木 */
       } else {
         var bIdx = placed + (lifting ? 1 : 0) + s2;
         var bL = (bIdx < tg.beams.length) ? tg.beams[bIdx].len : 6;
-        g3MatSteelH(a, yardX, G3GY + 0.14 + lvl * 0.46, yardZ + row * 0.62, bL, G3C.pSteelPre, 0.30, 0.36);
+        g3MatSteelH(a, yardX, G3GY + 0.14 + lvl * 0.50, yardZ + row * 0.62, bL, G3C.pSteelPre, 0.30, 0.36);
       }
     }
   });
@@ -10950,19 +11179,35 @@ function g3ErectDraw(a, now){
    量（束の数・山の数・積み段数）と配置は呼び出し側の従来ロジックのまま
    変えない。座標はすべてワールド系（x=中心, y=下面, z=中心） */
 var G3MAT_WOOD = [0.79,0.63,0.42], G3MAT_WOOD2 = [0.70,0.55,0.36], G3MAT_BATTEN = [0.45,0.33,0.20], G3MAT_STRAP = [0.28,0.28,0.30];
+/* 資材の表示倍率：従来の小モデルは建物の実寸スケール（柱0.40m・階高5.8m・
+   スパン9m級、作業者3.0m表示）に対して小さく、板も束も粒のように見えた。
+   資材モデルは各 g3Mat* の末尾で、自らの足元中心 (x,y,z) を基準に一様
+   ×1.5 へ後スケールし、実寸の資材感覚（鉄筋束・H形鋼の長さ、ALC／ボードの
+   板寸法、ドラムの径、ダクトの断面）が絵で伝わる大きさにする。建物・重機・
+   車両のスケール（高さ強調×2.6、重機×1.13、トラック高さ×0.5／幅×2）は
+   変えない。大きくなった分の干渉は、呼び出し側の配置間隔で吸収する。
+   鉄骨（H形鋼・柱）だけは長さが部材の実寸そのものなので、長さは変えず
+   断面（成・幅）だけを太くする */
+var G3MATK = 1.5;
 function g3MatSleepers(a, x, y, z, w){ /* 枕木2本（資材の下に敷く角材） */
+  var _mn = a.length;
   g3Box(a, x - w / 2, y, z - 0.72, x + w / 2, y + 0.14, z - 0.42, G3MAT_BATTEN);
   g3Box(a, x - w / 2, y, z + 0.42, x + w / 2, y + 0.14, z + 0.72, G3MAT_BATTEN);
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatRebarBundle(a, x, y, z, L){ /* 鉄筋の束：単材5本を結束バンドで締めた姿 */
+  var _mn = a.length;
   var offs = [[-0.15,0],[0.15,0],[0,0.15],[-0.15,0.30],[0.15,0.30]];
   for(var i = 0; i < offs.length; i++)
     g3Box(a, x - L / 2, y + offs[i][1], z + offs[i][0] - 0.065, x + L / 2, y + offs[i][1] + 0.13, z + offs[i][0] + 0.065, i % 2 ? G3C.pRebar : G3C.pRebarB);
   [-0.32, 0.32].forEach(function(fx){ /* 結束バンド */
     g3Box(a, x + fx * L - 0.07, y - 0.02, z - 0.30, x + fx * L + 0.07, y + 0.45, z + 0.30, G3MAT_STRAP); });
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatSteelH(a, x, y, z, L, col, h, w, alongZ){ /* 鉄骨：H形鋼（フランジ2枚＋ウェブ） */
-  var fw = (w === undefined) ? h : w, ft = Math.min(0.11, h * 0.24);
+  /* 長さ L は部材の実寸なので変えず、断面（成 h・幅 w）だけ ×1.5 に太くする */
+  h *= G3MATK;
+  var fw = (w === undefined) ? h : w * G3MATK, ft = Math.min(0.16, h * 0.24);
   if(!alongZ){
     g3Box(a, x - L / 2, y, z - fw / 2, x + L / 2, y + ft, z + fw / 2, col);
     g3Box(a, x - L / 2, y + h - ft, z - fw / 2, x + L / 2, y + h, z + fw / 2, col);
@@ -10974,39 +11219,51 @@ function g3MatSteelH(a, x, y, z, L, col, h, w, alongZ){ /* 鉄骨：H形鋼（�
   }
 }
 function g3MatSteelV(a, x, y, z, H, col){ /* 鉄骨の柱（吊り荷用：縦向きのH形） */
-  g3Box(a, x - 0.33, y, z - 0.30, x + 0.33, y + H, z - 0.20, col); /* フランジ */
-  g3Box(a, x - 0.33, y, z + 0.20, x + 0.33, y + H, z + 0.30, col);
-  g3Box(a, x - 0.05, y, z - 0.20, x + 0.05, y + H, z + 0.20, col); /* ウェブ */
+  /* 高さ H は柱部材の実寸なので変えず、断面だけ ×1.5 に太くする（g3MatSteelH と同じ扱い） */
+  g3Box(a, x - 0.50, y, z - 0.45, x + 0.50, y + H, z - 0.30, col); /* フランジ */
+  g3Box(a, x - 0.50, y, z + 0.30, x + 0.50, y + H, z + 0.45, col);
+  g3Box(a, x - 0.075, y, z - 0.30, x + 0.075, y + H, z + 0.30, col); /* ウェブ */
 }
 function g3MatFormwork(a, x, y, z, L, n){ /* 型枠パネル：木の板の積み重ね＋天端の桟 */
+  var _mn = a.length;
   for(var i = 0; i < n; i++)
     g3Box(a, x - L / 2, y + i * 0.17, z - 0.95, x + L / 2, y + i * 0.17 + 0.15, z + 0.95, i % 2 ? G3MAT_WOOD2 : G3MAT_WOOD);
   g3Box(a, x - L / 2 + 0.3, y + n * 0.17, z - 0.95, x - L / 2 + 0.62, y + n * 0.17 + 0.14, z + 0.95, G3MAT_BATTEN);
   g3Box(a, x + L / 2 - 0.62, y + n * 0.17, z - 0.95, x + L / 2 - 0.3, y + n * 0.17 + 0.14, z + 0.95, G3MAT_BATTEN);
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatDeck(a, x, y, z, W, n){ /* デッキプレート：波板の重なり（天面にリブ） */
+  var _mn = a.length;
   for(var i = 0; i < n; i++)
     g3Box(a, x - W / 2, y + i * 0.085, z - 1.1, x + W / 2, y + i * 0.085 + 0.07, z + 1.1, G3C.pDeck);
   var ty = y + n * 0.085;
   [-0.72, 0, 0.72].forEach(function(dz){ g3Box(a, x - W / 2, ty, z + dz - 0.09, x + W / 2, ty + 0.055, z + dz + 0.09, G3C.pDeck); });
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatALC(a, x, y, z, n){ /* ALCパネル：立て掛け置き（少しずつずらして並べる） */
+  var _mn = a.length;
   for(var i = 0; i < n; i++){
     var px = x + i * 0.5;
     g3Box(a, px, y, z - 1.55, px + 0.28, y + 2.71, z + 1.55, i % 2 ? [0.72,0.68,0.60] : G3C.alc);
     g3Box(a, px, y + 1.34, z - 1.55, px + 0.30, y + 1.44, z + 1.55, [0.62,0.58,0.51]); /* パネルの目地溝 */
   }
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatALCPanelX(a, x, y, z){ /* ALCパネル単体（外装の足元置き：横長1枚＋目地溝） */
+  var _mn = a.length;
   g3Box(a, x - 1.4, y, z - 0.14, x + 1.4, y + 3.4, z + 0.14, G3C.alc);
   g3Box(a, x - 1.42, y + 1.66, z - 0.15, x + 1.42, y + 1.76, z + 0.15, [0.62,0.58,0.51]);
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatLGS(a, x, y, z, L){ /* LGS（軽量鉄骨）：スタッド6本の束＋結束 */
+  var _mn = a.length;
   for(var i = 0; i < 6; i++)
     g3Box(a, x - L / 2, y, z - 0.26 + i * 0.105, x + L / 2, y + 0.17, z - 0.175 + i * 0.105, G3C.lgs);
   [-0.3, 0.3].forEach(function(fx){ g3Box(a, x + fx * L - 0.06, y - 0.015, z - 0.30, x + fx * L + 0.06, y + 0.19, z + 0.30, G3MAT_STRAP); });
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatDuct(a, x, y, z, L){ /* 角ダクト：本体＋フランジ枠2か所 */
+  var _mn = a.length;
   g3Box(a, x - L / 2, y, z - 0.48, x + L / 2, y + 0.72, z + 0.48, G3C.duct);
   [-0.30, 0.30].forEach(function(fx){
     var fx2 = x + fx * L;
@@ -11015,14 +11272,18 @@ function g3MatDuct(a, x, y, z, L){ /* 角ダクト：本体＋フランジ枠2�
     g3Box(a, fx2 - 0.05, y, z - 0.54, fx2 + 0.05, y + 0.72, z - 0.47, [0.55,0.57,0.59]);
     g3Box(a, fx2 - 0.05, y, z + 0.47, fx2 + 0.05, y + 0.72, z + 0.54, [0.55,0.57,0.59]);
   });
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatPipes(a, x, y, z, L, col){ /* 配管：管の束（下3・中2・上1のピラミッド積み） */
+  var _mn = a.length;
   var rows = [[-0.20,0],[0,0],[0.20,0],[-0.10,0.18],[0.10,0.18],[0,0.36]];
   for(var i = 0; i < rows.length; i++)
     g3Box(a, x - L / 2, y + rows[i][1], z + rows[i][0] - 0.085, x + L / 2, y + rows[i][1] + 0.17, z + rows[i][0] + 0.085, col);
   [-0.3, 0.3].forEach(function(fx){ g3Box(a, x + fx * L - 0.06, y - 0.015, z - 0.32, x + fx * L + 0.06, y + 0.55, z + 0.32, G3MAT_STRAP); });
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatDrum(a, x, y, z){ /* ケーブルドラム：リール形（鍔2枚＋巻いたケーブル＋軸） */
+  var _mn = a.length;
   [-0.52, 0.42].forEach(function(dz){ /* 鍔（丸を3段の板で近似） */
     g3Box(a, x - 0.48, y + 0.28, z + dz, x + 0.48, y + 1.22, z + dz + 0.10, G3MAT_WOOD2);
     g3Box(a, x - 0.68, y + 0.52, z + dz, x + 0.68, y + 0.98, z + dz + 0.10, G3MAT_WOOD2);
@@ -11030,23 +11291,29 @@ function g3MatDrum(a, x, y, z){ /* ケーブルドラム：リール形（鍔2�
   });
   g3Box(a, x - 0.52, y + 0.23, z - 0.42, x + 0.52, y + 1.27, z + 0.42, [0.30,0.27,0.24]); /* 巻いたケーブル */
   g3Box(a, x - 0.16, y + 0.59, z - 0.60, x + 0.16, y + 0.91, z + 0.60, G3MAT_BATTEN); /* 軸 */
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatBoard(a, x, y, z, W, n){ /* ボード：桟木を挟んだ積層 */
+  var _mn = a.length;
   function sheets(y0, cnt){ for(var i = 0; i < cnt; i++) g3Box(a, x - W / 2, y0 + i * 0.058, z - 0.9, x + W / 2, y0 + i * 0.058 + 0.05, z + 0.9, G3C.board); }
   function battens(y0){ [-0.55, 0.55].forEach(function(dz){ g3Box(a, x - W / 2 + 0.25, y0, z + dz - 0.09, x + W / 2 - 0.25, y0 + 0.11, z + dz + 0.09, G3MAT_BATTEN); }); }
   var n1 = Math.ceil(n / 2), n2 = n - n1;
   sheets(y, n1);
   var ymid = y + n1 * 0.058 + 0.02; battens(ymid);
   sheets(ymid + 0.13, n2);
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
-function g3MatEquip(a, x, y, z, W, H, D, col){ /* 器具・機器：筐体＋扉＋天面の通気口＋架台 */
+function g3MatEquip(a, x, y, z, W, H, D, col, noScale){ /* 器具・機器：筐体＋扉＋天面の通気口＋架台 */
+  var _mn = a.length;
   g3Box(a, x - W / 2, y, z - D / 2, x + W / 2, y + 0.14, z + D / 2, [0.32,0.33,0.35]); /* 架台 */
   g3Box(a, x - W / 2, y + 0.14, z - D / 2, x + W / 2, y + H, z + D / 2, col); /* 筐体 */
   g3Box(a, x - W / 2 + 0.14, y + 0.30, z + D / 2, x + W / 2 - 0.14, y + H - 0.18, z + D / 2 + 0.05, [Math.max(0, col[0] - 0.10), Math.max(0, col[1] - 0.10), Math.max(0, col[2] - 0.09)]); /* 扉 */
   if(H > 0.9){ g3Box(a, x - W / 4, y + H, z - D / 4, x + W / 4, y + H + 0.10, z + D / 4, [0.30,0.31,0.33]); /* 天面の通気口 */
     g3Box(a, x + W / 2, y + H * 0.45, z - 0.30, x + W / 2 + 0.14, y + H * 0.85, z + 0.30, [0.42,0.44,0.47]); } /* 側面のファンカバー */
+  if(!noScale) g3ScaleNew(a, _mn, x, y, z, G3MATK); /* 据付済みの設備（キュービクル等）は実寸指定なので拡大しない */
 }
 function g3MatSash(a, x, y, z){ /* サッシ：アルミ枠＋ガラス */
+  var _mn = a.length;
   var fm = [0.78,0.80,0.83];
   g3Box(a, x - 0.85, y, z - 0.05, x + 0.85, y + 0.09, z + 0.05, fm);
   g3Box(a, x - 0.85, y + 2.11, z - 0.05, x + 0.85, y + 2.20, z + 0.05, fm);
@@ -11054,25 +11321,32 @@ function g3MatSash(a, x, y, z){ /* サッシ：アルミ枠＋ガラス */
   g3Box(a, x + 0.76, y, z - 0.05, x + 0.85, y + 2.20, z + 0.05, fm);
   g3Box(a, x - 0.045, y + 0.09, z - 0.05, x + 0.045, y + 2.11, z + 0.05, fm); /* 方立 */
   g3Box(a, x - 0.76, y + 0.09, z - 0.02, x + 0.76, y + 2.11, z + 0.02, [0.62,0.76,0.85,0.75]); /* ガラス */
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatScaffold(a, x, y, z){ /* 足場材：単管の山＋布板 */
+  var _mn = a.length;
   var rows = [[-0.22,0],[0,0],[0.22,0],[-0.11,0.19],[0.11,0.19],[0,0.38]];
   for(var i = 0; i < rows.length; i++)
     g3Box(a, x - 1.8, y + rows[i][1], z + rows[i][0] - 0.05, x + 1.8, y + rows[i][1] + 0.10, z + rows[i][0] + 0.05, [0.62,0.64,0.66]);
   for(var b = 0; b < 3; b++) /* 布板（足場板）を脇に重ねる */
     g3Box(a, x - 1.7, y + b * 0.07, z + 0.62, x + 1.7, y + b * 0.07 + 0.05, z + 1.06, [0.58,0.60,0.62]);
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatCrate(a, x, y, z, W, H, D){ /* 木箱：板箱＋角の桟＋天端の桟 */
+  var _mn = a.length;
   g3Box(a, x - W / 2, y, z - D / 2, x + W / 2, y + H, z + D / 2, G3MAT_WOOD);
   [-1, 1].forEach(function(sx){ [-1, 1].forEach(function(sz){
     g3Box(a, x + sx * (W / 2 - 0.09) - 0.07, y, z + sz * (D / 2 - 0.09) - 0.07, x + sx * (W / 2 - 0.09) + 0.07, y + H, z + sz * (D / 2 - 0.09) + 0.07, G3MAT_BATTEN); }); });
   [-0.3, 0.3].forEach(function(fx){ g3Box(a, x + fx * W - 0.08, y + H, z - D / 2, x + fx * W + 0.08, y + H + 0.07, z + D / 2, G3MAT_BATTEN); });
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 function g3MatRoll(a, x, y, z){ /* 防水シート等のロール：丸みを3段で近似 */
+  var _mn = a.length;
   g3Box(a, x - 0.55, y + 0.10, z - 0.26, x + 0.55, y + 0.46, z + 0.26, G3C.wpDark);
   g3Box(a, x - 0.55, y, z - 0.17, x + 0.55, y + 0.10, z + 0.17, G3C.wpDark);
   g3Box(a, x - 0.55, y + 0.46, z - 0.17, x + 0.55, y + 0.56, z + 0.17, G3C.wpDark);
   g3Box(a, x + 0.55, y + 0.13, z - 0.13, x + 0.60, y + 0.43, z + 0.13, [0.55,0.55,0.52]); /* 切り口 */
+  g3ScaleNew(a, _mn, x, y, z, G3MATK);
 }
 /* ================= 資材の流れ（搬入→荷下ろし・仮置き→運搬→組立） =================
    建物は「資材が届く→荷下ろし→仮置き→作業場所へ運ぶ→1つずつ組み上げる」で
@@ -11121,8 +11395,8 @@ function g3MatFlowDraw(a, now, craneFree){
     var nb = Math.max(0, Math.ceil((1 - r) * 4));
     for(var s = 0; s < nb; s++){
       var row = Math.floor(s / 2), lvl = s % 2;
-      g3MatRebarBundle(a, yardX, G3GY + 0.16 + lvl * 0.42, yardZ + row * 1.0, 6.8);
-      if(lvl === 0) g3Box(a, yardX - 2.4, G3GY + 0.02, yardZ - 0.55 + row * 1.0, yardX + 2.4, G3GY + 0.16, yardZ + 0.55 + row * 1.0, [0.45,0.33,0.20]); /* 枕木 */
+      g3MatRebarBundle(a, yardX, G3GY + 0.16 + lvl * 0.72, yardZ + row * 1.3, 6.8);
+      if(lvl === 0) g3Box(a, yardX - 2.4, G3GY + 0.02, yardZ - 0.62 + row * 1.3, yardX + 2.4, G3GY + 0.16, yardZ + 0.62 + row * 1.3, [0.45,0.33,0.20]); /* 枕木 */
     }
     if(!logisticsActive) return; /* 揚重・横引きは夕礼・残業帯（内業帯）でも止めない：日中だけの仕事ではない */
     busy = true;
@@ -11185,10 +11459,10 @@ function g3MatFlowDraw(a, now, craneFree){
       if(sy2 !== null) g3MatDeck(a, g3X(Z.x0 + 4200), fl2 * FH - 0.28, g3Z(sy2) - 2.3, 2.6, n + 1);
     } else if(/_fit$/.test(t.id) && Z){ /* LGS：軽天材の束（その階の床・工区の南寄り） */
       var fl3 = parseInt(t.zone.charAt(1), 10), yB3 = (fl3 - 1) * FH + 0.30, sy3 = segSouthY(t.zone, Z.x0 + 5000);
-      if(sy3 !== null) for(var i3 = 0; i3 < n; i3++) g3MatLGS(a, g3X(Z.x0 + 5000), yB3 + i3 * 0.30, g3Z(sy3) - 2.3, 5.2);
+      if(sy3 !== null) for(var i3 = 0; i3 < n; i3++) g3MatLGS(a, g3X(Z.x0 + 5000), yB3 + i3 * 0.36, g3Z(sy3) - 2.3, 5.2);
     } else if(/_hvac$/.test(t.id) && Z){ /* ダクト：大きな角ダクトの仮置き */
       var fl4 = parseInt(t.zone.charAt(1), 10), yB4 = (fl4 - 1) * FH + 0.30, sy4 = segSouthY(t.zone, Z.x0 + 6000);
-      if(sy4 !== null) for(var i4 = 0; i4 < n; i4++) g3MatDuct(a, g3X(Z.x0 + 6000), yB4 + i4 * 0.85, g3Z(sy4) - 2.55, 3.0);
+      if(sy4 !== null) for(var i4 = 0; i4 < n; i4++) g3MatDuct(a, g3X(Z.x0 + 6000), yB4 + i4 * 1.30, g3Z(sy4) - 2.55, 3.0);
     } else if(/_plu$/.test(t.id) && Z){ /* 衛生配管：配管の束（結束バンド付き） */
       var fl5 = parseInt(t.zone.charAt(1), 10), yB5 = (fl5 - 1) * FH + 0.30, sy5 = segSouthY(t.zone, Z.x0 + 5000);
       if(sy5 !== null){ for(var i5 = 0; i5 < n + 1; i5++) g3Box(a, g3X(Z.x0 + 5000) - 2.4, yB5 + (i5 % 2) * 0.20, g3Z(sy5) - 2.4 + Math.floor(i5 / 2) * 0.24, g3X(Z.x0 + 5000) + 2.4, yB5 + 0.16 + (i5 % 2) * 0.20, g3Z(sy5) - 2.28 + Math.floor(i5 / 2) * 0.24, G3C.pipeW);
@@ -11204,13 +11478,13 @@ function g3MatFlowDraw(a, now, craneFree){
       if(sy7 !== null) g3MatBoard(a, g3X(Z.x0 + 5000), yB7, g3Z(sy7) - 2.2, 3.8, n + 2);
     } else if(/_fix$/.test(t.id) && Z){ /* 器具：機器と木箱の仮置き */
       var fl8 = parseInt(t.zone.charAt(1), 10), yB8 = (fl8 - 1) * FH + 0.30, sy8 = segSouthY(t.zone, Z.x0 + 4800);
-      if(sy8 !== null) for(var i8 = 0; i8 < n; i8++){ var cx8 = g3X(Z.x0 + 4800 + (i8 % 2) * 1.5), cy8 = yB8 + Math.floor(i8 / 2) * 0.85, cz8 = g3Z(sy8) - 2.0;
+      if(sy8 !== null) for(var i8 = 0; i8 < n; i8++){ var cx8 = g3X(Z.x0 + 4800 + (i8 % 2) * 2.1), cy8 = yB8 + Math.floor(i8 / 2) * 1.45, cz8 = g3Z(sy8) - 2.0;
         if(i8 % 2 === 0) g3MatEquip(a, cx8, cy8, cz8, 1.3, 0.8, 1.2, [0.62,0.64,0.67]); else g3MatCrate(a, cx8, cy8, cz8, 1.3, 0.8, 1.2); }
     } else if(t.ext === 'alc'){ /* ALCパネル：その面の足元に立て掛けたパネルの山 */
       var fm = /^ext([NSEW])(\d)_/.exec(t.id); if(!fm) return;
       var fFx2 = (fm[1] === 'S') ? g3Z(foot.y0) + 3.4 : (fm[1] === 'N') ? g3Z(foot.y1) - 3.4 : g3Z((foot.y0 + foot.y1) / 2);
       var fXx = (fm[1] === 'W') ? g3X(foot.x0) - 3.2 : (fm[1] === 'E') ? g3X(foot.x1) + 3.2 : g3X(foot.x0 + 14000 + (h % 5) * 6000);
-      for(var i9 = 0; i9 < n + 1; i9++) g3MatALCPanelX(a, fXx + i9 * 0.30, G3GY, fFx2);
+      for(var i9 = 0; i9 < n + 1; i9++) g3MatALCPanelX(a, fXx + i9 * 0.55, G3GY, fFx2);
       genMat = true;
     } else if(t.loc === 'roof' && /^(roof|rf)/.test(t.id)){ /* 屋上資材：防水シートのロール等 */
       var rY = NF * FH + 0.80;
@@ -11226,7 +11500,10 @@ function g3MatFlowDraw(a, now, craneFree){
     var startedN = 0, totN = 0, frSum = 0, frN = 0;
     if(typeof TASKS !== 'undefined'){ TASKS.forEach(function(t){ totN++; if(S.started && S.started[t.id]) startedN++; }); }
     ZONES.forEach(function(zo){ var v = g3TL(zo.zk + '_frame'); if(v > 0){ frSum += v; frN++; } });
-    var fillF = Math.max(0.30, Math.min(1, 0.35 + 0.35 * (totN ? startedN / totN : 0) + 0.55 * (frN ? frSum / frN : 0))); /* 躯体（frame）の進みを重く見る：建方終了後は着工率が低くても敷地がほぼ埋まる */
+    /* 仮置き量は工程の進みに連動し、開始側はゼロから始める：着工直後は
+       ほぼ何も無く、工程が進むほど対応する資材の山が増え、建方後は
+       敷地がパンパンになる。下限（従来は3割から出ていた）は置かない */
+    var fillF = Math.max(0, Math.min(1, 0.06 + 0.55 * (totN ? startedN / totN : 0) + 0.85 * (frN ? frSum / frN : 0))); /* 躯体（frame）の進みを重く見る：建方終了後は着工率が低くても敷地がほぼ埋まる */
     var kinds = [
       function(x, z, y){ g3MatSleepers(a, x, y + 0.02, z, 4.2); g3MatBoard(a, x, y + 0.14, z, 3.8, 14); }, /* ボード（桟木を挟んだ積層） */
       function(x, z, y){ g3MatRebarBundle(a, x, y + 0.10, z - 0.55, 5.2); g3MatRebarBundle(a, x, y + 0.10, z + 0.55, 5.2); }, /* 鉄筋の束×2 */
@@ -11244,17 +11521,23 @@ function g3MatFlowDraw(a, now, craneFree){
     var piles = [];
     var bx0 = g3X(foot.x0) + 14, bx1 = g3X(foot.x1) - 14;
     var dollySX1 = g3X(foot.x0) + 34, dollySX2 = g3X(foot.x0) + 70, dollyNX = g3X(foot.x1) - 38; /* 台車の縦断ライン：この x 帯は山を置かず動線を空ける */
-    for(var px2 = bx0, pi = 0; px2 <= bx1; px2 += 11, pi++){ if(pi % 2 === 0 && Math.abs(px2 - dollyNX) < 5.5) continue; piles.push([px2, g3Z(foot.y1) - 9 - (pi % 2) * 5, pi, 0]); } /* 北ヤード（建物と北フェンスの間・2列千鳥） */
-    for(var pz2 = g3Z(foot.y1) - 16, pj = 0; pz2 >= g3Z(foot.y0) + 34; pz2 -= 11, pj++) piles.push([g3X(foot.x1) + 13, pz2, pj + 3, 1]); /* 東ヤード（南端は搬入動線を空ける） */
-    for(var pz3 = g3Z(foot.y1) - 16, pk = 0; pz3 >= g3Z(foot.y0) + 20; pz3 -= 11, pk++) piles.push([g3X(foot.x0) - 13, pz3, pk + 5, 1]); /* 西ヤード */
-    for(var px3 = bx0 + 8, pm = 0; px3 <= bx1 - 6; px3 += 13, pm++){ if(Math.abs(px3 - dollySX1) < 5.5 || Math.abs(px3 - dollySX2) < 5.5) continue; piles.push([px3, g3Z(foot.y0) + 4.5, pm + 1, 2]); } /* 南ヤード第2列（建物際・台車ラインを空ける） */
+    for(var px2 = bx0, pi = 0; px2 <= bx1; px2 += 13, pi++){ if(pi % 2 === 0 && Math.abs(px2 - dollyNX) < 6.4) continue; piles.push([px2, g3Z(foot.y1) - 9 - (pi % 2) * 6, pi, 0]); } /* 北ヤード（建物と北フェンスの間・2列千鳥） */
+    for(var pz2 = g3Z(foot.y1) - 16, pj = 0; pz2 >= g3Z(foot.y0) + 34; pz2 -= 13, pj++) piles.push([g3X(foot.x1) + 13, pz2, pj + 3, 1]); /* 東ヤード（南端は搬入動線を空ける） */
+    for(var pz3 = g3Z(foot.y1) - 16, pk = 0; pz3 >= g3Z(foot.y0) + 20; pz3 -= 13, pk++) piles.push([g3X(foot.x0) - 13, pz3, pk + 5, 1]); /* 西ヤード */
+    for(var px3 = bx0 + 8, pm = 0; px3 <= bx1 - 6; px3 += 13, pm++){ if(Math.abs(px3 - dollySX1) < 6.4 || Math.abs(px3 - dollySX2) < 6.4) continue; piles.push([px3, g3Z(foot.y0) + 4.5, pm + 1, 2]); } /* 南ヤード第2列（建物際・台車ラインを空ける） */
     for(var px4 = bx0 + 4, pn = 0; px4 <= bx1 - 6; px4 += 13, pn++){ if(px4 > g3X(foot.x1) - 58) continue; piles.push([px4, g3Z(foot.y0) + 17, pn + 2, 3]); } /* 南フェンス際の列（東端はゲート前の荷捌き場として空ける） */
     var showN = Math.ceil(piles.length * fillF);
-    for(var si = 0; si < showN; si++){ var pp = piles[si]; kinds[pp[2] % kinds.length](pp[0], pp[1], G3GY);
-      if(pp[2] % 2 === 0){ /* 隣にもう一山：間隔を詰めた上に重ねて「置きまくっている」密度にする */
+    /* 序盤（躯体がまだ始まらず、着工した作業もわずか）に出るのは仮設資材だけ：
+       工程が来ていない工種の資材（ボード・ダクト・ALC等）は出さない */
+    var earlySite = (frN ? frSum / frN : 0) <= 0.01 && (totN ? startedN / totN : 0) < 0.12;
+    if(earlySite) showN = Math.min(showN, 2);
+    for(var si = 0; si < showN; si++){ var pp = piles[si];
+      if(earlySite) kinds[9](pp[0], pp[1], G3GY); /* 足場材＝仮設資材 */
+      else kinds[pp[2] % kinds.length](pp[0], pp[1], G3GY);
+      if(!earlySite && pp[2] % 2 === 0){ /* 隣にもう一山：間隔を詰めた上に重ねて「置きまくっている」密度にする */
         var cx2 = pp[0], cz2 = pp[1];
-        if(pp[3] === 1) cz2 -= 5.4; else cx2 += 5.4;
-        if(!(pp[3] === 2 && (Math.abs(cx2 - dollySX1) < 5.5 || Math.abs(cx2 - dollySX2) < 5.5)))
+        if(pp[3] === 1) cz2 -= 7.2; else cx2 += 7.2;
+        if(!(pp[3] === 2 && (Math.abs(cx2 - dollySX1) < 6.4 || Math.abs(cx2 - dollySX2) < 6.4)))
           kinds[(pp[2] + 3) % kinds.length](cx2, cz2, G3GY);
       } }
     if(logisticsActive && showN >= 7){ /* 仮置き場の荷さばき：山の脇に荷役の作業員が付く */
@@ -11266,7 +11549,7 @@ function g3MatFlowDraw(a, now, craneFree){
   /* ---------- 建屋内への引き込み（台車の往復） ----------
      ヤードの山から建物南・北の開口へ、台車が資材を運び続ける。台車は
      地表面（G3GY）から床面（0.25）へなだらかに上がって建屋内へ入る */
-  if(logisticsActive){
+  if(logisticsActive && (genMat || act.some(function(t){ return /_fit$|_board$|_hvac$|_fix$|_frame$/.test(t.id); }))){
     function dollyRun(x, zYard, zIn, period, phase, matKey){
       var u = g3Shuttle(now, period, phase);
       var zz = zYard + (zIn - zYard) * u, yy = G3GY + (0.25 - G3GY) * u;
@@ -11286,10 +11569,14 @@ function g3MatFlowDraw(a, now, craneFree){
     dollyRun(g3X(foot.x1) - 38, g3Z(foot.y1) - 11, g3Z(foot.y1) + 9, 13500, 7000, 'crate'); /* 北：木箱を建屋内へ */
     busy = true;
   }
-  /* 朝礼中は搬入車がゲート前に並んで待機（朝の搬入ラッシュ） */
+  /* 朝礼中は搬入車がゲート前に並んで待機（朝の搬入ラッシュ）。
+     ただし着工前（まだ何の作業も始まっていない）現場に車両は来ない。
+     1台目は「今日の搬入がある日」だけ、2台目は資材系の作業が動いている日だけ */
   if(S.phase === 'morning' && S.machineStopDay !== S.day){
-    g3Truck(a, g3X(foot.x1) - 6, G3GY, g3Z(foot.y0) + 14, 'cargo', -1, 1);
-    g3Truck(a, g3X(foot.x1) - 68, G3GY, g3Z(foot.y0) + 14, 'steel', -1, 1);
+    var mStartedN = S.started ? Object.keys(S.started).length : 0;
+    var mDelToday = (S.deliveries || []).some(function(dl){ return dl.day === S.day; });
+    if(mStartedN > 0 && mDelToday) g3Truck(a, g3X(foot.x1) - 6, G3GY, g3Z(foot.y0) + 14, 'cargo', -1, 1);
+    if(mStartedN > 0 && (genMat || rebTasks.length)) g3Truck(a, g3X(foot.x1) - 68, G3GY, g3Z(foot.y0) + 14, 'steel', -1, 1);
   }
   /* 北側レーンの搬送：資材系の作業がある日は北ヤード沿いもトラックが往復する */
   if(genMat && logisticsActive){
@@ -11301,9 +11588,10 @@ function g3MatFlowDraw(a, now, craneFree){
     var cFrom = g3X(foot.x1) + 30, cTo = g3X(foot.x1) - 24;
     g3Truck(a, cFrom + (cTo - cFrom) * g3Shuttle(now, 16000, 9000), G3GY, g3Z(foot.y0) + 14, 'cargo');
     busy = true;
-  } else if(logisticsActive && !rebTasks.length && S.started && Object.keys(S.started).length){
-    /* 資材系タスクの無い日（土工事・打設単独・仕上げ単独の日）も搬入の往復は
-       止めない：現場への搬入は工事の全期間を通じて日夜続く */
+  } else if(logisticsActive && !rebTasks.length && S.started && Object.keys(S.started).length >= 6 &&
+      (S.deliveries || []).some(function(dl){ return Math.abs(dl.day - S.day) <= 1; })){
+    /* 資材系タスクの無い日でも、搬入予定が近い日は搬入の往復がある。
+       着工序盤（始まった作業がわずか・搬入予定も無い）は車両を出さない */
     var cFrom2 = g3X(foot.x1) + 30, cTo2 = g3X(foot.x1) - 24;
     g3Truck(a, cFrom2 + (cTo2 - cFrom2) * g3Shuttle(now, 21000, 3000), G3GY, g3Z(foot.y0) + 14, 'cargo');
     busy = true;
@@ -11313,6 +11601,7 @@ function g3MatFlowDraw(a, now, craneFree){
 function g3BuildDynamic(now){
   if(G3.epi) return g3BuildEpilogue(now);
   var a = [], FH = G3FH;
+  G3.spk = {}; /* 会話吹き出し用：話者のワールド座標アンカー（頭上）。3Dでも吹き出しを出すために毎フレーム取り直す */
   g3Ground(a); /* 敷地・道路＋地盤の厚み：見上げ時も不透明（下から覗けない） */
   /* ラフタークレーン（原則・同時2台まで）：建方中の工区では搬入トラック→
      荷下ろし・仮置き→揚重→横引き（台車）→着座の段階表現で部材を建てる */
@@ -11535,7 +11824,9 @@ function g3BuildDynamic(now){
   /* 夕礼・残業帯の搬送（日が落ちても資材は止まらない）：南レーンの搬入
      トラックと北レーンの搬送トラックが往復し、ゲート脇では荷下ろしと
      荷さばきが続く */
-  if(S.phase === 'evening' && !machStopped && !(typeof SPEED_PAUSED !== 'undefined' && SPEED_PAUSED)){
+  var evMat = (S.deliveries || []).some(function(dl){ return dl.day === S.day || dl.day === S.day + 1; }) ||
+    (typeof TASKS !== 'undefined' && TASKS.some(function(t){ return S.started && S.started[t.id] && !isDone(t.id) && /_frame$|_fit$|_board$|_hvac$|_alc$/.test(t.id); }));
+  if(S.phase === 'evening' && evMat && !machStopped && !(typeof SPEED_PAUSED !== 'undefined' && SPEED_PAUSED)){
     var evGate = g3X(foot2.x1) + 30, evStop = g3X(foot2.x0) + 36, evLane = g3Z(foot2.y0) + 14;
     g3Truck(a, evGate + (evStop - evGate) * g3Shuttle(now, 30000, 0), G3GY, evLane, 'cargo', -1, 1);
     var evFrom = g3X(foot2.x0) - 30, evTo = g3X(foot2.x1) - 34;
@@ -11603,10 +11894,12 @@ function g3BuildDynamic(now){
          ボブも小さく「人が動いていない」絵になっていた */
       var wob = Math.sin(now / 3400 + h * 1.93 + w * 2.39) * 3.1;
       g3Worker(a, cx2 + (w - (n - 1) / 2) * 2.7 + (wax === 'x' ? wob : 0), cy2, cz2 + ((w % 2) ? 1.7 : -1.4) + (wax === 'z' ? wob : 0), colr, now / 170 + w * 2 + h);
+      if(w === 0 && !G3.spk.work) G3.spk.work = {x:cx2, y:cy2 + 3.4, z:cz2};
+      if(w === 1 && !G3.spk.fore) G3.spk.fore = {x:cx2 + 2.7, y:cy2 + 3.4, z:cz2 - 1.4};
     }
     /* 監督（白ヘルメット・紺）は工区ごとに1人 */
     var skey = t.zone || t.id;
-    if(sup && !supSeen[skey]){ supSeen[skey] = 1; g3Worker(a, cx2 + 4.6, cy2, cz2 + 5.2, [0.16,0.23,0.38], now / 420); }
+    if(sup && !supSeen[skey]){ supSeen[skey] = 1; g3Worker(a, cx2 + 4.6, cy2, cz2 + 5.2, [0.16,0.23,0.38], now / 420); if(!G3.spk.sup) G3.spk.sup = {x:cx2 + 4.6, y:cy2 + 3.4, z:cz2 + 5.2}; }
   });
   /* 担当者の巡回：作業中は建物の周りを一周して回る（全工区巡回が仕事の基本。
      往来の要として、止まっている監督とは別に歩く姿を常時出す） */
@@ -11619,6 +11912,7 @@ function g3BuildDynamic(now){
     else if(dd < 2 * pw2 + pdp){ ppx = px1 - (dd - pw2 - pdp); ppz = pzN; }
     else { ppx = px0; ppz = pzN + (dd - 2 * pw2 - pdp); }
     g3Worker(a, ppx, G3GY, ppz, [0.16,0.23,0.38], now / 170);
+    G3.spk.sup = {x:ppx, y:G3GY + 3.4, z:ppz}; /* 巡回中の担当者が吹き出しの主 */
   }
   /* 朝礼（全員整列）・夕礼（職長と監督の集まり）：アイソメ図と同じく、
      作業フェーズ以外でも現場に人がいる状態を描く */
@@ -11631,12 +11925,14 @@ function g3BuildDynamic(now){
       var baseX = g3X(foot2.x0 + 16000) + (ki % 3) * 34, baseZ = ry + Math.floor(ki / 3) * 6;
       var nw = Math.min(6, tc.count);
       for(var w2 = 0; w2 < nw; w2++) g3Worker(a, baseX + w2 * 2.7, G3GY, baseZ, colr, now / 500 + ki * 7 + w2);
+      if(ki === 0){ G3.spk.fore = {x:baseX + 2.7, y:G3GY + 3.4, z:baseZ}; G3.spk.work = {x:baseX, y:G3GY + 3.4, z:baseZ}; }
       ki++;
     });
-    if(ki) g3Worker(a, g3X(foot2.x0 + 16000) + 12, G3GY, ry - 6.5, [0.16,0.23,0.38], now / 420); /* 担当者（列の前） */
+    if(ki){ g3Worker(a, g3X(foot2.x0 + 16000) + 12, G3GY, ry - 6.5, [0.16,0.23,0.38], now / 420); G3.spk.sup = {x:g3X(foot2.x0 + 16000) + 12, y:G3GY + 3.4, z:ry - 6.5}; } /* 担当者（列の前） */
   } else if(S.phase === 'evening'){
     var ey = g3Z(foot2.y0) + 14, ex0 = g3X(foot2.x0 + 20000);
     g3Worker(a, ex0, G3GY, ey, [0.16,0.23,0.38], now / 420);
+    G3.spk.sup = {x:ex0, y:G3GY + 3.4, z:ey}; G3.spk.fore = {x:ex0 + 4, y:G3GY + 3.4, z:ey + 2.6};
     var ek = 0;
     act.forEach(function(t){ if(ek >= 3) return; var k2 = null; try{ k2 = foremanOf(t); }catch(e){}
       if(!k2 || supSeen['eve' + k2]) return; supSeen['eve' + k2] = 1;
@@ -11758,7 +12054,35 @@ function draw3D(){
   var lg = document.getElementById('gl3dLegend');
   if(lg && !G3.epi){ var faces = Math.round(((G3.staticN || 0) + dynN) / 6);
     var modeTxt = G3.view === 'floor' ? VF + '階の単独表示' : G3.view === 'xray' ? VF + '階フォーカス（上階は透かし）' : '全体表示（透過なし）';
-    lg.innerHTML = '<span>3Dビュー（アイソメ投影・南西）— ' + modeTxt + '</span><span>ドラッグ：回転／2本指・右ドラッグ：移動／ピンチ・ホイール・＋−：拡縮（建物の中まで寄れる）</span><span>右端のボタン：全体／単独／透かし の表示切替</span><span>場所をタップ：工事・部材の情報</span><span>高さは約2.6倍に強調表示（従来のアイソメ図の縦横比に合わせた。平面の寸法は実寸）</span><span>描画面数 約' + faces.toLocaleString() + '</span>'; }
+    lg.innerHTML = '<span>3Dビュー（アイソメ投影・南西）— ' + modeTxt + '</span><span>ドラッグ：回転／2本指・右ドラッグ：移動／ピンチ・ホイール・＋−：拡縮（建物の中まで寄れる）</span><span>右端の「全体」ボタン：初期視点と全体表示に戻る</span><span>場所をタップ：工事・部材の情報</span><span>高さは約2.6倍に強調表示（従来のアイソメ図の縦横比に合わせた。平面の寸法は実寸）</span><span>描画面数 約' + faces.toLocaleString() + '</span>'; }
+  g3DrawBubbles();
+}
+/* ワールド座標→画面座標（吹き出しの追随用）。vp は高さ強調込みの行列なので
+   ワールドの実座標をそのまま渡す。画面外は null */
+function g3ProjectPt(p, W, H){
+  if(!G3.vp || !p) return null;
+  var vp = G3.vp;
+  var cx = vp[0] * p.x + vp[4] * p.y + vp[8] * p.z + vp[12];
+  var cy = vp[1] * p.x + vp[5] * p.y + vp[9] * p.z + vp[13];
+  var cw = vp[3] * p.x + vp[7] * p.y + vp[11] * p.z + vp[15];
+  if(!cw) return null;
+  var nx = cx / cw, ny = cy / cw;
+  if(nx < -1.2 || nx > 1.2 || ny < -1.2 || ny > 1.2) return null;
+  return {x:(nx * 0.5 + 0.5) * W, y:(0.5 - ny * 0.5) * H};
+}
+/* 3D上の会話吹き出し：WebGLの上に透明2Dレイヤーを重ね、アイソメ／平面図と
+   同じ convDraw で描く。話者の位置は G3.spk（毎フレーム更新のワールド座標）を
+   投影するので、巡回中の担当者にも吹き出しが追随する */
+function g3DrawBubbles(){
+  var bcv = document.getElementById('gl3dBub'); if(!bcv) return;
+  var W = bcv.clientWidth, H = bcv.clientHeight; if(!W || !H) return;
+  var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  if(bcv.width !== Math.round(W * dpr) || bcv.height !== Math.round(H * dpr)){ bcv.width = Math.round(W * dpr); bcv.height = Math.round(H * dpr); }
+  var ctx = bcv.getContext('2d'); if(!ctx) return;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  if(typeof CONV === 'undefined' || !CONV.on) return;
+  try{ convDraw(ctx, W, H, Date.now()); }catch(e){ if(window.console) console.warn('conv3d', e); }
 }
 function g3Loop(){
   if(ZOOM !== '3d'){ G3.raf = 0; return; }
@@ -13506,7 +13830,8 @@ function showPop(key){
       '<tr><td>事故の発生</td><td class="num">' + (S.accidents || 0) + '件</td></tr>' +
       '<tr><td>現場の地力（是正の蓄積）</td><td class="num">Lv' + siteStrength() + '／5</td></tr>' +
       '<tr><td>未是正の指摘</td><td class="num">' + openFindings().length + '件</td></tr></table>' +
-      '<p class="pnote2">発生源：同じ場所での作業のぶつかり（取り合い）と、疲労の蓄積。疲労4でヒヤリ・ハットが起きると翌日は安全確認を入念に行い、全体の進みが ×0.5 になる。パトロールの指摘を是正し切るほど地力が上がり、ヒヤリ・ハットの起きやすさ自体が下がる。事故は、進行中の作業ごとに「安全対策の甘さ」（巡回・記録の方針、未是正、地力、班と監督の疲労、巡回の間隔、悪天候）で判定され、対策が行き届いている時はほぼ起きない。同じ型のヒヤリ・ハットは事故の前兆で、放置すると事故側に寄る。</p>';
+      '<p class="pnote2">発生源：同じ場所での作業のぶつかり（取り合い）と、疲労の蓄積。疲労4でヒヤリ・ハットが起きると翌日は安全確認を入念に行い、全体の進みが ×0.5 になる。パトロールの指摘を是正し切るほど地力が上がり、ヒヤリ・ハットの起きやすさ自体が下がる。事故は、進行中の作業ごとに「安全対策の甘さ」（巡回・記録の方針、未是正、地力、班と監督の疲労、巡回の間隔、悪天候）で判定され、対策が行き届いている時はほぼ起きない。同じ型のヒヤリ・ハットは事故の前兆で、放置すると事故側に寄る。</p>' +
+      '<p class="pnote2">QCDSEの安全バーとは同じ物差しで連動している：バーが「悪い」以下の帯域に入るとヒヤリ・ハット（事故の前兆）が体感できる頻度で出始め、「最悪」の帯域では事故そのものが現実に起き得る。「良い」以上の帯域ではほぼ起きない。残業・急かし・人員追加の継続、未是正の積み残し、疲労と閉所の圧縮はバーを目に見えて押し下げる。</p>';
   }
   pop.innerHTML = '<button type="button" class="popclose" data-popclose>× 閉じる</button>' + h;
   pop.classList.add('show');
@@ -13893,8 +14218,10 @@ function schedRowHTML(t, proj, px, prefix){
   /* バーは基本計画だけを固定表示する。進捗は実績の塗りではなく、
      行をまたぐ「進捗の折れ線」（drawProgressLine）で示す */
   var bars = '<div class="splan" style="left:' + pxOf(g.planLeft, px) + 'px;width:' + pxW(g.planW, px) + 'px;border-color:' + col + '"></div>';
-  var rowCls = 'srow' + (g.lateNow ? ' late' : '') + (S.phase === 'evening' ? ' tappable' : '') + (S.sel === t.id ? ' sel' : '');
-  return '<div class="' + rowCls + '" data-tid="' + t.id + '"><div class="slabel"><span class="gchip" style="background:' + col + '"></span>' + t.name + '</div>' +
+  var rowCls = 'srow' + (g.lateNow ? ' late' : '') + ' tappable' + (S.sel === t.id ? ' sel' : '');
+  var lvChip = '';
+  if(typeof levyOf === 'function'){ var _lv0 = levyOf(t.id); if(_lv0) lvChip = '<span class="levychip">' + ({crew:'人員追加中', rush:'急かし中', ot:'残業依頼中'}[_lv0.mode] || '手当中') + '</span>'; }
+  return '<div class="' + rowCls + '" data-tid="' + t.id + '"><div class="slabel"><span class="gchip" style="background:' + col + '"></span>' + t.name + lvChip + '</div>' +
     '<div class="strack" style="width:' + W + 'px">' + bars + '<div class="stoday" style="left:' + Math.round((Math.min(S.day, DAYS) - FIT_A) * px) + 'px"></div></div>' +
     '<span id="' + prefix + 'sv-' + t.id + '">' + statusHTML(g) + '</span></div>';
 }
@@ -14470,7 +14797,7 @@ function openDialog(cfg){
 function dlgHiddenDrive(){
   if(!DLG) return;
   var kind = DLG.kind, guard = 0, picked = null;
-  while(DLG && guard++ < 120){
+  while(DLG && guard++ < 200){
     if(DLG._showChoices && DLG.choices && DLG.choices.length){
       var bi = 0, bs = -1e9;
       DLG.choices.forEach(function(c, i){ var s = autoChoiceScore(c, i); if(s > bs){ bs = s; bi = i; } });
@@ -14480,6 +14807,8 @@ function dlgHiddenDrive(){
       dlgAdvance();
     }
   }
+  /* 駆動し切れずに残った対話は「見えない待ち」そのもの：必ず畳んで時間を返す */
+  if(DLG){ closeDialog(); autoLog(kind + ' — 自動で畳んで進めた（イベント非表示）'); return; }
   if(kind === '入場の挨拶') return; /* 挨拶は openGreetDialog 側で既にお知らせ済み */
   if(picked) autoLog(kind + ' — 「' + picked + '」を選んだ（方針：' + polName() + '／イベント非表示）');
   else autoLog(kind + ' — 画面は出さず、お知らせに記録して進めた（イベント非表示）');
@@ -14670,7 +14999,11 @@ function renderDlg(){
   }
 }
 function dlgAdvance(){
-  if(!DLG || DLG._showChoices) return;
+  if(!DLG) return;
+  if(DLG._showChoices){ /* 選択肢が空のまま選択表示で固まる経路を潰す（送りも選択もできず時間が止まる） */
+    if(!DLG.choices || !DLG.choices.length) closeDialog();
+    return;
+  }
   DLG.idx++;
   if(DLG.idx < DLG.lines.length){ renderDlg(); return; }
   if(DLG.choices && !DLG._pendingDone){ DLG._showChoices = true; renderDlg(); return; }
@@ -14678,7 +15011,7 @@ function dlgAdvance(){
 }
 function dlgSkip(){
   if(!DLG) return;
-  if(DLG._showChoices) return;
+  if(DLG._showChoices){ if(!DLG.choices || !DLG.choices.length) closeDialog(); return; }
   if(DLG.choices && !DLG._pendingDone){ DLG._showChoices = true; DLG.idx = DLG.lines.length; renderDlg(); return; }
   closeDialog();
 }
@@ -14745,7 +15078,7 @@ function evtAutoPick(choices){
 function dlgAutoDriveNow(kindLabel){
   if(!DLG) return;
   var guard = 0, picked = null;
-  while(DLG && guard++ < 80){
+  while(DLG && guard++ < 200){
     if(DLG._showChoices && DLG.choices && DLG.choices.length){
       var bi = evtAutoPick(DLG.choices);
       picked = DLG.choices[bi].label;
@@ -14754,6 +15087,9 @@ function dlgAutoDriveNow(kindLabel){
       dlgAdvance();
     }
   }
+  /* 駆動し切れずに対話が残ると「表示されていない待ち」で時間が止まる。
+     最後の受け皿として必ず畳む（選んだ手の効果は _pending 経由で通常どおり走る） */
+  if(DLG){ closeDialog(); pushNews('flag', '【方針で自動対応】' + kindLabel + ' — 対話を自動で畳んで進めた'); return; }
   if(picked) pushNews('flag', '【方針で自動対応】' + kindLabel + ' — 「' + picked + '」を選んだ（方針：' + polName() + '）');
 }
 function shockDialog(sh){
@@ -15091,7 +15427,13 @@ function resolveConsultOutcome(){
        効果は翌作業日から。承認＝2作業日／一部承認＝1作業日。課金は効果が付く時にだけ行う */
     var startDay = (S.phase === 'evening' || S.phase === 'done') ? S.day + 1 : S.day;
     c.boostStartDay = startDay;
-    if(res === 'approve'){
+    if(c.type === 'crew'){
+      /* 人員追加（継続型）：許可が出たら増員が入り、遅れがなくなるまで続く。
+         承認＝速度 ×1.4／一部承認＝×1.2。開始費用はここで課金し、継続中の
+         人件費（−2／日）は levyDaily が持つ */
+      if(res === 'approve'){ S.money -= 8; S.levy[c.tid] = {mode:'crew', fac:0.4, since:S.day, level:1, decayFrom:0}; }
+      else if(res === 'partial'){ S.money -= 5; S.levy[c.tid] = {mode:'crew', fac:0.2, since:S.day, level:1, decayFrom:0}; }
+    } else if(res === 'approve'){
       S.money -= 8; S.boostStart[c.tid] = startDay; S.boost[c.tid] = startDay + 1;
       if(c.fromShortage){ S.shortageUntil = Math.min(S.shortageUntil, startDay - 1); if(S.shortageUntil < S.day) S.shortage = false; }
     } else if(res === 'partial'){
@@ -15129,6 +15471,29 @@ function openConsultResultDialog(){
         {who:'me', expr:'troubled', text:'承知しました。組み替えで吸収します。'}
       ];
       fx = '却下 — 別便はなし。組み替えで凌ぐしかない';
+    }
+  } else if(c.type === 'crew'){
+    var tn2 = T(c.tid).name;
+    if(res === 'approve'){
+      lines = [
+        {who:'p', expr:'normal', text:'「' + tn2 + '」の人員追加の件、認める。予算 −8 で手配を進めてくれ。'},
+        {who:'p', expr:'normal', text:'増員は遅れがなくなるまで続けてよい。取り戻したら、1ヶ月ほどかけて元の人員に自然に戻すこと。だらだら増やし続けるなよ。'},
+        {who:'me', expr:'smile', text:'ありがとうございます。増員が入りました — 人が増えた分、安全の目配りは増やします。'}
+      ];
+      fx = '承認 — 予算 −8／「' + tn2 + '」に人員追加（速度 ×1.4・継続中は予算 −2／日・安全は下がる）';
+    } else if(res === 'partial'){
+      lines = [
+        {who:'p', expr:'troubled', text:'人員追加の件、希望どおりの人数は認められない。一部だけだ。予算 −5 で手配してくれ。'},
+        {who:'me', expr:'normal', text:'分かりました。出せる人数で立て直します。'}
+      ];
+      fx = '一部承認 — 予算 −5／「' + tn2 + '」に人員追加（速度 ×1.2・継続中は予算 −2／日）';
+    } else {
+      lines = [
+        {who:'p', expr:'troubled', text:'人員追加の件、今は認められない。' + (S.money < 8 ? '予算も足りていない。' : '優先順位が他にある。')},
+        {who:'p', expr:'normal', text:'急かすか残業か、現場で回せる手で凌いでくれ。'},
+        {who:'me', expr:'troubled', text:'承知しました。他の手で立て直します。'}
+      ];
+      fx = '却下 — 人員追加はなし。急かす／残業を依頼するで凌ぐ';
     }
   } else {
     var tn = T(c.tid).name;
@@ -16042,6 +16407,10 @@ function renderGameCore(){
       var sh = S.shock;
       var key = S.day + '|' + sh.caption;
       if(!DLG && S._dlgShockKey !== key){ S._dlgShockKey = key; shockDialog(sh); }
+      /* 開いた対話の onDone が連鎖対話の影で早期 return し、S.shock が残ったまま
+         キーだけ焼けた状態では二度と開かず朝が止まる。対話が閉じていて
+         ショックが残っているならキーを戻し、次の描画で開き直させる */
+      if(!DLG && S.shock === sh) S._dlgShockKey = null;
       /* 方針で自動対応した場合は S.shock がその場で消える：カードは描き直しに任せる */
       if(S.shock || DLG){
         g.innerHTML = '<div class="card"><p class="caption">' + icon(sh.icon, 17) + ' <b>' + sh.caption + '</b></p>' +
@@ -16050,21 +16419,21 @@ function renderGameCore(){
       }
     } else if(consultDueMorning()){
       var ckeyM = 'consult|' + S.consult.askedDay + '|' + S.consult.type + '|' + (S.consult.tid || '');
-      if(!DLG && S._dlgConsultKey !== ckeyM){ S._dlgConsultKey = ckeyM; openConsultResultDialog(); }
+      if(!DLG && S._dlgConsultKey !== ckeyM){ S._dlgConsultKey = ckeyM; openConsultResultDialog(); if(!DLG && S.consult) S._dlgConsultKey = null; } /* 対話と競合して開けなかった／選ばず閉じた場合はキーを焼かず、次回描画で開き直す */
       if(DLG || S.consult) g.innerHTML = '<div class="card"><p class="caption">' + icon('users', 17) + ' <b>課長からの回答が届いた</b></p><p class="small">対話画面で確認してください — 権限外の手配（別便・応援）は、この判断を受けてから動きます</p></div>';
     } else if(S.estPending){
-      if(!DLG && S._dlgEstKey !== S.day){ S._dlgEstKey = S.day; openEstDialog(); }
+      if(!DLG && S._dlgEstKey !== S.day){ S._dlgEstKey = S.day; openEstDialog(); if(!DLG && S.estPending) S._dlgEstKey = 0; } /* 開けなかった／選ばず閉じた場合は次回描画で開き直す */
       if(S.estPending) g.innerHTML = '<div class="card"><p class="caption">' + icon('coins', 17) + ' <b>設計変更の見積査定 — 内装の協力業者代理人との交渉</b></p><p class="small">対話画面で査定してください — 交渉が済むまで設計変更の手続き（査定→施主承認）は進みません</p></div>';
     } else if(S.scoldDue){
       /* 所長のお叱り：検査が通らないまま節目に突入しそうになった割り込み。
          時間が止まる判断系 — 対話で課長と最優先調整するか否かを決める */
-      if(!DLG && S._dlgScoldKey !== S.day){ S._dlgScoldKey = S.day; openScoldDialog(); }
+      if(!DLG && S._dlgScoldKey !== S.day){ S._dlgScoldKey = S.day; openScoldDialog(); if(!DLG && S.scoldDue) S._dlgScoldKey = 0; } /* 選ばず閉じた場合は次回描画で開き直す */
       if(DLG || S.scoldDue) g.innerHTML = '<div class="card"><p class="caption">' + icon('alert', 17) + ' <b>所長からのお叱り — 検査の段取り</b></p><p class="small">対話画面で対応してください — 検査は通してから次へ進むものです</p></div>';
     } else if(S.docEscDue){
       /* 検査書類の段階エスカレーション：課長の警告／期限警告／巻き取り（／所長のお叱り）。
          時間が止まる判断系 — 対話で受け止めるまで進まない */
       var dkey = S.docEscDue.stage + '|' + S.docEscDue.x.id + '|' + S.day;
-      if(!DLG && S._dlgDocEscKey !== dkey){ S._dlgDocEscKey = dkey; openDocEscDialog(); }
+      if(!DLG && S._dlgDocEscKey !== dkey){ S._dlgDocEscKey = dkey; openDocEscDialog(); if(!DLG && S.docEscDue) S._dlgDocEscKey = null; } /* 選ばず閉じた場合は次回描画で開き直す */
       if(DLG || S.docEscDue) g.innerHTML = '<div class="card"><p class="caption">' + icon('alert', 17) + ' <b>' + (S.docEscDue.shocho ? '所長のお叱り — 検査資料の巻き取り' : S.docEscDue.stage === 3 ? '課長が検査資料を巻き取った' : '課長からの警告 — 検査書類') + '</b></p><p class="small">対話画面で対応してください — 検査書類は工程の一部です</p></div>';
     } else if(S.polDue){
       /* イベント非表示（おまかせ中）：月次の方針見直し画面も出さず、
@@ -16097,7 +16466,7 @@ function renderGameCore(){
       var qOver = qTotW > qCapacity();
       var qLine = '<p class="small">今日の監督キュー ' + (S.queue || []).length + '件・' + qTotW + '枠（処理容量 ' + qCapacity() + '枠）' +
         (qOver ? ' — <b style="color:var(--bad)">溢れそう。監督パネルで優先づけ・助け・肩代わりを</b>' : ' — 容量内。定型は自動で回る') + '</p>';
-      g.innerHTML = '<div class="card">' + chips +
+      g.innerHTML = levyPanelHTML() + '<div class="card">' + chips +
         '<p class="caption">' + icon('check', 17) + ' 朝礼・KY・巡回は自動 — 今日はキューが回す</p>' + qLine + prep +
         '<p class="small">' + (deafTrades.length
           ? '不満が限界の職長がいる間は時間が止まります — 関係修復が済むと、作業は自動で始まります（下のボタンで今すぐ始めることもできます）'
@@ -16109,12 +16478,13 @@ function renderGameCore(){
     if(S.claimActive && S.claimCause){
       var ckey = S.day + '|cause|' + S.claimCause.name;
       if(!DLG && S._dlgClaimKey !== ckey){ S._dlgClaimKey = ckey; openClaimDialog(); }
+      if(!DLG && S.claimActive) S._dlgClaimKey = null; /* 選ばず閉じた場合は次回描画で開き直す */
       if(DLG || S.claimActive) g.innerHTML = '<div class="card"><p class="caption">' + icon('mega', 17) + ' <b>近隣クレーム対応中</b></p><p class="small">対話画面で収めてください — 原因は ' + TRADES[S.claimCause.trade].name + 'の ' + S.claimCause.name + '</p></div>';
     } else if(S.claimPending){
       var pk = S.claimKey || 'noise';
       g.innerHTML = '<div class="card"><p class="caption">' + icon('mega', 17) + ' <b>近隣クレーム未対応</b></p><p class="small">原因は「' + CLAIM_CAUSES[pk].name + '」（' + ((S.claimByCause && S.claimByCause[pk]) || 0) + '回目）。作業は止まっていないが、放置すると条件が締まる — 近隣（右上の人物）をタップして対応する</p></div>';
     } else {
-      g.innerHTML = (S.adjOpen ? adjPanelHTML() : '') + '<div class="card"><p class="caption">現場は動いている<span class="workdots"><span>.</span><span>.</span><span>.</span></span></p>' +
+      g.innerHTML = (S.adjOpen ? adjPanelHTML() : '') + levyPanelHTML() + '<div class="card"><p class="caption">現場は動いている<span class="workdots"><span>.</span><span>.</span><span>.</span></span></p>' +
         '<p class="small">監督キューは上のパネルで自動処理中 — 溢れそうなタスクはタップして介入（優先・急がせる・助け・肩代わり）／カメラは自分でも撮れる／クレームが出たら近隣をタップ</p></div>';
     }
   } else if(S.phase === 'evening'){
@@ -16124,22 +16494,22 @@ function renderGameCore(){
       g.innerHTML = recovCardHTML();
     } else if(consultDueEve()){
       var ckeyE = 'consult|' + S.consult.askedDay + '|' + S.consult.type + '|' + (S.consult.tid || '');
-      if(!DLG && S._dlgConsultKey !== ckeyE){ S._dlgConsultKey = ckeyE; openConsultResultDialog(); }
+      if(!DLG && S._dlgConsultKey !== ckeyE){ S._dlgConsultKey = ckeyE; openConsultResultDialog(); if(!DLG && S.consult) S._dlgConsultKey = null; } /* 対話と競合して開けなかった／選ばず閉じた場合はキーを焼かず、次回描画で開き直す */
       if(DLG || S.consult) g.innerHTML = '<div class="card"><p class="caption">' + icon('users', 17) + ' <b>課長からの回答が届いた</b></p><p class="small">対話画面で確認してください — 回答を受けてから夕礼・明日の段取りに進みます</p></div>';
     } else if(S.adjOpen){
       /* 調整中：方針フォーム＋従来の段取り（個別の手）を並べる。自動対応は止まる */
-      g.innerHTML = adjPanelHTML() + evePanelHTML();
+      g.innerHTML = adjPanelHTML() + levyPanelHTML() + evePanelHTML();
       eveScrollSel();
     } else {
       var ints = AUTO_MODE ? [] : polInterrupts(); /* 全自動：割り込みでも止めず、方針の自動対応に流す */
       if(ints.length){
         /* 方針では裁けない事態だけが止まる：理由を示して従来の段取りで判断を求める */
         if(S._polIntDay !== S.day){ S._polIntDay = S.day; S.polStats.interrupts += 1; }
-        g.innerHTML = polInterruptHTML(ints) + evePanelHTML();
+        g.innerHTML = polInterruptHTML(ints) + levyPanelHTML() + evePanelHTML();
         eveScrollSel();
       } else {
         /* 方針で自動対応：少し置いてから自動決定し、フィードに流して翌日へ */
-        g.innerHTML = autoEveHTML();
+        g.innerHTML = levyPanelHTML() + autoEveHTML();
         /* 自動対応の張り直し：予約済みでも、見張り（runAutoEvening の再試行）が
            死んでいる気配なら再予約する（_polAutoRan が立つまでは諦めない） */
         if(S._polAutoRan !== S.day && !DLG && (S._polAutoDay !== S.day || Date.now() - (S._polAutoT || 0) > 10000)){
@@ -16209,6 +16579,16 @@ function eveTaskRow(t, kind, proj){
   var acts = taskActions(t);
   if(S.consult && S.consult.tid === t.id && S.consult.type === 'boost'){ hands += eveHandChip('boost', t.id, '応援を入れる', '課長に相談中 — 回答は' + (S.consult.duePhase === 'eve' ? '夕方' : '翌朝') + '／承認後に予算 −8', 'on'); anyOn = true; }
   else if(acts.some(function(a){ return a.k === 'boost'; })){ hands += eveHandChip('boost', t.id, '応援を入れる（要相談）', '課長に相談 → 承認後に予算 −8・速度 ×' + boostFactor(t).toFixed(1) + '（次の作業日から2作業日）', ''); }
+  /* 継続的な手（人員追加／急かす／残業を依頼する）：工程表のバーから打つ手と共通。
+     遅れている間は続き、取り戻したら約1ヶ月かけて自然に元へ戻る */
+  var lv = levyOf(t.id);
+  if(lv){ hands += eveHandChip('levy-off', t.id, '「' + LEVY_LABEL[lv.mode] + '」をやめる', levyStatusLine(t) + ' — タップで手当を解く', 'on'); anyOn = true; }
+  else if(levyEligible(t)){
+    if(S.consult && S.consult.tid === t.id && S.consult.type === 'crew'){ hands += eveHandChip('levy-crew', t.id, '人員追加', '課長に相談中 — 回答は' + (S.consult.duePhase === 'eve' ? '夕方' : '翌朝'), 'on'); anyOn = true; }
+    else hands += eveHandChip('levy-crew', t.id, '人員追加（課長の許可が要る）', '課長に相談 → 承認 −8・速度 ×1.4（継続中 −2／日）— 工程↑・安全↓', '');
+    hands += eveHandChip('levy-rush', t.id, '急かす', '速度 ×1.15 — 安全↓↓・信頼 −1・班疲労が少し増える', '');
+    hands += eveHandChip('levy-ot', t.id, '残業を依頼する', '遅れがなくなるまで毎日 +0.5・予算 −4／日 — 工程↑・安全↓・信頼 −1・班疲労が増える', '');
+  }
   /* 先行許可：今夜のうちは取り消せるトグル */
   if(S.senkou[t.id]){ hands += eveHandChip('senkou', t.id, '先行を許可する', '選択中 — 未確認先行 +1（タップで取り消し）', 'on'); anyOn = true; }
   else if(eveSenkouEligible(t)){ hands += eveHandChip('senkou', t.id, '先行を許可する', '前工程70%で開始可／未確認先行 +1（検査で返る）', ''); }
@@ -16307,6 +16687,10 @@ function evePanelHTML(){
 }
 function eveHand(kind, tid){
   if(kind === 'watch'){ setTicker('eye', '様子を見る — 今夜はこの作業に手を入れない'); return; }
+  if(kind === 'levy-crew'){ levyStart(tid, 'crew'); return; }
+  if(kind === 'levy-rush'){ levyStart(tid, 'rush'); return; }
+  if(kind === 'levy-ot'){ levyStart(tid, 'ot'); return; }
+  if(kind === 'levy-off'){ levyCancel(tid); return; }
   if(kind === 'ot'){ decideOT(tid); return; }
   if(kind === 'boost'){
     var a = taskActions(T(tid)).find(function(x){ return x.k === 'boost'; });
@@ -16581,34 +16965,74 @@ function renderTabs(){
   var mc = document.getElementById('mapCard');
   if(mc) mc.style.display = 'none';
 }
-/* QCDSEの現在スコア（0〜100）。リザルト画面（openEnding）の評価式と
-   同じ内部値（未是正累計・予算残り・完了見込み・ヒヤリ・ハット/事故・
-   クレーム件数）を0〜5→0〜100へ換算した実値で、飾り用の別数値は作らない */
-function qcdseScores(){
-  var q = Math.max(0, 5 - Math.ceil((S.debtTotal || 0) / 2));
-  var c = Math.max(0, Math.min(5, Math.round(5 * S.money / (S.moneyStart || 180))));
-  var d;
-  if(isDone('finish')){ var f = S.finished['finish']; d = !f ? 0 : f <= PLAN_FINISH ? 5 : f <= DEADLINE ? 3 : 1; }
-  else { var pf = projFinish(); d = pf <= PLAN_FINISH ? 5 : pf <= DEADLINE ? 3 : 1; }
-  var s5 = Math.max(0, 5 - Math.ceil((S.hiyari || 0) / 2) - (S.accidents || 0) * 2);
-  var e5 = Math.max(0, 5 - (S.claimCount || 0) * 2);
-  return {Q:q * 20, C:c * 20, D:d * 20, S:s5 * 20, E:e5 * 20};
+/* QCDSEの表示スコア（0〜100・連続値）。数値そのものは画面に出さず、
+   バーの位置としてだけ使う。物差しは「手つかずの順調な現場＝55（5段階の
+   目安で『順調』の中央）」に置き、良い運びは上へ、悪化は下へ連続的に動く。
+   100（最高）を常時目指す圧にならないよう、満点は例外的に良い運びの時だけ
+   届く距離に置いてある。材料は実値だけ：未是正・写真不足・指摘ゼロ立会い・
+   是正完了（品質）／残予算と進捗から見た計画上の残り目安（原価）／
+   完了見込みと計画の差（工程）／ヒヤリ・ハット・事故（安全）／
+   クレーム件数と近隣の信頼（環境）。リザルト画面の5段階評価とは別物差し */
+/* 安全の表示スコア（0〜100・連続値）。HUDの安全バーと事故判定（accLaxity）が
+   同じ物差しを共有する：悪化経路（ヒヤリ・ハット／事故／未是正の蓄積／
+   人員追加・急かし・残業依頼の継続／班と監督の疲労／閉所の圧縮／巡回を
+   軽くする方針）がすべて目に見える重さで効き、安全寄りの運用（巡回を
+   厚く・是正の蓄積＝地力）では回復・維持される。事故側の接続は accLaxity 参照 */
+function safetyScore(){
+  var v = 55;
+  v -= (S.hiyari || 0) * 5;
+  v -= (S.accidents || 0) * 20;
+  v -= (typeof openFindings === 'function' ? openFindings().length : 0) * 3;
+  v -= (S.debt || 0) * 2;
+  if(S.levy) Object.keys(S.levy).forEach(function(tid){
+    var lv = S.levy[tid]; if(!lv) return;
+    v -= (lv.mode === 'rush' ? 9 : 6) * (lv.level || 0); /* 急かしは安全↓↓、人員追加・残業依頼は安全↓ */
+  });
+  if(S.crewFatigue){
+    var fsum = 0, fn = 0;
+    Object.keys(S.crewFatigue).forEach(function(k){ fsum += S.crewFatigue[k] || 0; fn++; });
+    if(fn) v -= (fsum / fn) * 1.6;
+  }
+  v -= (S.fatigue || 0) * 1.5;
+  if(S.closeLv != null && S.closeLv <= 4) v -= S.closeLv === 0 ? 6 : 3;
+  if(S.pol) v += S.pol.patrol === 'thorough' ? 5 : S.pol.patrol === 'light' ? -6 : 0;
+  v += Math.min(5, (typeof siteStrength === 'function' ? siteStrength() : 0) * 1.0);
+  v += Math.min(8, (S.day || 1) * 0.15);
+  return Math.max(0, Math.min(100, Math.round(v * 10) / 10));
 }
-var QCD_ROWS = [['Q','品質'],['C','原価'],['D','工程'],['S','安全'],['E','環境']];
+function qcdseScores(){
+  function cl(v){ return Math.max(0, Math.min(100, Math.round(v * 10) / 10)); }
+  var q = 55 - (S.debtTotal || 0) * 4 - (S.photoMiss || 0) * 3 + (S.kanriGood || 0) * 4 + (S.corrDone || 0) * 0.3;
+  var tw = 0, td = 0;
+  TASKS.forEach(function(t){ tw += (S.work[t.id] || 0); td += t.dur; });
+  var prog = td > 0 ? Math.max(0, Math.min(1, tw / td)) : 0;
+  var cPlan = Math.max(1, (S.moneyStart || 180) * (1 - 0.8 * prog)); /* この進捗なら残っていてほしい予算の目安 */
+  var c = 55 * (S.money / cPlan);
+  var d;
+  if(isDone('finish')){ var f = S.finished['finish']; d = f ? 55 + (PLAN_FINISH - f) * 4 : 0; }
+  else d = 55 + (PLAN_FINISH - projFinish()) * 4;
+  var s = safetyScore();
+  var e = 55 - (S.claimCount || 0) * 12 + ((S.kinrinTrust == null ? 3 : S.kinrinTrust) - 3) * 4;
+  return {Q:cl(q), C:cl(c), D:cl(d), S:cl(s), E:cl(e)};
+}
+var QCD_ROWS = [['Q','品質','#2f6fb2'],['C','原価','#a87b0a'],['D','工程','#1f8a70'],['S','安全','#dd5f1c'],['E','環境','#5da33c']];
+var QCD_TICKS = [[10,'最悪'],[30,'悪い'],[50,'順調'],[70,'良い'],[90,'最高']];
 var _qcdCache = '';
 function updateQcdHud(){
   var el = document.getElementById('qcdHud');
   if(!el || !S) return;
   var sc;
   try{ sc = qcdseScores(); }catch(e){ return; }
-  var key = QCD_ROWS.map(function(r){ return sc[r[0]]; }).join(',');
+  var key = QCD_ROWS.map(function(r){ return sc[r[0]].toFixed(1); }).join(',');
   if(key === _qcdCache) return;
   _qcdCache = key;
-  el.innerHTML = QCD_ROWS.map(function(r){
+  var h = '<div class="qcdticks">' + QCD_TICKS.map(function(tk){ return '<span style="left:' + tk[0] + '%">' + tk[1] + '</span>'; }).join('') + '</div>';
+  h += QCD_ROWS.map(function(r){
     var v = sc[r[0]];
-    var cls = v < 40 ? 'bad' : v < 60 ? 'warn' : '';
-    return '<div class="qcdrow"><span class="qcdlab">' + r[0] + ' ' + r[1] + '</span><span class="qcdbar"><i class="' + cls + '" style="width:' + v + '%"></i></span><span class="qcdnum">' + v + '</span></div>';
+    var ttl = r[0] === 'S' ? ' title="安全の帯域と事故リスクの対応：悪い以下＝ヒヤリ・ハット（事故の前兆）が出やすい／最悪＝事故そのものが起き得る／良い以上＝ほぼ起きない"' : '';
+    return '<div class="qcdrow"' + ttl + '><span class="qcdlab" style="color:' + r[2] + '">' + r[0] + ' ' + r[1] + '</span><span class="qcdbar"><i style="width:' + v + '%;background:' + r[2] + '"></i></span></div>';
   }).join('');
+  el.innerHTML = h;
 }
 function render(){
   updateQcdHud();
@@ -17275,6 +17699,38 @@ function autoTick(){
   if(S.claimPending && !S.claimActive){ S.claimActive = true; openClaimDialog(); return; }
 }
 setInterval(autoTick, 650);
+/* 「表示されていない待ち」の見張り（保険）：対話オブジェクトと表示の食い違い、
+   および「待ちフラグは立っているのに対話が開いていない」状態が数秒続けば直す。
+   過去に繰り返した時間停止（キー焼け・駆動失敗・表示だけ消えた対話）の受け皿 */
+var _waitWatch = {sig:'', n:0};
+setInterval(function(){
+  if(typeof S === 'undefined' || !S || S.phase === 'done' || typeof DLG === 'undefined') return;
+  var ov = document.getElementById('dlgOverlay'); if(!ov) return;
+  var shown = ov.classList.contains('show');
+  if(DLG && !shown && !DLG._hidden){
+    /* 対話があるのに画面に出ていない：表示を復帰させる */
+    ov.classList.add('show'); document.body.classList.add('dlg-open'); renderDlg();
+  } else if(DLG && !shown && DLG._hidden && !autoHideActive()){
+    DLG._hidden = false;
+    ov.classList.add('show'); document.body.classList.add('dlg-open'); renderDlg();
+  } else if(!DLG && shown){
+    ov.classList.remove('show'); document.body.classList.remove('dlg-open');
+  }
+  /* 朝・夕の判断待ちフラグが立っているのに対話が開いていない状態の検出 */
+  var blocked = !DLG && !PLANMODE && (S.phase === 'morning' || S.phase === 'evening') &&
+    !!(S.shock || S.deferredShock || S.estPending || S.scoldDue || S.docEscDue ||
+       (S.consult && ((S.phase === 'morning' && typeof consultDueMorning === 'function' && consultDueMorning()) ||
+                      (S.phase === 'evening' && typeof consultDueEve === 'function' && consultDueEve()))));
+  if(!blocked){ _waitWatch.sig = ''; _waitWatch.n = 0; return; }
+  var sig = S.day + '|' + S.phase + '|' + (S.shock ? 1 : 0) + (S.estPending ? 1 : 0) + (S.scoldDue ? 1 : 0) + (S.docEscDue ? 1 : 0) + (S.consult ? 1 : 0);
+  if(sig !== _waitWatch.sig){ _waitWatch.sig = sig; _waitWatch.n = 0; return; }
+  if(++_waitWatch.n >= 3){
+    /* 3秒経っても開かない：一発キーを全部戻して描き直し、開き直させる */
+    _waitWatch.n = 0;
+    S._dlgShockKey = null; S._dlgEstKey = 0; S._dlgScoldKey = 0; S._dlgDocEscKey = null; S._dlgConsultKey = null; S._dlgClaimKey = null;
+    render();
+  }
+}, 1000);
 function setAutoMode(on){
   AUTO_MODE = on;
   if(on && typeof S !== 'undefined' && S){
@@ -17358,10 +17814,12 @@ function syncSysCtl(){
 /* ---- イベント ---- */
 document.getElementById('game').addEventListener('click', function(e){
   var rr = e.target.closest('.srow[data-tid], .mdia[data-tid]');
-  if(rr && S.phase === 'evening' && !e.target.closest('button[data-act]')){
-    S.sel = rr.getAttribute('data-tid'); S.eveStep = 'actions';
+  if(rr && !e.target.closest('button[data-act]')){
+    S.sel = rr.getAttribute('data-tid'); if(S.phase === 'evening') S.eveStep = 'actions';
     renderGame(); renderSched(); updateStage(); return;
   }
+  var lvb = e.target.closest('button[data-levy]');
+  if(lvb){ var lm = lvb.getAttribute('data-levy'), lt = lvb.getAttribute('data-tid'); if(lm === 'cancel') levyCancel(lt); else levyStart(lt, lm); return; }
   var hb = e.target.closest('button[data-hand]');
   if(hb && S.phase === 'evening'){ eveHand(hb.getAttribute('data-hand'), hb.getAttribute('data-tid')); return; }
   var b = e.target.closest('button[data-act]');
@@ -17543,10 +18001,11 @@ document.getElementById('sched').addEventListener('click', function(e){
     SCHED_MANUAL[gk] = true;
     SCHED_COLLAPSED[gk] = !SCHED_COLLAPSED[gk]; renderSched(); return;
   }
-  if(S.phase !== 'evening') return;
   var row = e.target.closest('.srow[data-tid], .mdia[data-tid]');
   if(!row) return;
-  S.sel = row.getAttribute('data-tid'); S.eveStep = 'actions';
+  /* 工程表のバーは夕方以外でも選べる：選んだ作業への手（人員追加／急かす／
+     残業を依頼する）のパネルが操作ドックに出る */
+  S.sel = row.getAttribute('data-tid'); if(S.phase === 'evening') S.eveStep = 'actions';
   renderSched(); renderGame(); updateStage();
 });
 document.getElementById('stage').addEventListener('click', function(e){
@@ -18205,7 +18664,7 @@ function dbgPhasePresets(){
 function dbgBuildState(){
   S = {day:1, phase:'work', money:180, moneyStart:180, fatigue:0, debt:0, debtTotal:0,
     claimCount:0, claimByCause:{}, claimGuard:{}, claimPending:false, claimKey:null, claimConductTrade:null, kinrinTrust:3, storyShown:{}, storyPending:null, storyOpen:false,
-    ot:false, otUsedYesterday:false, boost:{}, boostStart:{}, towerCrane:false, spotPlan:{}, spotMarked:{}, powerZones:{}, carts:1, scafPlan:{N:true, S:true, E:true, W:true}, senkou:{}, pourBooked:PLAN['foundP'][0], pourMoved:false,
+    ot:false, otUsedYesterday:false, boost:{}, boostStart:{}, levy:{}, towerCrane:false, spotPlan:{}, spotMarked:{}, powerZones:{}, carts:1, scafPlan:{N:true, S:true, E:true, W:true}, senkou:{}, pourBooked:PLAN['foundP'][0], pourMoved:false,
     shortage:false, shortageHard:false, deliverySlow:false, deliverySoft:false, consult:null, slowDay:0,
     findingsDone:false, hiyariDone:false, changeAccepted:false, sel:null,
     work:{}, started:{}, finished:{}, shock:null, _panelActs:[],
