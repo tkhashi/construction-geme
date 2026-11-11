@@ -1,0 +1,15 @@
+# Generated building/plan/scene data (regenerable from model code + seeds)
+model/generated_*.json
+model/__pycache__/
+iso_timelapse/iso_timelapse_data.json
+
+# Internal working files (not published)
+hidden_files/
+
+# Character sprite binaries are not synced via the GitHub connector (text-only).
+# They live in the local workspace; see characters/CHARACTER_PROFILES.md.
+characters/**/*.png
+
+# Misc
+*.muse-github-snapshot-sync.json
+.DS_Store
