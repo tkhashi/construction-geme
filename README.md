@@ -2,7 +2,7 @@
 
 日本の建設現場の現場監督（施工管理）の仕事を体験するゲーム。健全な工程計画が外乱で崩れ、立て直していく過程が中核の、工程ネットワーク・シミュレーション。
 
-**プレイ（GitHub Pages）**: https://tkhashi.github.io/construction-geme/ — `docs/` を GitHub Pages（ブランチ方式）で公開。本編を更新したら `game/index.html` と `docs/index.html` の両方へ反映する。
+**プレイ（GitHub Pages）**: https://tkhashi.github.io/construction-geme/ — `docs/` を GitHub Pages（ブランチ方式）で公開中。本編を更新したら `game/index.html` と `docs/index.html` の両方へ反映する。
 
 ![本編スクリーンショット（モラージュ柏・竣工直前の3D全景）](research/images/game-screenshot.png)
 
