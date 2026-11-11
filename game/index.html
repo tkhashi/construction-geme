@@ -9200,9 +9200,10 @@ var G3DEFZ = 1.5;
    g3FitZoom の戻り値と描画側 span の両方へ G3DEFZ を掛けたため割り算で
    相殺され、初期表示が全体フィットと同一だった。今回は描画側 span の換算
    （base × G3DEFZ / zoom）は一切変えず、フィット目標の span だけを縮める。
-   ただし「敷地・建物が初期表示で見切れないこと」も条件のため、目標 span が
-   敷地境界（仮囲い）と建物全体を実投影で収める最小 span（g3NeedSpan）を
-   下回る物件・画面比では、収まる範囲で可能な最大拡大まで戻す（両立策）。
+   以前は「見切れない」ことを優先し g3NeedSpan で下限を掛けていたため
+   実効は約×1.1〜1.2に留まっていたが、ユーザ判断（2026-11-11）で撤回：
+   収まりきらなくてよい — 敷地の端が少しはみ出す方が臨場感があるため、
+   ×1.5 をそのまま通し、見切れで戻すことはしない。
    ズーム可動範囲・見かけの仰角（約16°）は前回のまま */
 var G3INIZ = 1.5;
 /* 既定カメラ（起動時・初期視点リセット・ダブルクリックで戻る先）：
@@ -9222,7 +9223,10 @@ function g3ResetCam(){
 /* 敷地境界（仮囲い）と建物全体が画面に収まる最小の span を、既定カメラ
    （az・el・注視点）と描画側の高さ強調（G3VS）で実際に投影して求める。
    対象は敷地矩形の四隅（地表面）と建物フットプリント四隅の地表・最上階。
-   従来の need 見積もり（対角＋60m・×1.05）より実形に近いぶん小さい */
+   従来の need 見積もり（対角＋60m・×1.05）より実形に近いぶん小さい。
+   ※2026-11-11 のユーザ判断で初期表示のクランプには使わなくなった
+   （少しはみ出す方が臨場感があるため）。将来「収める」へ戻す場合の
+   計算として残置する */
 function g3NeedSpan(asp){
   if(typeof ISOFOOT === 'undefined' || !ISOFOOT[1]) return 0;
   var foot = ISOFOOT[1];
@@ -9248,9 +9252,9 @@ function g3NeedSpan(asp){
   return Math.max(hx / Math.max(asp, 0.30), Math.max(top, -bot)) * 1.03;
 }
 /* 建物全体（敷地＋高さ強調ぶん）が画面にちょうど収まるズームを基準に、
-   初期表示では実拡大率 G3INIZ（×1.5）だけ寄せたズームを返す。ただし目標が
-   g3NeedSpan（敷地境界と建物が収まる最小 span）を下回る場合は、見切れない
-   範囲で可能な最大拡大（span = g3NeedSpan）まで戻す。
+   初期表示では実拡大率 G3INIZ（×1.5）だけ寄せたズームを返す。
+   敷地の四隅が少しはみ出すのは仕様（ユーザ判断：臨場感を優先）。
+   ユーザが引いたりパンすれば全体は見られる（ズーム下限・操作は不変）。
    対地の対角と高さの投影寸法から必要な span（need）を出し、横はアスペクトで
    割る：縦長の電話画面では自動で引いた画角になる。描画側の span は
    base × G3DEFZ / zoom で従来どおり出すため、相殺は起きない */
@@ -9262,7 +9266,7 @@ function g3FitZoom(asp){
   var projH = diag * Math.sin(appEl) + NF * G3FH * G3VS * Math.cos(appEl);
   var need = Math.max(projH / 2, (diag / 2) / Math.max(asp, 0.30)) * 1.05;
   var base = Math.max(GB_W, GB_H) / 1000 * 0.62;
-  var spanTgt = Math.max(need / G3INIZ, g3NeedSpan(asp));
+  var spanTgt = need / G3INIZ; /* ×1.5 をそのまま通す：g3NeedSpan による見切れ防止の下限は掛けない（少しはみ出す方が臨場感がある、というユーザ判断） */
   return Math.max(0.26 * G3DEFZ, Math.min(2.2 * G3DEFZ * G3INIZ, base * G3DEFZ / spanTgt));
 }
 function g3SyncModeBtns(){
