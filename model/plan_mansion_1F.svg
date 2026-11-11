@@ -1,0 +1,219 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-9000 -9000 72000 29000" width="1800" height="725" font-family="sans-serif">
+<rect x="-9000" y="-9000" width="100%" height="100%" fill="white"/>
+<defs><pattern id="hatch" width="900" height="900" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="900" height="900" fill="#EAEDED"/><line x1="0" y1="0" x2="0" y2="900" stroke="#95A5A6" stroke-width="160"/></pattern></defs>
+<rect x="0" y="1500" width="6000" height="9500" fill="#D5D8DC" stroke="#BDC3C7" stroke-width="60"/>
+<text x="3000.0" y="6190.0" font-size="620" text-anchor="middle" fill="#1B2631">階段室・EVホール</text>
+<text x="3000.0" y="6870.0" font-size="496" text-anchor="middle" fill="#5D6D7E">57㎡</text>
+<rect x="6000" y="1500" width="6000" height="9500" fill="#B2DFDB" stroke="#BDC3C7" stroke-width="60"/>
+<text x="9000.0" y="6190.0" font-size="620" text-anchor="middle" fill="#1B2631">エントランス</text>
+<text x="9000.0" y="6870.0" font-size="496" text-anchor="middle" fill="#5D6D7E">57㎡</text>
+<rect x="12000" y="1500" width="6000" height="9500" fill="#C5CAE9" stroke="#BDC3C7" stroke-width="60"/>
+<text x="15000.0" y="6190.0" font-size="620" text-anchor="middle" fill="#1B2631">管理室</text>
+<text x="15000.0" y="6870.0" font-size="496" text-anchor="middle" fill="#5D6D7E">57㎡</text>
+<rect x="18000" y="1500" width="6000" height="9500" fill="#FFF9C4" stroke="#BDC3C7" stroke-width="60"/>
+<text x="21000.0" y="6190.0" font-size="620" text-anchor="middle" fill="#1B2631">101号室</text>
+<text x="21000.0" y="6870.0" font-size="496" text-anchor="middle" fill="#5D6D7E">57㎡</text>
+<rect x="24000" y="1500" width="6000" height="9500" fill="#D5D8DC" stroke="#BDC3C7" stroke-width="60"/>
+<text x="27000.0" y="6190.0" font-size="620" text-anchor="middle" fill="#1B2631">階段室・EVホール</text>
+<text x="27000.0" y="6870.0" font-size="496" text-anchor="middle" fill="#5D6D7E">57㎡</text>
+<rect x="30000" y="1500" width="6000" height="9500" fill="#FFF9C4" stroke="#BDC3C7" stroke-width="60"/>
+<text x="33000.0" y="6190.0" font-size="620" text-anchor="middle" fill="#1B2631">102号室</text>
+<text x="33000.0" y="6870.0" font-size="496" text-anchor="middle" fill="#5D6D7E">57㎡</text>
+<rect x="36000" y="1500" width="6000" height="9500" fill="#FFF9C4" stroke="#BDC3C7" stroke-width="60"/>
+<text x="39000.0" y="6190.0" font-size="620" text-anchor="middle" fill="#1B2631">103号室</text>
+<text x="39000.0" y="6870.0" font-size="496" text-anchor="middle" fill="#5D6D7E">57㎡</text>
+<rect x="42000" y="1500" width="6000" height="9500" fill="#E1BEE7" stroke="#BDC3C7" stroke-width="60"/>
+<text x="45000.0" y="6190.0" font-size="620" text-anchor="middle" fill="#1B2631">集会室</text>
+<text x="45000.0" y="6870.0" font-size="496" text-anchor="middle" fill="#5D6D7E">57㎡</text>
+<rect x="48000" y="1500" width="6000" height="9500" fill="#D5D8DC" stroke="#BDC3C7" stroke-width="60"/>
+<text x="51000.0" y="6190.0" font-size="620" text-anchor="middle" fill="#1B2631">階段室・EVホール</text>
+<text x="51000.0" y="6870.0" font-size="496" text-anchor="middle" fill="#5D6D7E">57㎡</text>
+<rect x="0" y="0" width="54000" height="1500" fill="#ECEFF1" stroke="#BDC3C7" stroke-width="60"/>
+<text x="27000.0" y="690.0" font-size="480" text-anchor="middle" fill="#1B2631">共用廊下</text>
+<text x="27000.0" y="1230.0" font-size="384" text-anchor="middle" fill="#5D6D7E">81㎡</text>
+<rect x="200" y="5800" width="2600" height="5000" fill="url(#hatch)" stroke="#616A6B" stroke-width="70"/>
+<text x="1500.0" y="8520.0" font-size="560" text-anchor="middle" fill="#1B2631">階段</text>
+<rect x="24200" y="5800" width="2600" height="5000" fill="url(#hatch)" stroke="#616A6B" stroke-width="70"/>
+<text x="25500.0" y="8520.0" font-size="560" text-anchor="middle" fill="#1B2631">階段</text>
+<rect x="27000" y="8500" width="2300" height="2300" fill="url(#hatch)" stroke="#616A6B" stroke-width="70"/>
+<text x="28150.0" y="9870.0" font-size="560" text-anchor="middle" fill="#1B2631">EV</text>
+<rect x="48200" y="5800" width="2600" height="5000" fill="url(#hatch)" stroke="#616A6B" stroke-width="70"/>
+<text x="49500.0" y="8520.0" font-size="560" text-anchor="middle" fill="#1B2631">階段</text>
+<rect x="10900" y="1700" width="900" height="1700" fill="url(#hatch)" stroke="#616A6B" stroke-width="70"/>
+<rect x="16900" y="1700" width="900" height="1700" fill="url(#hatch)" stroke="#616A6B" stroke-width="70"/>
+<rect x="22900" y="1700" width="900" height="1700" fill="url(#hatch)" stroke="#616A6B" stroke-width="70"/>
+<rect x="34900" y="1700" width="900" height="1700" fill="url(#hatch)" stroke="#616A6B" stroke-width="70"/>
+<rect x="40900" y="1700" width="900" height="1700" fill="url(#hatch)" stroke="#616A6B" stroke-width="70"/>
+<rect x="46900" y="1700" width="900" height="1700" fill="url(#hatch)" stroke="#616A6B" stroke-width="70"/>
+<line x1="0" y1="11000" x2="2500" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="3500" y1="11000" x2="6000" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="2500" y1="11000" x2="2500" y2="10000" stroke="#1B2631" stroke-width="60"/>
+<path d="M 2500 10000 A 1000 1000 0 0 1 3500 11000" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="6000" y1="11000" x2="8100" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="9900" y1="11000" x2="12000" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="8100" y1="11000" x2="8100" y2="9200" stroke="#1B2631" stroke-width="60"/>
+<path d="M 8100 9200 A 1800 1800 0 0 1 9900 11000" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="12000" y1="11000" x2="18000" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="18000" y1="11000" x2="19200" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="22800" y1="11000" x2="24000" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="24000" y1="11000" x2="26500" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="27500" y1="11000" x2="30000" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="26500" y1="11000" x2="26500" y2="10000" stroke="#1B2631" stroke-width="60"/>
+<path d="M 26500 10000 A 1000 1000 0 0 1 27500 11000" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="30000" y1="11000" x2="31200" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="34800" y1="11000" x2="36000" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="36000" y1="11000" x2="37200" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="40800" y1="11000" x2="42000" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="42000" y1="11000" x2="48000" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="48000" y1="11000" x2="50500" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="51500" y1="11000" x2="54000" y2="11000" stroke="#1B2631" stroke-width="210"/>
+<line x1="50500" y1="11000" x2="50500" y2="10000" stroke="#1B2631" stroke-width="60"/>
+<path d="M 50500 10000 A 1000 1000 0 0 1 51500 11000" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="0" y1="1500" x2="2500" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="3500" y1="1500" x2="6000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="2500" y1="1500" x2="2500" y2="500" stroke="#1B2631" stroke-width="60"/>
+<path d="M 2500 500 A 1000 1000 0 0 1 3500 1500" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="6000" y1="1500" x2="8200" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="9800" y1="1500" x2="12000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="8200" y1="1500" x2="8200" y2="-100" stroke="#1B2631" stroke-width="60"/>
+<path d="M 8200 -100 A 1600 1600 0 0 1 9800 1500" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="12000" y1="1500" x2="14500" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="15500" y1="1500" x2="18000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="14500" y1="1500" x2="14500" y2="500" stroke="#1B2631" stroke-width="60"/>
+<path d="M 14500 500 A 1000 1000 0 0 1 15500 1500" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="18000" y1="1500" x2="20550" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="21450" y1="1500" x2="24000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="20550" y1="1500" x2="20550" y2="600" stroke="#1B2631" stroke-width="60"/>
+<path d="M 20550 600 A 900 900 0 0 1 21450 1500" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="24000" y1="1500" x2="26500" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="27500" y1="1500" x2="30000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="26500" y1="1500" x2="26500" y2="500" stroke="#1B2631" stroke-width="60"/>
+<path d="M 26500 500 A 1000 1000 0 0 1 27500 1500" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="30000" y1="1500" x2="32550" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="33450" y1="1500" x2="36000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="32550" y1="1500" x2="32550" y2="600" stroke="#1B2631" stroke-width="60"/>
+<path d="M 32550 600 A 900 900 0 0 1 33450 1500" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="36000" y1="1500" x2="38550" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="39450" y1="1500" x2="42000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="38550" y1="1500" x2="38550" y2="600" stroke="#1B2631" stroke-width="60"/>
+<path d="M 38550 600 A 900 900 0 0 1 39450 1500" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="42000" y1="1500" x2="44500" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="45500" y1="1500" x2="48000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="44500" y1="1500" x2="44500" y2="500" stroke="#1B2631" stroke-width="60"/>
+<path d="M 44500 500 A 1000 1000 0 0 1 45500 1500" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="48000" y1="1500" x2="50500" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="51500" y1="1500" x2="54000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="50500" y1="1500" x2="50500" y2="500" stroke="#1B2631" stroke-width="60"/>
+<path d="M 50500 500 A 1000 1000 0 0 1 51500 1500" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="0" y1="0" x2="6000" y2="0" stroke="#1B2631" stroke-width="210"/>
+<line x1="6000" y1="0" x2="12000" y2="0" stroke="#1B2631" stroke-width="210"/>
+<line x1="12000" y1="0" x2="18000" y2="0" stroke="#1B2631" stroke-width="210"/>
+<line x1="18000" y1="0" x2="24000" y2="0" stroke="#1B2631" stroke-width="210"/>
+<line x1="24000" y1="0" x2="30000" y2="0" stroke="#1B2631" stroke-width="210"/>
+<line x1="30000" y1="0" x2="36000" y2="0" stroke="#1B2631" stroke-width="210"/>
+<line x1="36000" y1="0" x2="42000" y2="0" stroke="#1B2631" stroke-width="210"/>
+<line x1="42000" y1="0" x2="48000" y2="0" stroke="#1B2631" stroke-width="210"/>
+<line x1="48000" y1="0" x2="54000" y2="0" stroke="#1B2631" stroke-width="210"/>
+<line x1="0" y1="11000" x2="0" y2="6750" stroke="#1B2631" stroke-width="210"/>
+<line x1="0" y1="5750" x2="0" y2="1500" stroke="#1B2631" stroke-width="210"/>
+<line x1="0" y1="6750" x2="1000" y2="6750" stroke="#1B2631" stroke-width="60"/>
+<path d="M 1000 6750 A 1000 1000 0 0 1 0 5750" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="0" y1="1500" x2="0" y2="0" stroke="#1B2631" stroke-width="210"/>
+<line x1="6000" y1="11000" x2="6000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="12000" y1="11000" x2="12000" y2="6700" stroke="#1B2631" stroke-width="110"/>
+<line x1="12000" y1="5800" x2="12000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="12000" y1="6700" x2="12900" y2="6700" stroke="#1B2631" stroke-width="60"/>
+<path d="M 12900 6700 A 900 900 0 0 1 12000 5800" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="18000" y1="11000" x2="18000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="24000" y1="11000" x2="24000" y2="1500" stroke="#1B2631" stroke-width="210"/>
+<line x1="30000" y1="11000" x2="30000" y2="1500" stroke="#1B2631" stroke-width="210"/>
+<line x1="36000" y1="11000" x2="36000" y2="1500" stroke="#1B2631" stroke-width="210"/>
+<line x1="42000" y1="11000" x2="42000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="48000" y1="11000" x2="48000" y2="1500" stroke="#1B2631" stroke-width="110"/>
+<line x1="54000" y1="11000" x2="54000" y2="6750" stroke="#1B2631" stroke-width="210"/>
+<line x1="54000" y1="5750" x2="54000" y2="1500" stroke="#1B2631" stroke-width="210"/>
+<line x1="54000" y1="6750" x2="55000" y2="6750" stroke="#1B2631" stroke-width="60"/>
+<path d="M 55000 6750 A 1000 1000 0 0 1 54000 5750" fill="none" stroke="#808B96" stroke-width="45"/>
+<line x1="54000" y1="1500" x2="54000" y2="0" stroke="#1B2631" stroke-width="210"/>
+<rect x="-350" y="10650" width="700" height="700" fill="#1B2631"/>
+<rect x="-350" y="1150" width="700" height="700" fill="#1B2631"/>
+<rect x="-350" y="-350" width="700" height="700" fill="#1B2631"/>
+<rect x="5650" y="10650" width="700" height="700" fill="#1B2631"/>
+<rect x="5650" y="1150" width="700" height="700" fill="#1B2631"/>
+<rect x="5650" y="-350" width="700" height="700" fill="#1B2631"/>
+<rect x="11650" y="10650" width="700" height="700" fill="#1B2631"/>
+<rect x="11650" y="1150" width="700" height="700" fill="#1B2631"/>
+<rect x="11650" y="-350" width="700" height="700" fill="#1B2631"/>
+<rect x="17650" y="10650" width="700" height="700" fill="#1B2631"/>
+<rect x="17650" y="1150" width="700" height="700" fill="#1B2631"/>
+<rect x="17650" y="-350" width="700" height="700" fill="#1B2631"/>
+<rect x="23650" y="10650" width="700" height="700" fill="#1B2631"/>
+<rect x="23650" y="1150" width="700" height="700" fill="#1B2631"/>
+<rect x="23650" y="-350" width="700" height="700" fill="#1B2631"/>
+<rect x="29650" y="10650" width="700" height="700" fill="#1B2631"/>
+<rect x="29650" y="1150" width="700" height="700" fill="#1B2631"/>
+<rect x="29650" y="-350" width="700" height="700" fill="#1B2631"/>
+<rect x="35650" y="10650" width="700" height="700" fill="#1B2631"/>
+<rect x="35650" y="1150" width="700" height="700" fill="#1B2631"/>
+<rect x="35650" y="-350" width="700" height="700" fill="#1B2631"/>
+<rect x="41650" y="10650" width="700" height="700" fill="#1B2631"/>
+<rect x="41650" y="1150" width="700" height="700" fill="#1B2631"/>
+<rect x="41650" y="-350" width="700" height="700" fill="#1B2631"/>
+<rect x="47650" y="10650" width="700" height="700" fill="#1B2631"/>
+<rect x="47650" y="1150" width="700" height="700" fill="#1B2631"/>
+<rect x="47650" y="-350" width="700" height="700" fill="#1B2631"/>
+<rect x="53650" y="10650" width="700" height="700" fill="#1B2631"/>
+<rect x="53650" y="1150" width="700" height="700" fill="#1B2631"/>
+<rect x="53650" y="-350" width="700" height="700" fill="#1B2631"/>
+<line x1="0" y1="-4500" x2="0" y2="13500" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="0" cy="-5800" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="0" y="-5450" font-size="950" text-anchor="middle" fill="#1B2631">X1</text>
+<line x1="6000" y1="-4500" x2="6000" y2="13500" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="6000" cy="-5800" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="6000" y="-5450" font-size="950" text-anchor="middle" fill="#1B2631">X2</text>
+<line x1="12000" y1="-4500" x2="12000" y2="13500" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="12000" cy="-5800" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="12000" y="-5450" font-size="950" text-anchor="middle" fill="#1B2631">X3</text>
+<line x1="18000" y1="-4500" x2="18000" y2="13500" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="18000" cy="-5800" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="18000" y="-5450" font-size="950" text-anchor="middle" fill="#1B2631">X4</text>
+<line x1="24000" y1="-4500" x2="24000" y2="13500" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="24000" cy="-5800" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="24000" y="-5450" font-size="950" text-anchor="middle" fill="#1B2631">X5</text>
+<line x1="30000" y1="-4500" x2="30000" y2="13500" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="30000" cy="-5800" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="30000" y="-5450" font-size="950" text-anchor="middle" fill="#1B2631">X6</text>
+<line x1="36000" y1="-4500" x2="36000" y2="13500" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="36000" cy="-5800" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="36000" y="-5450" font-size="950" text-anchor="middle" fill="#1B2631">X7</text>
+<line x1="42000" y1="-4500" x2="42000" y2="13500" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="42000" cy="-5800" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="42000" y="-5450" font-size="950" text-anchor="middle" fill="#1B2631">X8</text>
+<line x1="48000" y1="-4500" x2="48000" y2="13500" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="48000" cy="-5800" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="48000" y="-5450" font-size="950" text-anchor="middle" fill="#1B2631">X9</text>
+<line x1="54000" y1="-4500" x2="54000" y2="13500" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="54000" cy="-5800" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="54000" y="-5450" font-size="950" text-anchor="middle" fill="#1B2631">X10</text>
+<line x1="-4500" y1="11000" x2="56500" y2="11000" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="-5800" cy="11000" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="-5800" y="11350" font-size="950" text-anchor="middle" fill="#1B2631">Y1</text>
+<line x1="-4500" y1="1500" x2="56500" y2="1500" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="-5800" cy="1500" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="-5800" y="1850" font-size="950" text-anchor="middle" fill="#1B2631">Y2</text>
+<line x1="-4500" y1="0" x2="56500" y2="0" stroke="#A93226" stroke-width="35" stroke-dasharray="1600 300 260 300"/>
+<circle cx="-5800" cy="0" r="1050" fill="white" stroke="#1B2631" stroke-width="60"/>
+<text x="-5800" y="350" font-size="950" text-anchor="middle" fill="#1B2631">Y3</text>
+<text x="3000.0" y="-1600" font-size="800" text-anchor="middle" fill="#1B2631">6,000</text>
+<text x="9000.0" y="-1600" font-size="800" text-anchor="middle" fill="#1B2631">6,000</text>
+<text x="15000.0" y="-1600" font-size="800" text-anchor="middle" fill="#1B2631">6,000</text>
+<text x="21000.0" y="-1600" font-size="800" text-anchor="middle" fill="#1B2631">6,000</text>
+<text x="27000.0" y="-1600" font-size="800" text-anchor="middle" fill="#1B2631">6,000</text>
+<text x="33000.0" y="-1600" font-size="800" text-anchor="middle" fill="#1B2631">6,000</text>
+<text x="39000.0" y="-1600" font-size="800" text-anchor="middle" fill="#1B2631">6,000</text>
+<text x="45000.0" y="-1600" font-size="800" text-anchor="middle" fill="#1B2631">6,000</text>
+<text x="51000.0" y="-1600" font-size="800" text-anchor="middle" fill="#1B2631">6,000</text>
+<text x="-1600" y="6530.0" font-size="800" text-anchor="end" fill="#1B2631">9,500</text>
+<text x="-1600" y="1030.0" font-size="800" text-anchor="end" fill="#1B2631">1,500</text>
+<text x="27000.0" y="17200" font-size="1100" text-anchor="middle" fill="#1B2631">生成：マンション（片廊下型）　1F 平面図</text>
+</svg>

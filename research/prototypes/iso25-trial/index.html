@@ -1,0 +1,4315 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>検証試作 アイソメ2.5D現場ビュー</title>
+    <style>
+      :root {
+        --bg: #eef1f4;
+        --panel: #ffffff;
+        --panel-2: #f4f6f8;
+        --ink: #1d2733;
+        --ink-2: #5b6a78;
+        --line: #d5dce2;
+        --accent: #2563eb;
+        --accent-ink: #ffffff;
+        --warn: #d64545;
+        --chip: #e8edf1;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #141a20;
+          --panel: #1e262f;
+          --panel-2: #242f3a;
+          --ink: #e8eef3;
+          --ink-2: #9db0bf;
+          --line: #37434f;
+          --accent: #5b8cff;
+          --accent-ink: #0d1522;
+          --chip: #2b3742;
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP",
+          "Yu Gothic UI", "Yu Gothic", system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* ---------- header ---------- */
+      header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        flex-wrap: wrap;
+      }
+      .day-badge {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 5px 12px;
+      }
+      .day-badge .d {
+        font-size: 22px;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+      }
+      .day-badge .of { font-size: 12px; color: var(--ink-2); }
+      .phase {
+        font-size: 15px;
+        font-weight: 700;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-left: 5px solid var(--accent);
+        border-radius: 8px;
+        padding: 6px 12px;
+      }
+      .meters {
+        display: flex;
+        gap: 14px;
+        margin-left: auto;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .meter { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2); }
+      .meter .bar {
+        width: 92px; height: 9px;
+        background: var(--chip);
+        border-radius: 99px;
+        overflow: hidden;
+        position: relative;
+      }
+      .meter .fill { position: absolute; inset: 0 auto 0 0; border-radius: 99px; }
+      .meter .fill.plan { background: repeating-linear-gradient(45deg, #7db3f0 0 5px, #a9ccf5 5px 10px); }
+      .meter .fill.act { background: #3f9e4d; }
+      .meter b { color: var(--ink); font-variant-numeric: tabular-nums; min-width: 34px; }
+      .lag {
+        font-size: 12px; font-weight: 700; color: var(--warn);
+        background: color-mix(in srgb, var(--warn) 12%, transparent);
+        border-radius: 99px; padding: 3px 9px;
+        display: none;
+      }
+      .lag.on { display: inline-block; }
+
+      /* ---------- stage ---------- */
+      .stage {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        margin: 0 10px;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: #bfe0ee;
+      }
+      canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+
+      .note {
+        position: absolute;
+        left: 10px; bottom: 8px;
+        font-size: 11px;
+        color: #33505f;
+        background: rgba(255,255,255,.72);
+        border-radius: 6px;
+        padding: 3px 8px;
+        pointer-events: none;
+        z-index: 3;
+      }
+      .event-cap {
+        position: absolute;
+        top: 10px; left: 50%;
+        transform: translateX(-50%);
+        font-size: 13px; font-weight: 700;
+        color: #17303f;
+        background: rgba(255,255,255,.88);
+        border: 1px solid rgba(23,48,63,.18);
+        border-radius: 99px;
+        padding: 5px 14px;
+        white-space: nowrap;
+        display: none;
+        pointer-events: none;
+        z-index: 4;
+        max-width: calc(100% - 16px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .event-cap.on { display: block; }
+
+      /* ---------- 吹き出し（会話の可視化） ---------- */
+      #bubLayer {
+        position: absolute; inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 5;
+      }
+      .bub {
+        position: absolute;
+        max-width: 178px;
+        background: #ffffff;
+        color: #17303f;
+        border: 1.5px solid rgba(23,48,63,.35);
+        border-radius: 10px;
+        padding: 5px 8px 6px;
+        font-size: 11.5px;
+        line-height: 1.35;
+        box-shadow: 0 3px 10px rgba(15,30,45,.22);
+      }
+      .bub .who {
+        display: inline-block;
+        font-size: 9.5px; font-weight: 800;
+        color: #ffffff;
+        border-radius: 99px;
+        padding: 0.5px 6px;
+        margin-bottom: 2px;
+      }
+      .bub .tail {
+        position: absolute;
+        width: 9px; height: 9px;
+        background: #ffffff;
+        border-right: 1.5px solid rgba(23,48,63,.35);
+        border-bottom: 1.5px solid rgba(23,48,63,.35);
+        transform: rotate(45deg);
+      }
+      .bub.phone { border-color: #7a4fd0; background: #f6f1ff; }
+      .bub.phone .tail { background: #f6f1ff; border-color: #7a4fd0; }
+      .bubmini {
+        position: absolute;
+        font-size: 13px;
+        background: rgba(255,255,255,.9);
+        border: 1px solid rgba(23,48,63,.3);
+        border-radius: 99px;
+        padding: 1px 5px;
+        box-shadow: 0 2px 6px rgba(15,30,45,.2);
+      }
+      .caller-chip {
+        position: absolute;
+        right: 10px; top: 52px;
+        display: none;
+        align-items: center; gap: 7px;
+        background: #f6f1ff;
+        border: 1.5px solid #7a4fd0;
+        color: #3d2470;
+        border-radius: 99px;
+        padding: 4px 11px 4px 5px;
+        font-size: 11.5px; font-weight: 700;
+        box-shadow: 0 3px 10px rgba(15,30,45,.2);
+        z-index: 6;
+      }
+      .caller-chip.on { display: inline-flex; }
+      .caller-chip .av {
+        width: 22px; height: 22px; border-radius: 50%;
+        background: #7a4fd0; color: #fff;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 800;
+      }
+
+      /* ---------- info card ---------- */
+      .card {
+        position: absolute;
+        top: 10px; left: 10px;
+        width: 252px;
+        max-width: calc(100% - 20px);
+        max-height: calc(100% - 20px);
+        overflow-y: auto;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(15, 30, 45, .18);
+        padding: 12px 14px;
+        display: none;
+        z-index: 7;
+      }
+      .card.on { display: block; }
+      .card h2 { margin: 0 26px 2px 0; font-size: 16px; }
+      .card .work { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+      .card .close {
+        position: absolute; top: 8px; right: 8px;
+        width: 26px; height: 26px;
+        border: none; border-radius: 8px;
+        background: var(--chip); color: var(--ink);
+        font-size: 14px; line-height: 1; cursor: pointer;
+      }
+      .foreman { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+      .avatar {
+        width: 40px; height: 40px; border-radius: 50%;
+        flex: none;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 16px; color: #fff;
+        border: 3px solid #f5c542;
+      }
+      .foreman .who { font-size: 13px; font-weight: 700; }
+      .foreman .tag { font-size: 11.5px; color: var(--ink-2); }
+      .card .row { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; padding: 2.5px 0; }
+      .card .row span:first-child { color: var(--ink-2); }
+      .card .row b { font-variant-numeric: tabular-nums; text-align: right; }
+      .card .row b.gate { color: var(--warn); }
+      .pbar { height: 8px; background: var(--chip); border-radius: 99px; overflow: hidden; margin: 6px 0 4px; position: relative; }
+      .pbar .pf { position: absolute; inset: 0 auto 0 0; background: repeating-linear-gradient(45deg, #7db3f0 0 5px, #a9ccf5 5px 10px); }
+      .pbar .af { position: absolute; inset: 0 auto 0 0; background: #3f9e4d; border-radius: 99px; }
+      .hint {
+        position: absolute;
+        top: 10px; left: 10px;
+        font-size: 12.5px;
+        color: #33505f;
+        background: rgba(255,255,255,.85);
+        border-radius: 8px;
+        padding: 6px 10px;
+        pointer-events: none;
+        z-index: 4;
+      }
+      .hint.gone { display: none; }
+
+      /* ---------- controls ---------- */
+      .controls {
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .ctl-row { display: flex; align-items: center; gap: 10px; }
+      .btn {
+        flex: none;
+        height: 42px; min-width: 46px;
+        padding: 0 12px;
+        border-radius: 11px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        font-size: 14px; font-weight: 700;
+        cursor: pointer;
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+      .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+      .btn svg { display: block; }
+      input[type="range"] {
+        flex: 1;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 30px;
+        background: transparent;
+        cursor: pointer;
+        min-width: 80px;
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        height: 8px; border-radius: 99px;
+        background: linear-gradient(to right, var(--accent) var(--p, 0%), var(--chip) var(--p, 0%));
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 26px; height: 26px; margin-top: -9px;
+        border-radius: 50%;
+        background: var(--panel);
+        border: 3px solid var(--accent);
+        box-shadow: 0 2px 6px rgba(0,0,0,.25);
+      }
+      input[type="range"]::-moz-range-track { height: 8px; border-radius: 99px; background: var(--chip); }
+      input[type="range"]::-moz-range-progress { height: 8px; border-radius: 99px; background: var(--accent); }
+      input[type="range"]::-moz-range-thumb {
+        width: 20px; height: 20px; border-radius: 50%;
+        background: var(--panel); border: 3px solid var(--accent);
+      }
+      .legend {
+        display: flex; gap: 6px 12px; flex-wrap: wrap;
+        font-size: 11.5px; color: var(--ink-2);
+        align-items: center;
+      }
+      .legend .li { display: inline-flex; align-items: center; gap: 5px; }
+      .legend .dot { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+      .legend .ghostdot {
+        width: 11px; height: 11px; border-radius: 3px; flex: none;
+        background: rgba(110,170,255,.25);
+        border: 1.5px dashed #5b8cff;
+      }
+      .ctl-row.wrap { flex-wrap: wrap; }
+      .flabel { font-size: 12.5px; font-weight: 700; color: var(--ink-2); flex: none; }
+      .fbtn { height: 38px; min-width: 44px; padding: 0 11px; font-size: 13px; }
+      .fstatus { font-size: 12px; color: var(--ink-2); }
+
+      /* ---------- 物件パラメータパネル ---------- */
+      .params {
+        margin: 0 10px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 8px 12px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .params .prow {
+        display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap;
+      }
+      .params label {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 12.5px; font-weight: 700; color: var(--ink-2);
+      }
+      .params select {
+        height: 34px;
+        padding: 0 8px;
+        border-radius: 9px;
+        border: 1px solid var(--line);
+        background: var(--panel-2);
+        color: var(--ink);
+        font-size: 13.5px; font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+      }
+      .params select:disabled { opacity: .45; cursor: not-allowed; }
+      .params .summary {
+        font-size: 13px; font-weight: 800; color: var(--ink);
+      }
+      .params .summary .sub { font-size: 11.5px; font-weight: 600; color: var(--ink-2); }
+      .params .prule {
+        font-size: 12px; font-weight: 700; color: var(--warn);
+        display: none;
+      }
+      .params .prule.on { display: block; }
+      @media (max-width: 560px) {
+        .meters { margin-left: 0; }
+        .meter .bar { width: 64px; }
+        .day-badge .d { font-size: 19px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="day-badge"><span class="d" id="dayNum">0</span><span class="of">日目 / <span id="totalDays">60</span>日</span></div>
+      <div class="phase" id="phaseName">土工事</div>
+      <div class="meters">
+        <div class="meter">計画
+          <div class="bar"><div class="fill plan" id="planFill" style="width:0%"></div></div>
+          <b id="planPct">0%</b>
+        </div>
+        <div class="meter">実績
+          <div class="bar"><div class="fill act" id="actFill" style="width:0%"></div></div>
+          <b id="actPct">0%</b>
+        </div>
+        <div class="meter">部材 <b id="memCount" style="min-width:0">0 / 0</b></div>
+        <span class="lag" id="lagBadge">約3日遅れ</span>
+      </div>
+    </header>
+
+    <div class="params" id="paramPanel">
+      <div class="prow">
+        <label>敷地形状
+          <select id="prmSite">
+            <option value="rect">矩形</option>
+            <option value="trap">台形</option>
+            <option value="L">L字敷地</option>
+          </select>
+        </label>
+        <label>建物形状
+          <select id="prmShape">
+            <option value="rect">矩形</option>
+            <option value="stepped">雁行</option>
+            <option value="L">L字</option>
+            <option value="setback">セットバック</option>
+          </select>
+        </label>
+        <label>階数
+          <select id="prmFloors">
+            <option value="2">2階</option>
+            <option value="3" selected>3階</option>
+            <option value="4">4階</option>
+          </select>
+        </label>
+        <label>構造
+          <select id="prmFrame">
+            <option value="S" selected>S造</option>
+            <option value="RC">RC造</option>
+            <option value="SRC">SRC造</option>
+          </select>
+        </label>
+        <label>躯体工法
+          <select id="prmMethod">
+            <option value="conv">在来</option>
+            <option value="pca">PCa</option>
+          </select>
+        </label>
+      </div>
+      <div class="prow">
+        <span class="summary" id="prmSummary">この物件：—</span>
+      </div>
+      <div class="prule" id="prmRule"></div>
+    </div>
+
+    <div class="stage" id="stage">
+      <canvas id="cv"></canvas>
+      <div id="bubLayer"></div>
+      <div class="caller-chip" id="callerChip"><span class="av" id="callerAv">？</span><span id="callerName">—</span></div>
+      <div class="hint" id="hint">工区をタップすると、その場所の様子が見られます</div>
+      <div class="card" id="card">
+        <button class="close" id="cardClose" aria-label="閉じる">×</button>
+        <h2 id="cardTitle">—</h2>
+        <div class="work" id="cardWork">—</div>
+        <div class="foreman" id="cardForeman">
+          <div class="avatar" id="cardAvatar">？</div>
+          <div>
+            <div class="who" id="cardWho">—</div>
+            <div class="tag" id="cardTag">—</div>
+          </div>
+        </div>
+        <div class="row"><span>作業員</span><b id="cardCrew">—</b></div>
+        <div class="pbar"><div class="pf" id="cardPlan"></div><div class="af" id="cardAct"></div></div>
+        <div class="row"><span>進捗（実績 / 計画）</span><b id="cardPct">—</b></div>
+        <div class="row"><span>状態</span><b id="cardState">—</b></div>
+        <div class="row" id="rowGate"><span>検査ゲート</span><b id="cntGate">—</b></div>
+        <div class="row" id="rowSteel"><span id="lblSteel">躯体（柱・梁・床版・配筋）</span><b id="cntSteel">—</b></div>
+        <div class="row" id="rowExt"><span>外装パネル・サッシ（全4面）</span><b id="cntExt">—</b></div>
+        <div class="row" id="rowScaf"><span>足場（組立 / 解体）</span><b id="cntScaf">—</b></div>
+        <div class="row" id="rowEquip"><span>設備 3系統（先行/隠蔽/器具）</span><b id="cntEquip">—</b></div>
+        <div class="row" id="rowInt"><span>内装（ボード・床）</span><b id="cntInt">—</b></div>
+        <div class="row" id="rowRoofEq"><span>屋上設備（室外機・受電）</span><b id="cntRoofEq">—</b></div>
+        <div class="row" id="rowEV"><span>エレベーター</span><b id="cntEV">—</b></div>
+      </div>
+      <div class="event-cap" id="eventCap"></div>
+      <div class="note">検証用プロトタイプ — 物件パラメータ（敷地・形状・階数・構造・工法）で現場が再生成される</div>
+    </div>
+
+    <div class="controls">
+      <div class="ctl-row">
+        <button class="btn primary" id="playBtn" aria-label="再生・停止">
+          <svg id="playIco" width="15" height="15" viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z" fill="currentColor"/></svg>
+        </button>
+        <button class="btn" id="restartBtn" aria-label="最初から">
+          <svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 2a6 6 0 1 1-5.66 4H.7A7.5 7.5 0 1 0 8 .5v3L3.6 0 8 3.5z" fill="currentColor" transform="translate(0.5,0.5) scale(0.94)"/></svg>
+        </button>
+        <input type="range" id="slider" min="0" max="600" value="0" step="1" aria-label="日数スライダー" />
+        <button class="btn" id="speedBtn">×1</button>
+        <button class="btn" id="ghostBtn" aria-pressed="true">ゴースト表示</button>
+      </div>
+      <div class="ctl-row wrap">
+        <span class="flabel">階フォーカス</span>
+        <span id="focusBtns" style="display:inline-flex;gap:10px;flex-wrap:wrap"></span>
+        <button class="btn fbtn" id="roofBtn" aria-pressed="false">屋根：自動</button>
+        <span class="flabel">視点</span>
+        <button class="btn fbtn" id="rotBtn">回転：南東から</button>
+        <button class="btn fbtn" id="bubBtn" aria-pressed="true">会話：ON</button>
+        <span class="fstatus" id="focusStatus"></span>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <script>
+    'use strict';
+    /* =========================================================
+       アイソメ2.5D現場ビュー 検証試作（パラメータ対応版）
+       物件パラメータ（敷地形状／建物形状／階数／構造／躯体工法）を変えると
+       現場が再生成される。躯体のステージ構成と部材の生まれ方は
+       構造×工法の「工程テンプレート」で切り替わる：
+         S×在来 ＝ 節建方→本締め確認→デッキ→配筋→打設
+         RC×在来 ＝ 型枠→配筋→配筋検査→打設→養生→脱型（転用）→強度確認
+         SRC×在来 ＝ Sの建方の後に型枠・配筋・打設が回る二重構造
+         RC/SRC×PCa ＝ 完成部材を吊り込み、接合で繋ぐ（製品検査・接合確認）
+       進捗は「部材の設置イベント」で離散的に進み、計画ゴーストで遅れが見える。
+       ========================================================= */
+
+    var TRADES = {
+      earth:    { name: '土工',   color: '#9a6a3f', dark: '#6f4a29' },
+      found:    { name: '基礎',   color: '#a89e90', dark: '#7d7466' },
+      steel:    { name: '鉄骨',   color: '#b06a44', dark: '#7e4a2a' },
+      frame:    { name: '躯体',   color: '#8d8578', dark: '#655d4f' },
+      elec:     { name: '電気',   color: '#f2c230', dark: '#b8911c' },
+      plumb:    { name: '衛生',   color: '#3a7bd5', dark: '#2a5ca3' },
+      hvac:     { name: '空調',   color: '#7ec8e3', dark: '#4d97b5' },
+      interior: { name: '内装',   color: '#ef8354', dark: '#c25c2e' },
+      exterior: { name: '外装',   color: '#5da85f', dark: '#3f7a41' },
+      scaffold: { name: '鳶',     color: '#8593a0', dark: '#5b6a76' },
+      roof:     { name: '屋根',   color: '#707a88', dark: '#4c545f' },
+      insp:     { name: '検査',   color: '#37474f', dark: '#263238' },
+      ev:       { name: 'EV',     color: '#6e7a87', dark: '#49525c' }
+    };
+
+    var FOREMEN = {
+      earth:    { name: '大山', tag: '重機の段取りが速い。朝が強い' },
+      found:    { name: '大山', tag: '重機の段取りが速い。朝が強い' },
+      steel:    { name: '佐藤', tag: '腕は確かだが段取りは粗い' },
+      frame:    { name: '佐藤', tag: '型枠と鉄筋の段取りを束ねる躯体職長' },
+      elec:     { name: '鈴木', tag: '気になる点はすぐ聞きに来る' },
+      plumb:    { name: '高橋', tag: '寡黙。隠蔽部の写真は完璧' },
+      hvac:     { name: '伊藤', tag: '調整ごとが得意なまとめ役' },
+      interior: { name: '田中', tag: '仕上げにうるさい職人気質' },
+      exterior: { name: '山本', tag: '天気を読むのが異常に上手い' },
+      scaffold: { name: '藤田', tag: '鳶の頭。足場の段取りと安全に厳しい' },
+      roof:     { name: '山本', tag: '天気を読むのが異常に上手い' },
+      insp:     { name: '田辺', tag: '監理者。見る前に隠すな、が口癖' },
+      ev:       { name: '西村', tag: 'EV専門。単独ラインで黙々と進める' }
+    };
+    var SUPERVISOR = { name: '担当者', tag: '現場担当（監督）。巡回と段取りが仕事' };
+    var MANAGER = { name: '課長', tag: '工程と原価を見る。事務所と現場を行き来する' };
+    var INSPECTOR = { name: '田辺', tag: '監理者。検査の立会い・判定をする' };
+
+    /* ---------- 物件パラメータ ---------- */
+    var PARAMS = { site: 'rect', shape: 'rect', floors: 3, frame: 'S', method: 'conv' };
+    var SITE_LABEL = { rect: '矩形', trap: '台形', L: 'L字敷地' };
+    var SHAPE_LABEL = { rect: '矩形', stepped: '雁行', L: 'L字', setback: 'セットバック' };
+    var FLOORS = 3;          // 派生：PARAMS.floors
+    var TOTAL_DAYS = 60;     // 再生成のたびに実スケジュールから決まる
+    var EST_DAYS = 61;       // 天候ウィンドウ配置用の概算工期
+
+    /* ---------- 工程モデル（計画 / 実績） ---------- */
+    function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+    function prog(t, s, e) {
+      var p = clamp01((t - s) / (e - s));
+      return p * p * (3 - 2 * p);
+    }
+    function hash(n) { var x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+    function lagJitter(seed) { return hash(seed) * 1.6; }
+    function mkStage(trade, work, ps, dur, crew, seed) {
+      var lag = lagJitter(seed || 1);
+      return {
+        trade: trade, work: work, crew: crew,
+        ps: ps, pe: ps + dur,
+        as: ps + lag, ae: ps + dur + lag + dur * 0.05
+      };
+    }
+    function mkStageAbs(trade, work, ps, pe, as, ae, crew) {
+      return { trade: trade, work: work, crew: crew, ps: ps, pe: pe, as: as, ae: ae };
+    }
+
+    var ZONE_NAMES = ['西', '中', '東'];
+    var POWER_PLAN = 45.5, POWER_ACT = 46.5;
+    var units = [];        // プレート（セル集合）に存在する工区だけを作る
+    var UNITMAP = {};      // (f*3+z) -> unit
+    function U(f, z) { return UNITMAP[f * 3 + z] || null; }
+    var EARTH = null, FOUND = null;
+    var MOBILE_CRANE_DAYS = [2, 4, 6, 8, 9];
+    var RAIN = { from: 18, to: 21 };
+    var RAIN2 = { from: 40, to: 41.2 };
+    var WIND = { from: 26.6, to: 27.4 };
+    var BACKFILL = { from: 12, to: 16.5 };
+    var WASTE_DAYS = [20, 33, 46, 55];
+    var LAYER_GATES = [];
+    var EVST = null;
+    var EVSHAFT = null;
+
+    /* プレート：階ごとに存在する工区（z の集合）を返す。中央工区 z=1 は
+       EVシャフトと吹抜けのために全形状・全階で必ず存在させる */
+    function plateZones(f) {
+      if (f === 0) return [0, 1, 2];
+      switch (PARAMS.shape) {
+        case 'stepped': return f === FLOORS - 1 ? [0, 1] : [0, 1, 2];
+        case 'L': return [0, 1];
+        case 'setback': return f === FLOORS - 1 ? [1, 2] : (FLOORS >= 4 && f === FLOORS - 2 ? [1, 2] : [0, 1, 2]);
+        default: return [0, 1, 2];
+      }
+    }
+    function isTopFloor(f) { return f === FLOORS - 1; }
+
+    /* =========================================================
+       部材モデル：進捗は「部材の設置イベント」で離散的に進む
+       ========================================================= */
+    var FH = 30; // 階高（描画側の FLOOR_H と同じ値）
+    function setTimes(st, it, frac) {
+      it.plan = st.ps + frac * (st.pe - st.ps);
+      var ae = Math.min(st.ae, 999);
+      it.act = st.as + frac * (ae - st.as);
+      return it;
+    }
+    function setAbs(it, planT, actT) { it.plan = planT; it.act = actT; return it; }
+    function spreadInto(st, items, a, b) {
+      for (var i = 0; i < items.length; i++)
+        setTimes(st, items[i], a + (b - a) * (i + 0.5) / items.length);
+    }
+    function shiftStageActs(st, d) {
+      if (!st) return;
+      st.as += d; st.ae += d;
+      if (!st.items) return;
+      for (var i = 0; i < st.items.length; i++) {
+        var it = st.items[i];
+        it.act += d;
+        if (it.aStart != null) it.aStart += d;
+        if (it.rmvA != null) it.rmvA += d;
+      }
+    }
+    function shiftUnitFrame(u, dP, dA) {
+      var st = u.stages.steel;
+      if (dP > 0) {
+        st.ps += dP; st.pe += dP;
+        for (var j = 0; j < st.items.length; j++) {
+          st.items[j].plan += dP;
+          if (st.items[j].pStart != null) st.items[j].pStart += dP;
+        }
+        for (var k in u.gates) if (u.gates[k]) u.gates[k].plan += dP;
+        u.curePlan += dP;
+      }
+      if (dA > 0) {
+        shiftStageActs(st, dA);
+        for (var k2 in u.gates) if (u.gates[k2]) u.gates[k2].act += dA;
+        u.cureAct += dA;
+      }
+    }
+
+    /* ---------- 基礎：フーチング＋地中梁＋土間 ---------- */
+    function buildFoundation() {
+      var st = mkStage('found', '基礎（フーチング・地中梁）', 5, 7, 6, 23);
+      var items = [], i, j;
+      var xs = [4.5, 6, 7.5, 9, 10.5, 12, 13.5], ys = [3.5, 6.5, 9.5];
+      for (i = 0; i < xs.length; i++) for (j = 0; j < ys.length; j++)
+        items.push({ k: 'foot', x0: xs[i] - 0.42, y0: ys[j] - 0.42, x1: xs[i] + 0.42, y1: ys[j] + 0.42,
+          dz0: 0, dz1: 3.2, sp: [[xs[i], ys[j], 3.2]] });
+      var beams = [];
+      for (j = 0; j < ys.length; j++)
+        beams.push({ k: 'gbeam', x0: 4.5, y0: ys[j] - 0.22, x1: 13.5, y1: ys[j] + 0.22, dz0: 0.6, dz1: 2.6, sp: [[9, ys[j], 2.6]] });
+      for (i = 0; i < xs.length; i++)
+        beams.push({ k: 'gbeam', x0: xs[i] - 0.22, y0: 3.5, x1: xs[i] + 0.22, y1: 9.5, dz0: 0.6, dz1: 2.6, sp: [[xs[i], 6.5, 2.6]] });
+      var slabs = [];
+      for (i = 0; i < 3; i++)
+        slabs.push({ k: 'fslab', x0: 4.5 + i * 3, y0: 3.5, x1: 7.5 + i * 3, y1: 9.5, dz0: 2.6, dz1: 6, sp: [[6 + i * 3, 6.5, 6]] });
+      spreadInto(st, items, 0.04, 0.46);
+      spreadInto(st, beams, 0.48, 0.78);
+      spreadInto(st, slabs, 0.82, 0.97);
+      st.items = items.concat(beams, slabs);
+      FOUND = st;
+    }
+
+    /* =========================================================
+       躯体テンプレート：構造×工法でステージ構成と部材の生まれ方が変わる。
+       どのテンプレートも「結果としてその階の床が出来る」点は共通で、
+       後段（設備・内装・屋根）は床の完成（floorState）を前提に進む。
+       ========================================================= */
+    function colPositions(u) {
+      var zx = 4.5 + u.z * 3, xm = zx + 1.5, xe = zx + 3, y0 = 3.5, y1 = 9.5;
+      return { zx: zx, xm: xm, xe: xe, y0: y0, y1: y1,
+        pos: [[zx, y0], [xe, y0], [xm, y0], [zx, y1], [xe, y1], [xm, y1]] };
+    }
+    function beamDefs(g) {
+      return [
+        [g.zx, g.y0 - 0.15, g.xe, g.y0 + 0.15, g.zx, g.y0, g.xe, g.y0],
+        [g.zx, g.y1 - 0.15, g.xe, g.y1 + 0.15, g.zx, g.y1, g.xe, g.y1],
+        [g.zx - 0.15, g.y0, g.zx + 0.15, g.y1, g.zx, g.y0, g.zx, g.y1],
+        [g.xe - 0.15, g.y0, g.xe + 0.15, g.y1, g.xe, g.y0, g.xe, g.y1],
+        [g.xm - 0.15, g.y0, g.xm + 0.15, g.y1, g.xm, g.y0, g.xm, g.y1]
+      ];
+    }
+    function makePour(u, st, gatePlan, gateAct) {
+      var g = colPositions(u);
+      var pour = { k: 'pour', trucks: 4, sp: [[g.xm, 6.5, FH]] };
+      pour.pStart = gatePlan + 0.1;
+      pour.plan = pour.pStart + 1.1;
+      pour.aStart = gateAct + 0.1;
+      pour.act = pour.aStart + 1.1;
+      return pour;
+    }
+    function finishPourStage(u, st, pour) {
+      st.items.push(pour);
+      st.pe = pour.plan + 0.2;
+      st.ae = pour.act + 0.2;
+      u.curePlan = pour.plan + 2.0;
+      u.cureAct = pour.act + 2.5;
+    }
+    function maxItemTime(items, key) {
+      var m = 0;
+      for (var i = 0; i < items.length; i++) if (items[i][key] > m) m = items[i][key];
+      return m;
+    }
+
+    /* ---------- S×在来：節単位の建方→本締め・建入れ確認→デッキ→配筋→打設 ---------- */
+    function buildFrameSteel(u) {
+      var g = colPositions(u);
+      var steelStart = 10 + u.f * 6 + u.z * 2;
+      var st = mkStage('steel', '鉄骨建方・本締め・配筋・スラブ', steelStart, 8, 6, 31 + u.f * 7 + u.z * 13);
+      var cols = [], beams = [], sbeams = [], braces = [], plates = [], rebars = [], i;
+      if (u.f % 2 === 0) { // 節：柱は最大2層分を通して立てる（下の節が担当する階では立てない）
+        var spanFloors = Math.min(2, FLOORS - u.f);
+        var colTop = spanFloors * FH - 3;
+        for (i = 0; i < g.pos.length; i++) {
+          var c = g.pos[i];
+          cols.push({ k: 'col', x0: c[0] - 0.17, y0: c[1] - 0.17, x1: c[0] + 0.17, y1: c[1] + 0.17,
+            dz0: 0, dz1: colTop, tall: spanFloors > 1, sp: [[c[0], c[1], 1]] });
+        }
+      }
+      var bd = beamDefs(g);
+      for (i = 0; i < bd.length; i++) {
+        var b = bd[i];
+        beams.push({ k: 'beam', x0: b[0], y0: b[1], x1: b[2], y1: b[3], dz0: FH - 6, dz1: FH - 3.2,
+          sp: [[b[4], b[5], FH - 3], [b[6], b[7], FH - 3]] });
+      }
+      for (i = 0; i < 2; i++) {
+        var sx = g.zx + 0.75 + i * 1.5;
+        sbeams.push({ k: 'sbeam', x0: sx - 0.09, y0: g.y0, x1: sx + 0.09, y1: g.y1, dz0: FH - 5.4, dz1: FH - 3.4,
+          sp: [[sx, 6.5, FH - 3.4]] });
+      }
+      braces.push({ k: 'brace', x0: g.zx, y0: g.y0, x1: g.xm, y1: g.y0, dz0: 2, dz1: FH - 4, sp: [[g.zx + 0.7, g.y0, FH / 2]] });
+      braces.push({ k: 'brace', x0: g.xe, y0: g.y1, x1: g.xm, y1: g.y1, dz0: 2, dz1: FH - 4, sp: [[g.xe - 0.7, g.y1, FH / 2]] });
+      if (!u.atrium) {
+        for (var ix = 0; ix < 2; ix++) for (var iy = 0; iy < 3; iy++) {
+          plates.push({ k: 'plate', x0: g.zx + ix * 1.5, y0: g.y0 + iy * 2, x1: g.zx + ix * 1.5 + 1.5, y1: g.y0 + iy * 2 + 2,
+            dz0: FH - 2.6, dz1: FH, sp: [[g.zx + ix * 1.5 + 0.75, g.y0 + iy * 2 + 1, FH]] });
+          rebars.push({ k: 'rebar', x0: g.zx + ix * 1.5 + 0.06, y0: g.y0 + iy * 2 + 0.06, x1: g.zx + ix * 1.5 + 1.44, y1: g.y0 + iy * 2 + 1.94,
+            dz0: FH, dz1: FH + 0.4, sp: [[g.zx + ix * 1.5 + 0.75, g.y0 + iy * 2 + 1, FH + 0.4]] });
+        }
+      }
+      spreadInto(st, cols, 0.02, 0.26);
+      spreadInto(st, beams, 0.33, 0.50);
+      spreadInto(st, sbeams, 0.50, 0.58);
+      spreadInto(st, braces, 0.56, 0.62);
+      // 本締め・建入れ直し確認：梁・小梁・ブレースが揃ってから判定し、合格までデッキは始まらない
+      var frameParts = cols.concat(beams, sbeams, braces);
+      var tgP = maxItemTime(frameParts, 'plan'), tgA = maxItemTime(frameParts, 'act');
+      u.gates.frame = { kind: 'torque', label: '本締め・建入れ確認', plan: tgP + 0.1, act: tgA + 0.1, dur: 0.4 };
+      // デッキ以降の開始をゲート合格の後ろへ寄せる
+      spreadInto(st, plates, 0.60, 0.72);
+      var di;
+      for (di = 0; di < plates.length; di++) {
+        if (plates[di].plan < tgP + 0.55) plates[di].plan = tgP + 0.55 + di * 0.06;
+        if (plates[di].act < tgA + 0.55) plates[di].act = tgA + 0.55 + di * 0.06;
+      }
+      spreadInto(st, rebars, 0.74, 0.85);
+      for (di = 0; di < rebars.length; di++) {
+        if (rebars[di].plan < tgP + 0.8) rebars[di].plan = tgP + 0.8 + di * 0.05;
+        if (rebars[di].act < tgA + 0.8) rebars[di].act = tgA + 0.8 + di * 0.05;
+      }
+      var all = cols.concat(beams, sbeams, braces, plates, rebars);
+      if (!u.atrium) {
+        var rbP = maxItemTime(rebars, 'plan'), rbA = maxItemTime(rebars, 'act');
+        var pour = makePour(u, st, rbP + 0.15, rbA + 0.15);
+        st.items = all.concat([pour]);
+        st.pe = pour.plan + 0.2;
+        st.ae = pour.act + 0.2;
+        u.curePlan = pour.plan + 2.0;
+        u.cureAct = pour.act + 2.5;
+      } else {
+        st.items = all;
+        u.curePlan = st.pe; u.cureAct = st.ae;
+      }
+      u.stages.steel = st;
+    }
+
+    /* ---------- RC×在来：型枠→配筋→配筋検査→打設→養生→脱型（転用）→強度確認 ----------
+       柱・梁・床は打設で初めて実体化する（conc 部材は打設時刻に生まれる）。
+       型枠は rmvA（脱型）で消え、次の工区の材料になる。クレーンは資材揚重のみ。 */
+    function buildFrameRC(u) {
+      var g = colPositions(u);
+      var start = 10 + u.f * 6 + u.z * 2;
+      var st = mkStage('frame', '躯体（型枠・配筋・打設）', start, 9, 7, 31 + u.f * 7 + u.z * 13);
+      var forms = [], cages = [], rebars = [], concs = [], i;
+      for (i = 0; i < g.pos.length; i++) {
+        var c = g.pos[i];
+        forms.push({ k: 'form', x0: c[0] - 0.30, y0: c[1] - 0.30, x1: c[0] + 0.30, y1: c[1] + 0.30,
+          dz0: 0, dz1: FH - 3.4, sp: [[c[0], c[1], FH - 4]] });
+        cages.push({ k: 'cage', x0: c[0] - 0.20, y0: c[1] - 0.20, x1: c[0] + 0.20, y1: c[1] + 0.20,
+          dz0: 0.4, dz1: FH - 3.8, sp: [[c[0], c[1], FH / 2]] });
+        concs.push({ k: 'conc', x0: c[0] - 0.26, y0: c[1] - 0.26, x1: c[0] + 0.26, y1: c[1] + 0.26,
+          dz0: 0, dz1: FH - 3.2, bornAtPour: true, sp: [[c[0], c[1], 1]] });
+      }
+      var bd = beamDefs(g);
+      for (i = 0; i < bd.length; i++) {
+        var b = bd[i];
+        forms.push({ k: 'form', x0: b[0] - 0.06, y0: b[1] - 0.06, x1: b[2] + 0.06, y1: b[3] + 0.06,
+          dz0: FH - 6.6, dz1: FH - 3.0, sp: [[b[4], b[5], FH - 3]] });
+        concs.push({ k: 'conc', x0: b[0], y0: b[1], x1: b[2], y1: b[3], dz0: FH - 6, dz1: FH - 3.2,
+          bornAtPour: true, sp: [[b[4], b[5], FH - 3]] });
+      }
+      if (!u.atrium) {
+        for (var ix = 0; ix < 2; ix++) for (var iy = 0; iy < 3; iy++) {
+          rebars.push({ k: 'rebar', x0: g.zx + ix * 1.5 + 0.06, y0: g.y0 + iy * 2 + 0.06, x1: g.zx + ix * 1.5 + 1.44, y1: g.y0 + iy * 2 + 1.94,
+            dz0: FH - 2.2, dz1: FH - 1.8, sp: [[g.zx + ix * 1.5 + 0.75, g.y0 + iy * 2 + 1, FH - 1.8]] });
+          forms.push({ k: 'form', x0: g.zx + ix * 1.5, y0: g.y0 + iy * 2, x1: g.zx + ix * 1.5 + 1.5, y1: g.y0 + iy * 2 + 2,
+            dz0: FH - 2.9, dz1: FH - 2.55, sp: [] });
+        }
+      }
+      spreadInto(st, forms, 0.03, 0.34);   // 型枠：材料の山から一枚ずつ建て込み
+      spreadInto(st, cages, 0.30, 0.55);   // 柱配筋：束から一本ずつ組み上げ
+      spreadInto(st, rebars, 0.52, 0.72);  // 床配筋
+      var all = forms.concat(cages, rebars);
+      if (!u.atrium) {
+        var rbAll = cages.concat(rebars);
+        var rbP = maxItemTime(rbAll, 'plan'), rbA = maxItemTime(rbAll, 'act');
+        u.gates.rebar = { kind: 'rebar', label: '配筋検査', plan: rbP + 0.15, act: rbA + 0.15, dur: 0.45 };
+        var pour = makePour(u, st, rbP + 0.6, rbA + 0.6);
+        // コンクリート部材は打設で初めて実体化する
+        for (i = 0; i < concs.length; i++) setAbs(concs[i], pour.pStart + 0.05, pour.aStart + 0.05);
+        all = all.concat(concs);
+        st.items = all;
+        finishPourStage(u, st, pour);
+        st.items = all.concat([pour]);
+        // 脱型：養生が明けたら型枠は外れて次の工区へ転用される
+        for (i = 0; i < forms.length; i++) {
+          forms[i].rmvP = u.curePlan + 0.4 + (i % 4) * 0.15;
+          forms[i].rmvA = u.cureAct + 0.4 + (i % 4) * 0.15;
+        }
+        // 強度確認：材齢が来てから判定。合格するまで上の階の躯体は始められない
+        u.gates.strength = { kind: 'strength', label: '強度確認（材齢）',
+          plan: u.curePlan + 0.6, act: u.cureAct + 0.6, dur: 0.5 };
+      } else {
+        st.items = all;
+        u.curePlan = st.pe; u.cureAct = st.ae;
+      }
+      u.stages.steel = st;
+    }
+
+    /* ---------- SRC×在来：Sの建方の後に、型枠・配筋・打設が回る二重構造 ---------- */
+    function buildFrameSRC(u) {
+      var g = colPositions(u);
+      var start = 10 + u.f * 6 + u.z * 2;
+      var st = mkStage('steel', '鉄骨建方＋RC巻き（SRC）', start, 11, 7, 31 + u.f * 7 + u.z * 13);
+      var cols = [], beams = [], forms = [], cages = [], rebars = [], concs = [], i;
+      if (u.f % 2 === 0) {
+        var spanFloors = Math.min(2, FLOORS - u.f);
+        var colTop = spanFloors * FH - 3;
+        for (i = 0; i < g.pos.length; i++) {
+          var c = g.pos[i];
+          cols.push({ k: 'col', x0: c[0] - 0.15, y0: c[1] - 0.15, x1: c[0] + 0.15, y1: c[1] + 0.15,
+            dz0: 0, dz1: colTop, tall: spanFloors > 1, sp: [[c[0], c[1], 1]] });
+        }
+      }
+      var bd = beamDefs(g);
+      for (i = 0; i < bd.length; i++) {
+        var b = bd[i];
+        beams.push({ k: 'beam', x0: b[0], y0: b[1], x1: b[2], y1: b[3], dz0: FH - 6, dz1: FH - 3.2,
+          sp: [[b[4], b[5], FH - 3], [b[6], b[7], FH - 3]] });
+      }
+      // 鉄骨の周りに型枠を組み、配筋してコンクリートを巻く
+      for (i = 0; i < g.pos.length; i++) {
+        var c2 = g.pos[i];
+        forms.push({ k: 'form', x0: c2[0] - 0.32, y0: c2[1] - 0.32, x1: c2[0] + 0.32, y1: c2[1] + 0.32,
+          dz0: 0, dz1: FH - 3.4, sp: [[c2[0], c2[1], FH - 4]] });
+        cages.push({ k: 'cage', x0: c2[0] - 0.24, y0: c2[1] - 0.24, x1: c2[0] + 0.24, y1: c2[1] + 0.24,
+          dz0: 0.4, dz1: FH - 3.8, sp: [[c2[0], c2[1], FH / 2]] });
+        concs.push({ k: 'conc', x0: c2[0] - 0.28, y0: c2[1] - 0.28, x1: c2[0] + 0.28, y1: c2[1] + 0.28,
+          dz0: 0, dz1: FH - 3.2, bornAtPour: true, sp: [[c2[0], c2[1], 1]] });
+      }
+      if (!u.atrium) {
+        for (var ix = 0; ix < 2; ix++) for (var iy = 0; iy < 3; iy++) {
+          rebars.push({ k: 'rebar', x0: g.zx + ix * 1.5 + 0.06, y0: g.y0 + iy * 2 + 0.06, x1: g.zx + ix * 1.5 + 1.44, y1: g.y0 + iy * 2 + 1.94,
+            dz0: FH - 2.2, dz1: FH - 1.8, sp: [[g.zx + ix * 1.5 + 0.75, g.y0 + iy * 2 + 1, FH - 1.8]] });
+          forms.push({ k: 'form', x0: g.zx + ix * 1.5, y0: g.y0 + iy * 2, x1: g.zx + ix * 1.5 + 1.5, y1: g.y0 + iy * 2 + 2,
+            dz0: FH - 2.9, dz1: FH - 2.55, sp: [] });
+        }
+      }
+      spreadInto(st, cols, 0.02, 0.20);
+      spreadInto(st, beams, 0.24, 0.38);
+      var steelParts = cols.concat(beams);
+      var tgP = maxItemTime(steelParts, 'plan'), tgA = maxItemTime(steelParts, 'act');
+      u.gates.frame = { kind: 'torque', label: '本締め・建入れ確認', plan: tgP + 0.1, act: tgA + 0.1, dur: 0.4 };
+      spreadInto(st, forms, 0.42, 0.60);
+      spreadInto(st, cages, 0.55, 0.70);
+      spreadInto(st, rebars, 0.66, 0.80);
+      var all = cols.concat(beams, forms, cages, rebars);
+      if (!u.atrium) {
+        var rbAll = cages.concat(rebars);
+        var rbP = maxItemTime(rbAll, 'plan'), rbA = maxItemTime(rbAll, 'act');
+        u.gates.rebar = { kind: 'rebar', label: '配筋検査', plan: rbP + 0.15, act: rbA + 0.15, dur: 0.45 };
+        var pour = makePour(u, st, rbP + 0.6, rbA + 0.6);
+        for (i = 0; i < concs.length; i++) setAbs(concs[i], pour.pStart + 0.05, pour.aStart + 0.05);
+        all = all.concat(concs);
+        st.items = all;
+        finishPourStage(u, st, pour);
+        st.items = all.concat([pour]);
+        for (i = 0; i < forms.length; i++) {
+          forms[i].rmvP = u.curePlan + 0.4 + (i % 4) * 0.15;
+          forms[i].rmvA = u.cureAct + 0.4 + (i % 4) * 0.15;
+        }
+        u.gates.strength = { kind: 'strength', label: '強度確認（材齢）',
+          plan: u.curePlan + 0.6, act: u.cureAct + 0.6, dur: 0.5 };
+      } else {
+        st.items = all;
+        u.curePlan = st.pe; u.cureAct = st.ae;
+      }
+      u.stages.steel = st;
+    }
+
+    /* ---------- RC/SRC×PCa：完成部材が届いて吊り込まれ、接合で繋がる ----------
+       型枠・現場配筋・打設は消える。現場加工の束は出ない。
+       ゲートは製品検査（工場出荷・受入）と接合確認（目地・グラウト）。 */
+    function buildFramePCa(u) {
+      var g = colPositions(u);
+      var start = 10 + u.f * 6 + u.z * 2;
+      var st = mkStage('frame', 'PCa建方（吊り込み・接合）', start, 6.5, 5, 31 + u.f * 7 + u.z * 13);
+      var cols = [], beams = [], slabs = [], joints = [], i;
+      if (u.f % 2 === 0) {
+        var spanFloors = Math.min(2, FLOORS - u.f);
+        var colTop = spanFloors * FH - 3;
+        for (i = 0; i < g.pos.length; i++) {
+          var c = g.pos[i];
+          cols.push({ k: 'pccol', x0: c[0] - 0.24, y0: c[1] - 0.24, x1: c[0] + 0.24, y1: c[1] + 0.24,
+            dz0: 0, dz1: colTop, tall: spanFloors > 1, sp: [[c[0], c[1], 1]] });
+        }
+      }
+      var bd = beamDefs(g);
+      for (i = 0; i < bd.length; i++) {
+        var b = bd[i];
+        beams.push({ k: 'pcbeam', x0: b[0], y0: b[1], x1: b[2], y1: b[3], dz0: FH - 6, dz1: FH - 3.2,
+          sp: [[b[4], b[5], FH - 3], [b[6], b[7], FH - 3]] });
+      }
+      if (!u.atrium) {
+        for (var ix = 0; ix < 2; ix++) for (var iy = 0; iy < 3; iy++)
+          slabs.push({ k: 'pcslab', x0: g.zx + ix * 1.5 + 0.03, y0: g.y0 + iy * 2 + 0.03, x1: g.zx + ix * 1.5 + 1.47, y1: g.y0 + iy * 2 + 1.97,
+            dz0: FH - 2.6, dz1: FH, sp: [[g.zx + ix * 1.5 + 0.75, g.y0 + iy * 2 + 1, FH]] });
+      }
+      // 接合部（目地・グラウト）：部材同士の繋ぎ目に小さな接合イベントが立つ
+      for (i = 0; i < g.pos.length; i++) {
+        var cp = g.pos[i];
+        joints.push({ k: 'joint', x0: cp[0] - 0.30, y0: cp[1] - 0.30, x1: cp[0] + 0.30, y1: cp[1] + 0.30,
+          dz0: FH - 6.4, dz1: FH - 5.6, sp: [[cp[0], cp[1], FH - 5.6]] });
+      }
+      // 製品検査：最初の部材が吊り込まれる前に、受入検査で一度止まる
+      u.gates.frame = { kind: 'product', label: '製品検査（PCa受入）',
+        plan: st.ps + 0.1, act: st.as + 0.1, dur: 0.4 };
+      spreadInto(st, cols, 0.10, 0.34);
+      spreadInto(st, beams, 0.38, 0.58);
+      spreadInto(st, slabs, 0.60, 0.82);
+      spreadInto(st, joints, 0.84, 0.97);
+      st.items = cols.concat(beams, slabs, joints);
+      var jP = maxItemTime(joints, 'plan'), jA = maxItemTime(joints, 'act');
+      if (!u.atrium) {
+        u.gates.joint = { kind: 'joint', label: '接合確認（目地・グラウト）', plan: jP + 0.1, act: jA + 0.1, dur: 0.4 };
+        u.curePlan = jP + 0.5;
+        u.cureAct = jA + 0.5;
+      } else {
+        u.curePlan = st.pe; u.cureAct = st.ae;
+      }
+      u.stages.steel = st;
+    }
+
+    function buildFrame(u) {
+      if (PARAMS.method === 'pca') buildFramePCa(u);
+      else if (PARAMS.frame === 'RC') buildFrameRC(u);
+      else if (PARAMS.frame === 'SRC') buildFrameSRC(u);
+      else buildFrameSteel(u);
+    }
+
+    /* ---------- 外部足場（鳶）：建物を回り込む4面に、外装より大きく先行して組む ---------- */
+    function buildScaffold(u) {
+      var steelStart = 10 + u.f * 6 + u.z * 2;
+      var extPs = steelStart + 9 + u.z;
+      var st = mkStageAbs('scaffold', '外部足場 組立（鳶）',
+        extPs - 4.2, extPs - 1.6, extPs - 4.2 + lagJitter(41 + u.f * 3 + u.z), extPs - 1.6 + lagJitter(41 + u.f * 3 + u.z) + 0.2, 5);
+      var zx = 4.5 + u.z * 3, xe = zx + 3, y0 = 3.5, y1 = 9.5;
+      var frames = [], r, c;
+      for (r = 0; r < 2; r++) { // 面の並び（E,S,N,W）は外装パネルと対応させる
+        for (c = 0; c < 3; c++) frames.push({ k: 'scaf', face: 'E', r: r, c: c,
+          x0: xe, y0: y0 + c * 2, x1: xe, y1: y0 + c * 2 + 2, dz0: r * 15, dz1: r * 15 + 15, sp: [] });
+        for (c = 0; c < 3; c++) frames.push({ k: 'scaf', face: 'S', r: r, c: c,
+          x0: zx + c, y0: y1, x1: zx + c + 1, y1: y1, dz0: r * 15, dz1: r * 15 + 15, sp: [] });
+        for (c = 0; c < 3; c++) frames.push({ k: 'scaf', face: 'N', r: r, c: c,
+          x0: zx + c, y0: y0, x1: zx + c + 1, y1: y0, dz0: r * 15, dz1: r * 15 + 15, sp: [] });
+        for (c = 0; c < 3; c++) frames.push({ k: 'scaf', face: 'W', r: r, c: c,
+          x0: zx, y0: y0 + c * 2, x1: zx, y1: y0 + c * 2 + 2, dz0: r * 15, dz1: r * 15 + 15, sp: [] });
+      }
+      spreadInto(st, frames, 0.03, 0.97);
+      var extPe = extPs + 8, extAe = extPe + lagJitter(53 + u.f * 5 + u.z * 3) + 0.4;
+      var dP = extPe + 0.3, dA = extAe + 0.3, dDur = 1.8;
+      var order = frames.slice().sort(function (a, b) { return (b.r - a.r) || (a.c - b.c); });
+      for (var i = 0; i < order.length; i++) {
+        var fr = (i + 0.5) / order.length;
+        order[i].rmvP = dP + fr * dDur;
+        order[i].rmvA = dA + fr * dDur;
+      }
+      st.items = frames;
+      u.scaffold = st;
+      u.scaffoldOut = { trade: 'scaffold', work: '足場バラし（解体）・資材返却', crew: 4,
+        ps: dP, pe: dP + dDur, as: dA, ae: dA + dDur };
+    }
+
+    /* ---------- 外装：全4面（東・南・北・西）にパネル・サッシ・シーリングが存在する。
+       どの視点から見ても、その方向から見える2面の外装が描かれる ---------- */
+    function buildExterior(u) {
+      var steelStart = 10 + u.f * 6 + u.z * 2;
+      var st = mkStage('exterior', '外装（ALC・シーリング）', steelStart + 9 + u.z, 8, 5, 53 + u.f * 5 + u.z * 3);
+      var zx = 4.5 + u.z * 3, xe = zx + 3, y0 = 3.5, y1 = 9.5;
+      var items = [];
+      for (var r = 0; r < 2; r++) {
+        var c;
+        for (c = 0; c < 3; c++) items.push({ k: 'panel', face: 'E', glass: (c + r) % 2 === 1,
+          x0: xe, y0: y0 + c * 2, x1: xe + 0.18, y1: y0 + c * 2 + 2, dz0: r * 15, dz1: r * 15 + 15,
+          sp: [[xe + 0.2, y0 + c * 2 + 1, r * 15 + 7]] });
+        for (c = 0; c < 3; c++) items.push({ k: 'panel', face: 'S', glass: (c + r) % 2 === 0,
+          x0: zx + c, y0: y1, x1: zx + c + 1, y1: y1 + 0.18, dz0: r * 15, dz1: r * 15 + 15,
+          sp: [[zx + c + 0.5, y1 + 0.2, r * 15 + 7]] });
+        for (c = 0; c < 3; c++) items.push({ k: 'panel', face: 'N', glass: (c + r + 1) % 2 === 0,
+          x0: zx + c, y0: y0 - 0.18, x1: zx + c + 1, y1: y0, dz0: r * 15, dz1: r * 15 + 15,
+          sp: [[zx + c + 0.5, y0 - 0.2, r * 15 + 7]] });
+        for (c = 0; c < 3; c++) items.push({ k: 'panel', face: 'W', glass: (c + r + 1) % 2 === 1,
+          x0: zx - 0.18, y0: y0 + c * 2, x1: zx, y1: y0 + c * 2 + 2, dz0: r * 15, dz1: r * 15 + 15,
+          sp: [[zx - 0.2, y0 + c * 2 + 1, r * 15 + 7]] });
+      }
+      spreadInto(st, items, 0.03, 0.97);
+      // 依存：パネルは対応する足場枠（同じ面・段・位置）が立ってからでないと付かない
+      for (var pi = 0; pi < items.length; pi++) {
+        var fr2 = u.scaffold.items[pi];
+        if (!fr2) continue;
+        if (items[pi].plan < fr2.plan + 0.2) items[pi].plan = fr2.plan + 0.2;
+        if (items[pi].act < fr2.act + 0.2) items[pi].act = fr2.act + 0.2;
+      }
+      st.items = items;
+      u.stages.exterior = st;
+    }
+
+    /* ---------- 設備：全工区に電気・衛生・空調の3系統 × 3段階 ---------- */
+    var EQ_TRADES = ['elec', 'plumb', 'hvac'];
+    function buildEquip(u) {
+      var steelStart = 10 + u.f * 6 + u.z * 2;
+      var zx = 4.5 + u.z * 3;
+      var items = [];
+      var concPs = 0, concPe = 0, concAs = 0, concAe = 0;
+      for (var ti = 0; ti < 3; ti++) {
+        var tr = EQ_TRADES[ti];
+        var big = tr === 'hvac';
+        var y = 3.9 + ti * 1.55;
+        var pi2, seg;
+        for (pi2 = 0; pi2 < 2; pi2++) {
+          seg = { k: 'pipe', tr: tr, ph: 'pre', x0: zx + 0.3 + pi2 * 0.5, y0: y - 0.14,
+            x1: zx + 0.8 + pi2 * 0.5, y1: y + 0.14, dz0: FH + 0.2, dz1: FH + 1.1, sp: [[zx + 0.5 + pi2 * 0.5, y, FH + 1]] };
+          setAbs(seg, steelStart + 3.2 + pi2 * 0.7 + ti * 0.3, steelStart + 3.2 + pi2 * 0.7 + ti * 0.3 + lagJitter(61 + u.f + ti));
+          items.push(seg);
+        }
+        var cps = u.curePlan + 0.3 + ti * 0.5, cas = u.cureAct + 0.3 + ti * 0.5;
+        for (pi2 = 0; pi2 < 3; pi2++) {
+          var sx = zx + 0.3 + pi2 * 0.85;
+          seg = { k: 'pipe', tr: tr, ph: 'conc', x0: sx, y0: y - (big ? 0.3 : 0.16),
+            x1: sx + 0.85, y1: y + (big ? 0.3 : 0.16),
+            dz0: FH + 0.2, dz1: FH + (big ? 2.4 : 1.5), sp: [[sx, y, FH + 1]] };
+          setAbs(seg, cps + pi2 * 1.1, cas + pi2 * 1.1);
+          items.push(seg);
+        }
+        if (ti === 0) { concPs = cps; concAs = cas; }
+        if (cps + 2 * 1.1 + 0.8 > concPe) concPe = cps + 2 * 1.1 + 0.8;
+        if (cas + 2 * 1.1 + 0.8 > concAe) concAe = cas + 2 * 1.1 + 0.8;
+        var fps = Math.max(POWER_PLAN + 0.3, steelStart + 19 + u.f * 2);
+        var fas = Math.max(POWER_ACT + 0.3, steelStart + 19 + u.f * 2 + lagJitter(67 + u.f * 3 + ti));
+        for (pi2 = 0; pi2 < 2; pi2++) {
+          var fx = zx + 0.5 + pi2 * 1.1;
+          seg = { k: 'fixture', tr: tr, ph: 'fix', x0: fx, y0: y - 0.3, x1: fx + 0.62, y1: y + 0.3,
+            dz0: FH + 0.4, dz1: FH + (tr === 'elec' ? 1.6 : 2.2), sp: [[fx + 0.3, y, FH + 1.5]] };
+          setAbs(seg, fps + pi2 * 0.9, fas + pi2 * 0.9);
+          items.push(seg);
+        }
+      }
+      u.gates.press = { kind: 'press', label: '隠蔽前試験（圧力・通水）', plan: concPe + 0.1, act: concAe + 0.1, dur: 0.4 };
+      var st = mkStageAbs('elec', '設備（電気・衛生・空調）', steelStart + 3, 0, steelStart + 3, 0, 4);
+      st.ps = steelStart + 3; st.pe = Math.max(POWER_PLAN + 2.4, steelStart + 21.5 + u.f * 2);
+      st.as = steelStart + 3; st.ae = Math.max(POWER_ACT + 2.4, steelStart + 21.5 + u.f * 2 + 1);
+      st.items = items;
+      u.stages.equip = st;
+    }
+    function buildInterior(u) {
+      if (u.atrium) { u.stages.interior = null; return; }
+      var steelStart = 10 + u.f * 6 + u.z * 2;
+      var origPs = steelStart + 12 + u.z * 2 + u.f * 2;
+      var st = mkStage('interior', '内装（ボード・仕上げ）', origPs, 9, 8, 71 + u.f * 11 + u.z * 5);
+      st.origPs = origPs;
+      var zx = 4.5 + u.z * 3, xm = zx + 1.5, xe = zx + 3, y0 = 3.5, y1 = 9.5;
+      var boards = [], tiles = [];
+      boards.push({ k: 'board', x0: zx, y0: y1 - 0.18, x1: xm, y1: y1, dz0: FH, dz1: FH + 14, sp: [[zx + 0.75, y1 - 0.2, FH + 7]] });
+      boards.push({ k: 'board', x0: xm, y0: y1 - 0.18, x1: xe, y1: y1, dz0: FH, dz1: FH + 14, sp: [[xm + 0.75, y1 - 0.2, FH + 7]] });
+      boards.push({ k: 'board', x0: xe - 0.18, y0: y0, x1: xe, y1: 6.5, dz0: FH, dz1: FH + 14, sp: [[xe - 0.2, y0 + 1.5, FH + 7]] });
+      boards.push({ k: 'board', x0: xe - 0.18, y0: 6.5, x1: xe, y1: y1, dz0: FH, dz1: FH + 14, sp: [[xe - 0.2, 6.5 + 1.5, FH + 7]] });
+      for (var ix = 0; ix < 3; ix++) for (var iy = 0; iy < 2; iy++)
+        tiles.push({ k: 'tile', alt: (ix + iy) % 2 === 0, x0: zx + ix, y0: y0 + iy * 3, x1: zx + ix + 1, y1: y0 + iy * 3 + 3,
+          dz0: FH, dz1: FH + 0.5, sp: [[zx + ix + 0.5, y0 + iy * 3 + 1.5, FH + 0.5]] });
+      spreadInto(st, boards, 0.04, 0.42);
+      spreadInto(st, tiles, 0.50, 0.96);
+      st.items = boards.concat(tiles);
+      u.stages.interior = st;
+    }
+    function buildRoof(u) {
+      if (!isTopFloor(u.f)) { u.roof = null; return; }
+      var base = 12 + FLOORS * 8 + u.z;
+      var st = mkStage('roof', '屋根防水・笠木', base, 6, 4, 83 + u.z * 3);
+      var zx = 4.5 + u.z * 3, xm = zx + 1.5, xe = zx + 3, y0 = 3.5, y1 = 9.5;
+      var items = [];
+      var xs = [[zx, xm], [xm, xe]], ys = [[y0, 6.5], [6.5, y1]];
+      for (var i = 0; i < 2; i++) for (var j = 0; j < 2; j++)
+        items.push({ k: 'sheet', x0: xs[i][0], y0: ys[j][0], x1: xs[i][1], y1: ys[j][1], dz0: FH, dz1: FH + 0.7,
+          sp: [[(xs[i][0] + xs[i][1]) / 2, (ys[j][0] + ys[j][1]) / 2, FH + 0.7]] });
+      items.push({ k: 'parapet', x0: zx, y0: y0, x1: xe, y1: y0 + 0.3, dz0: FH, dz1: FH + 3.5, sp: [[xm, y0 + 0.15, FH + 3.5]] });
+      items.push({ k: 'parapet', x0: zx, y0: y1 - 0.3, x1: xe, y1: y1, dz0: FH, dz1: FH + 3.5, sp: [[xm, y1 - 0.15, FH + 3.5]] });
+      spreadInto(st, items, 0.05, 0.95);
+      st.items = items;
+      u.roof = st;
+    }
+    function buildRoofEq(u) {
+      if (!isTopFloor(u.f)) { u.roofEq = null; return; }
+      var st = mkStage('hvac', '屋上設備・受電', POWER_PLAN - 2.5 + u.z, 5, 3, 89 + u.z * 3);
+      var zx = 4.5 + u.z * 3, y0 = 3.5;
+      var items = [];
+      items.push({ k: 'acunit', x0: zx + 0.3, y0: y0 + 0.5, x1: zx + 1.1, y1: y0 + 1.3, dz0: FH + 0.7, dz1: FH + 3.4, sp: [[zx + 0.7, y0 + 0.9, FH + 3.4]] });
+      items.push({ k: 'acunit', x0: zx + 1.4, y0: y0 + 0.5, x1: zx + 2.2, y1: y0 + 1.3, dz0: FH + 0.7, dz1: FH + 3.4, sp: [[zx + 1.8, y0 + 0.9, FH + 3.4]] });
+      items.push({ k: 'pipe', tr: 'hvac', ph: 'roof', x0: zx + 0.4, y0: y0 + 2.6, x1: zx + 2.6, y1: y0 + 3.0, dz0: FH + 0.7, dz1: FH + 1.8, sp: [[zx + 1.5, y0 + 2.8, FH + 1.8]] });
+      if (u.z === 1) { // キュービクル＝受電の山場（日付は POWER_* に一致）
+        var cub = { k: 'cubicle', x0: zx + 0.9, y0: y0 + 4.2, x1: zx + 2.1, y1: y0 + 5.4, dz0: FH + 0.7, dz1: FH + 4.6, sp: [[zx + 1.5, y0 + 4.8, FH + 4.6]] };
+        setAbs(cub, POWER_PLAN, POWER_ACT);
+        items.push(cub);
+      }
+      spreadInto(st, items.slice(0, 3), 0.1, 0.85);
+      st.items = items;
+      u.roofEq = st;
+    }
+
+    /* ---------- エレベーター：シャフトはピット（1F床下）から最上階天井まで
+       連続した1本。高さは絶対 z で持ち、各階セグメントはその階の床高を
+       基準に「1回だけ」積む（zBase の二重加算を構造的に排除する）。
+       EV 部材（レール・かご・ドア）も dz0/dz1 に絶対 z を格納する規約で、
+       描画は drawEV から zBase=0 で呼ぶ単一経路のみ（工区の zBase を
+       足し直す経路は存在しない） ---------- */
+    function buildEV() {
+      var railStart = 10 + FLOORS * 6.5;
+      var st = mkStageAbs('ev', 'エレベーター工事', railStart, POWER_PLAN + 10, railStart + 0.5, POWER_ACT + 10, 3);
+      var items = [], f;
+      for (f = 0; f < FLOORS; f++) {
+        var zb = 6 + f * FH; // FOUND_H + f*FLOOR_H（この階の床高・絶対z）
+        items.push({ k: 'evrail', fl: f, x0: 8.58, y0: 4.00, x1: 9.42, y1: 4.40,
+          dz0: zb + 2, dz1: zb + FH - 2, sp: [[9, 4.2, zb + FH / 2]] });
+      }
+      items.push({ k: 'evcar', x0: 8.70, y0: 3.90, x1: 9.30, y1: 4.55, dz0: 6 + 2, dz1: 6 + 17, sp: [[9, 4.2, 6 + 17]] });
+      for (f = 0; f < FLOORS; f++) {
+        var zb2 = 6 + f * FH;
+        items.push({ k: 'evdoor', fl: f, x0: 8.68, y0: 4.78, x1: 9.32, y1: 4.88,
+          dz0: zb2 + 1.5, dz1: zb2 + 15.5, sp: [[9, 4.83, zb2 + 15]] });
+      }
+      var times = [];
+      for (f = 0; f < FLOORS; f++) times.push([railStart + f * 4, railStart + f * 4 + 0.7]);
+      times.push([railStart + FLOORS * 4 + 2, railStart + FLOORS * 4 + 2.8]); // かご
+      for (f = 0; f < FLOORS; f++) times.push([railStart + f * 2 + 1, railStart + f * 2 + 1.8]); // ドア
+      for (var i = 0; i < items.length && i < times.length; i++) setAbs(items[i], times[i][0], times[i][1]);
+      st.items = items;
+      EVST = st;
+      EVST.testGate = { kind: 'evtest', label: 'EV試運転・検査',
+        plan: POWER_PLAN + 9, act: POWER_ACT + 9.2, dur: 0.8 };
+      // シャフト壁：全セグメントが「z0＝その階の床高、z1＝z0＋階高」を厳密に満たす
+      // 形で格納する（不変条件・全パラメータ組合せで成立）。乗場開口は格納データでは
+      // 作らず、ホール側の壁に opening フラグを付け、描画時にだけ袖壁＋まぐさへ
+      // 分割する。壁の時刻はここでは仮置きし、buildModel の全シフト（強度確認
+      // ゲート・天候）が終わった後に finalizeEVShaft() が最終の躯体ステージから
+      // 決め直す（生成時点のステージを掴むと、後段のシフトで壁だけ取り残される）。
+      EVSHAFT = { walls: [],
+        pit: { plan: 9.5, act: 10.5 },
+        cap: { plan: 14 + FLOORS * 9.5, act: 15 + FLOORS * 9.5 },
+        machine: { plan: 16 + FLOORS * 9.5, act: 17 + FLOORS * 9.5 } };
+      for (f = 0; f < FLOORS; f++) {
+        var zb3 = 6 + f * FH; // FOUND_H + f*FLOOR_H（この階の床高・絶対z、加算はここで1回だけ）
+        var segs = [
+          [8.40, 3.66, 9.60, 3.80, zb3, zb3 + FH, 0],
+          [8.40, 3.80, 8.54, 4.90, zb3, zb3 + FH, 0],
+          [9.46, 3.80, 9.60, 4.90, zb3, zb3 + FH, 0],
+          [8.40, 4.76, 9.60, 4.90, zb3, zb3 + FH, 1] // ホール側：乗場開口つき
+        ];
+        for (var si = 0; si < segs.length; si++) {
+          var sg = segs[si];
+          EVSHAFT.walls.push({ fl: f, x0: sg[0], y0: sg[1], x1: sg[2], y1: sg[3],
+            z0: sg[4], z1: sg[5], opening: !!sg[6], plan: 0, act: 0 });
+        }
+      }
+    }
+    /* シャフト壁の時刻を、その階（中央工区）の最終確定した躯体ステージから
+       決め直す。buildModel の最後（全シフト適用後）に1回だけ呼ばれる単一経路 */
+    function finalizeEVShaft() {
+      if (!EVSHAFT) return;
+      for (var i = 0; i < EVSHAFT.walls.length; i++) {
+        var wl = EVSHAFT.walls[i];
+        var cu = U(wl.fl, 1);
+        if (!cu || !cu.stages.steel) continue;
+        var sst = cu.stages.steel;
+        wl.plan = sst.ps + (sst.pe - sst.ps) * 0.82;
+        wl.act = sst.as + (sst.ae - sst.as) * 0.84;
+      }
+    }
+
+    /* ---------- モデル再生成：パラメータから現場を全部作り直す ---------- */
+    function buildModel() {
+      FLOORS = PARAMS.floors;
+      POWER_PLAN = 12 + FLOORS * 11;
+      POWER_ACT = POWER_PLAN + 1;
+      EST_DAYS = 34 + FLOORS * 9;
+      var K = EST_DAYS / 60;
+      RAIN = { from: EST_DAYS * 0.30, to: EST_DAYS * 0.30 + 3 };
+      RAIN2 = { from: EST_DAYS * 0.66, to: EST_DAYS * 0.66 + 1.2 };
+      WIND = { from: EST_DAYS * 0.44, to: EST_DAYS * 0.44 + 0.8 };
+      BACKFILL = { from: 12 * K, to: 16.5 * K };
+      WASTE_DAYS = [20, 33, 46, 55].map(function (d) { return d * K; });
+      MOBILE_CRANE_DAYS = [2, 4, 6, 8, 9];
+
+      units = []; UNITMAP = {}; LAYER_GATES = [];
+      var f, z, i, j;
+      for (f = 0; f < FLOORS; f++) {
+        var zs = plateZones(f);
+        for (var zi = 0; zi < zs.length; zi++) {
+          z = zs[zi];
+          var u = {
+            z: z, f: f, atrium: (z === 1 && f >= 1),
+            stages: {}, gates: {}, curePlan: 0, cureAct: 0,
+            scaffold: null, scaffoldOut: null, roof: null, roofEq: null
+          };
+          units.push(u);
+          UNITMAP[f * 3 + z] = u;
+        }
+      }
+      EARTH = mkStage('earth', '掘削・山留め・整地', 0, 7, 7, 11);
+      buildFoundation();
+      for (i = 0; i < units.length; i++) {
+        buildFrame(units[i]);
+        buildScaffold(units[i]);
+        buildExterior(units[i]);
+        buildEquip(units[i]);
+        buildInterior(units[i]);
+        buildRoof(units[i]);
+        buildRoofEq(units[i]);
+      }
+      buildEV();
+      // 層間ふさぎ確認：その階の全工区の隠蔽前試験が終わってから（階単位のゲート）
+      for (f = 0; f < FLOORS; f++) {
+        var mp = 0, ma = 0, anyU = false;
+        for (z = 0; z < 3; z++) {
+          var uu = U(f, z);
+          if (!uu) continue;
+          anyU = true;
+          var g = uu.gates.press;
+          if (g.plan + g.dur > mp) mp = g.plan + g.dur;
+          if (g.act + g.dur > ma) ma = g.act + g.dur;
+        }
+        LAYER_GATES[f] = anyU ? { kind: 'layer', label: '層間ふさぎ確認', plan: mp + 0.2, act: ma + 0.2, dur: 0.4, fl: f } : null;
+      }
+      // 内装の開始をゲートの後ろへ寄せる（隠蔽前試験＋層間ふさぎ＋PCa接合確認）
+      for (i = 0; i < units.length; i++) {
+        var u2 = units[i], st2 = u2.stages.interior;
+        if (!st2) continue;
+        var needP = Math.max(u2.gates.press.plan + u2.gates.press.dur + 0.2,
+          LAYER_GATES[u2.f] ? LAYER_GATES[u2.f].plan + LAYER_GATES[u2.f].dur + 0.2 : 0);
+        var needA = Math.max(u2.gates.press.act + u2.gates.press.dur + 0.2,
+          LAYER_GATES[u2.f] ? LAYER_GATES[u2.f].act + LAYER_GATES[u2.f].dur + 0.2 : 0);
+        if (u2.gates.joint) {
+          needP = Math.max(needP, u2.gates.joint.plan + u2.gates.joint.dur + 0.2);
+          needA = Math.max(needA, u2.gates.joint.act + u2.gates.joint.dur + 0.2);
+        }
+        var dP = Math.max(0, needP - st2.ps), dA = Math.max(0, needA - st2.as);
+        if (dP > 0) { st2.ps += dP; st2.pe += dP; for (j = 0; j < st2.items.length; j++) st2.items[j].plan += dP; }
+        if (dA > 0) shiftStageActs(st2, dA);
+      }
+      // 強度確認（RC/SRC）：合格するまで真上の階の躯体は始められない
+      for (i = 0; i < units.length; i++) {
+        var below = units[i];
+        if (!below.gates.strength) continue;
+        var above = U(below.f + 1, below.z);
+        if (!above) continue;
+        var sg = below.gates.strength;
+        var ndP = Math.max(0, (sg.plan + sg.dur + 0.2) - above.stages.steel.ps);
+        var ndA = Math.max(0, (sg.act + sg.dur + 0.2) - above.stages.steel.as);
+        if (ndP > 0 || ndA > 0) shiftUnitFrame(above, ndP, ndA);
+      }
+      // 搬入遅れは該当工区だけに効く（1F東の内装材が遅れる）
+      var u02 = U(0, 2);
+      if (u02 && u02.stages.interior) shiftStageActs(u02.stages.interior, 2.2);
+      // 職人の手配が付かず最上階・中の躯体が少し遅れる
+      var uTop = U(FLOORS - 1, 1);
+      if (uTop) shiftUnitFrame(uTop, 0, 1.0);
+
+      eachStage(applyWeatherToStage);
+
+      // シャフト壁の時刻を最終の躯体ステージに合わせ直す（全シフト適用後・単一経路）
+      finalizeEVShaft();
+
+      // 竣工日：全ステージ・全ゲートの実績最大値から決める（必ず到達する）
+      var maxT = 0;
+      eachStage(function (st) {
+        if (!st) return;
+        if (st.ae > maxT) maxT = st.ae;
+        if (st.items) for (var q = 0; q < st.items.length; q++) {
+          if (st.items[q].act > maxT) maxT = st.items[q].act;
+          if (st.items[q].rmvA != null && st.items[q].rmvA > maxT) maxT = st.items[q].rmvA;
+        }
+      });
+      for (i = 0; i < units.length; i++) {
+        if (units[i].scaffoldOut && units[i].scaffoldOut.ae > maxT) maxT = units[i].scaffoldOut.ae;
+        for (var gk in units[i].gates) {
+          var gg = units[i].gates[gk];
+          if (gg && gg.act + gg.dur > maxT) maxT = gg.act + gg.dur;
+        }
+      }
+      for (f = 0; f < LAYER_GATES.length; f++)
+        if (LAYER_GATES[f] && LAYER_GATES[f].act + LAYER_GATES[f].dur > maxT) maxT = LAYER_GATES[f].act + LAYER_GATES[f].dur;
+      if (EVST && EVST.testGate.act + EVST.testGate.dur > maxT) maxT = EVST.testGate.act + EVST.testGate.dur;
+      TOTAL_DAYS = Math.ceil(maxT + 2.5);
+
+      MEM_TOTAL = 0;
+      eachStage(function (st) { if (st && st.items) MEM_TOTAL += st.items.length; });
+      // 描画キャッシュを捨てる
+      MAT_ITEMS = null; TRUCK_EVENTS = null; CRANE_DAYS = null;
+      fadeFloor = []; fadeWall = [];
+      for (f = 0; f < FLOORS; f++) { fadeFloor.push(1); fadeWall.push(1); }
+    }
+
+    /* ---------- 天候は作業ごとに効き方が違う ---------- */
+    var RAIN_KINDS = { pour: 1, panel: 1, sheet: 1 };
+    var FACTORY_KINDS = { col: 1, beam: 1, sbeam: 1, plate: 1, panel: 1, sheet: 1, parapet: 1, acunit: 1, cubicle: 1, evcar: 1, pccol: 1, pcbeam: 1, pcslab: 1 };
+    function weatherBlock(kind, t) {
+      if (RAIN_KINDS[kind]) {
+        if (t >= RAIN.from && t < RAIN.to) return RAIN.to;
+        if (t >= RAIN2.from && t < RAIN2.to) return RAIN2.to;
+      }
+      if (FACTORY_KINDS[kind] && t >= WIND.from && t < WIND.to) return WIND.to;
+      return 0;
+    }
+    function applyWeatherToStage(st) {
+      if (!st || !st.items) return;
+      var items = st.items.slice().sort(function (a, b) { return a.act - b.act; });
+      var shift = 0;
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        if (it.k === 'pour') {
+          var w0 = weatherBlock('pour', it.aStart + shift);
+          if (w0) shift += w0 - (it.aStart + shift) + 0.05;
+          it.aStart += shift; it.act += shift;
+          continue;
+        }
+        var w = weatherBlock(it.k, it.act + shift);
+        if (w) shift += w - (it.act + shift) + 0.05;
+        it.act += shift;
+        if (it.rmvA != null) it.rmvA += shift * 0.3;
+      }
+      if (shift > 0) st.ae = Math.max(st.ae, st.ae + shift * 0.5);
+    }
+    function eachStage(fn) {
+      fn(EARTH); fn(FOUND); fn(EVST);
+      for (var i = 0; i < units.length; i++) {
+        var u = units[i];
+        fn(u.stages.steel); fn(u.stages.exterior); fn(u.stages.equip);
+        if (u.scaffold) fn(u.scaffold);
+        if (u.stages.interior) fn(u.stages.interior);
+        if (u.roof) fn(u.roof);
+        if (u.roofEq) fn(u.roofEq);
+      }
+    }
+
+    /* ---------- 進捗の数え方 ---------- */
+    var MEM_TOTAL = 0;
+    function countPlaced(st, t, actual) {
+      if (!st || !st.items) return 0;
+      var n = 0;
+      for (var i = 0; i < st.items.length; i++)
+        if ((actual ? st.items[i].act : st.items[i].plan) <= t) n++;
+      return n;
+    }
+    function stageProg(st, t, actual) {
+      if (!st) return 0;
+      if (st.items) return st.items.length ? countPlaced(st, t, actual) / st.items.length : 0;
+      return actual ? prog(t, st.as, st.ae) : prog(t, st.ps, st.pe);
+    }
+    function membersPlaced(t, actual) {
+      var n = 0;
+      eachStage(function (st) { n += countPlaced(st, t, actual); });
+      return n;
+    }
+    function scaffoldDownCount(u, t) {
+      if (!u.scaffold) return 0;
+      var n = 0, items = u.scaffold.items;
+      for (var i = 0; i < items.length; i++) if (items[i].rmvA <= t) n++;
+      return n;
+    }
+    function unitProgress(u, t, actual) {
+      var w = 0, s = 0;
+      var parts = [['steel', 0.34], ['exterior', 0.17], ['equip', 0.19], ['interior', 0.20]];
+      for (var i = 0; i < parts.length; i++) {
+        var st = u.stages[parts[i][0]];
+        if (!st) continue;
+        w += parts[i][1];
+        s += parts[i][1] * stageProg(st, t, actual);
+      }
+      if (u.scaffold) { w += 0.05; s += 0.05 * stageProg(u.scaffold, t, actual); }
+      if (u.roof) { w += 0.03; s += 0.03 * stageProg(u.roof, t, actual); }
+      if (u.roofEq) { w += 0.02; s += 0.02 * stageProg(u.roofEq, t, actual); }
+      return w ? s / w : 0;
+    }
+    function overallProgress(t, actual) {
+      var s = 0;
+      s += 0.05 * stageProg(EARTH, t, actual) + 0.07 * stageProg(FOUND, t, actual) + 0.02 * stageProg(EVST, t, actual);
+      var us = 0;
+      for (var i = 0; i < units.length; i++) us += unitProgress(units[i], t, actual);
+      return s + 0.86 * (units.length ? us / units.length : 0);
+    }
+
+    /* ---------- 床の状態（全テンプレート共通の後段前提） ---------- */
+    function pourItemOf(u) {
+      var items = (u.stages.steel && u.stages.steel.items) || [];
+      for (var i = 0; i < items.length; i++) if (items[i].k === 'pour') return items[i];
+      return null;
+    }
+    function pourInfo(u, t) {
+      var it = pourItemOf(u);
+      if (!it) return { state: '', frac: 0, phase: 0 };
+      if (t >= it.act) return { state: 'done', frac: 1, phase: 0 };
+      if (t >= it.aStart) {
+        var fe = clamp01((t - it.aStart) / (it.act - it.aStart));
+        var ft = fe * it.trucks;
+        var k = Math.min(it.trucks - 1, Math.floor(ft));
+        var local = ft - k;
+        var strip = clamp01((local - 0.22) / 0.53);
+        return { state: 'pouring', frac: (k + strip) / it.trucks, phase: local };
+      }
+      if (t >= it.pStart) return { state: 'ghost', frac: 0, phase: 0 };
+      return { state: '', frac: 0, phase: 0 };
+    }
+    function floorState(u, t) {
+      if (pourItemOf(u)) return pourInfo(u, t);
+      // PCa：床版（pcslab）の吊り込み枚数が床の出来具合
+      var items = (u.stages.steel && u.stages.steel.items) || [];
+      var tot = 0, done = 0, planAny = false, i;
+      for (i = 0; i < items.length; i++) {
+        if (items[i].k !== 'pcslab') continue;
+        tot++;
+        if (items[i].act <= t) done++;
+        if (items[i].plan <= t) planAny = true;
+      }
+      if (!tot) { // 吹抜け等：躯体ステージの進みで代用
+        var p = stageProg(u.stages.steel, t, true);
+        return { state: p >= 1 ? 'done' : p > 0 ? 'pouring' : '', frac: p, phase: 0 };
+      }
+      if (done >= tot) return { state: 'done', frac: 1, phase: 0 };
+      if (done > 0) return { state: 'pouring', frac: done / tot, phase: 0 };
+      if (planAny && ghostOn) return { state: 'ghost', frac: 0, phase: 0 };
+      return { state: '', frac: 0, phase: 0 };
+    }
+
+    /* ---------- 検査ゲートの状態 ---------- */
+    var GATE_KEYS = ['frame', 'rebar', 'strength', 'joint', 'press'];
+    function gateState(g, t, actual) {
+      if (!g) return '';
+      var s = actual ? g.act : g.plan;
+      if (t < s) return 'before';
+      if (t < s + g.dur) return 'during';
+      return 'done';
+    }
+    function activeGate(u, t) {
+      for (var i = 0; i < GATE_KEYS.length; i++) {
+        var g = u.gates[GATE_KEYS[i]];
+        if (g && gateState(g, t, true) === 'during') return g;
+      }
+      var lg = LAYER_GATES[u.f];
+      if (lg && gateState(lg, t, true) === 'during') return lg;
+      return null;
+    }
+    function activeStage(u, t) {
+      var g = activeGate(u, t);
+      if (g) return { st: { trade: 'insp', work: g.label + '（立会い・判定中）', crew: 0 }, p: 0.5, gate: g };
+      var order = ['steel', 'scaffold', 'exterior', 'equip', 'interior'];
+      var best = null;
+      for (var i = 0; i < order.length; i++) {
+        var st = order[i] === 'scaffold' ? u.scaffold : u.stages[order[i]];
+        if (!st) continue;
+        var p = stageProg(st, t, true);
+        if (p > 0 && p < 1) return { st: st, p: p };
+        if (p >= 1) best = { st: st, p: 1 };
+      }
+      if (u.scaffold) {
+        var dn = scaffoldDownCount(u, t), tot = u.scaffold.items.length;
+        if (dn > 0 && dn < tot) return { st: u.scaffoldOut, p: dn / tot };
+        if (tot > 0 && dn >= tot) best = { st: u.scaffoldOut, p: 1 };
+      }
+      if (u.roof) {
+        var rp = stageProg(u.roof, t, true);
+        if (rp > 0 && rp < 1) return { st: u.roof, p: rp };
+      }
+      if (u.roofEq) {
+        var qp = stageProg(u.roofEq, t, true);
+        if (qp > 0 && qp < 1) return { st: u.roofEq, p: qp };
+      }
+      return best;
+    }
+    function phaseName(t) {
+      var fr = TOTAL_DAYS ? t / TOTAL_DAYS : 0;
+      if (fr < 0.12) return '土工事';
+      if (fr < 0.20) return '基礎・躯体工事';
+      if (fr < 0.48) return '躯体工事';
+      if (fr < 0.68) return '躯体・外装工事';
+      if (fr < 0.78) return '内装・仕上げ工事';
+      if (fr < 0.85) return '受電・器具付け';
+      if (fr < 0.96) return '試運転・仕上げ';
+      return '竣工間近';
+    }
+    function anyGateDuring(t) {
+      for (var i = 0; i < units.length; i++) {
+        var g = activeGate(units[i], t);
+        if (g) return { u: units[i], g: g };
+      }
+      return null;
+    }
+    function anyScaffoldBusy(t) {
+      for (var i = 0; i < units.length; i++) {
+        var p = stageProg(units[i].scaffold, t, true);
+        if (p > 0 && p < 1) return true;
+      }
+      return false;
+    }
+    function eventCaption(t) {
+      var ag = anyGateDuring(t);
+      if (ag) return ag.g.label + 'の立会い中 — 合格するまで次の工程は始まらない';
+      if (t >= RAIN.from && t < RAIN.to) return '長雨 — 打設とシーリングは中止。できる作業だけが進む';
+      if (t >= WIND.from && t < WIND.to + 0.6) return '強風で揚重中止 — ラフタークレーンは来ない';
+      if (t >= RAIN2.from && t < RAIN2.to) return '雨 — 屋根とシーリングは中止';
+      if (t >= POWER_ACT - 0.4 && t < POWER_ACT + 1.2) return '受電の山場 — キュービクルに電気が入る。これで試運転が始められる';
+      if (EVST && t >= EVST.testGate.act - 0.3 && t < EVST.testGate.act + EVST.testGate.dur + 0.6) return 'エレベーター試運転・検査 — 単独ラインの最終関門';
+      if (PARAMS.method === 'pca' && t > 9 && t < 14) return 'PCa部材が完成品で届き、ラフターで吊り込まれる。現場加工の束は出ない';
+      if (PARAMS.frame !== 'S' && PARAMS.method !== 'pca' && t > 9 && t < 14) return '型枠は材料の山から建て込み、配筋は束から組み上げる。実体は打設で生まれる';
+      if (anyScaffoldBusy(t) && t < EST_DAYS * 0.5) return '鳶が外部足場を組立中 — 足場は外装より数段先に立つ';
+      var u02 = U(0, 2);
+      if (u02 && u02.stages.interior && stageProg(u02.stages.interior, t, true) > 0 && stageProg(u02.stages.interior, t, true) < 1 && t > EST_DAYS * 0.35 && t < EST_DAYS * 0.55)
+        return '搬入遅れ — 1F東工区の内装材だけが遅れている';
+      if (t >= BACKFILL.from && t < BACKFILL.to + 3) return '埋め戻し・転圧 — 基礎の周りの地面が戻っていく';
+      if (t >= 5 && t < 10) return '生コン車が一台ずつ来て基礎を打設 — 型枠は材料の山から建て込まれる';
+      if (t >= 10 && t < 12) return 'ラフタークレーンが入って躯体の建方が始まった';
+      if (t >= TOTAL_DAYS - 3) return '竣工が見えてきた';
+      return '';
+    }
+
+    /* ---------- 描画セットアップ ---------- */
+    var cv = document.getElementById('cv');
+    var ctx = cv.getContext('2d');
+    var stageEl = document.getElementById('stage');
+    var TW = 42, TH = 21, FLOOR_H = 30, FOUND_H = 6;
+    var WORLD_W = 780, WORLD_H = 460;
+    var view = { s: 1, tx: 0, ty: 0, w: 0, h: 0, dpr: 1 };
+
+    var SITE = { x0: 1, y0: 1, x1: 16, y1: 12 };
+    var BLD = { x0: 4.5, y0: 3.5, x1: 13.5, y1: 9.5 };
+    var ZONE_X = [4.5, 7.5, 10.5, 13.5];
+    /* 敷地形状：輪郭ポリゴン。南辺（y=12）にゲートの開口を持つ */
+    function sitePolygon() {
+      if (PARAMS.site === 'trap') return [[2.5, 1], [14.5, 1], [16, 12], [1, 12]];
+      if (PARAMS.site === 'L') return [[4, 1], [16, 1], [16, 12], [1, 12], [1, 4.5], [4, 4.5]];
+      return [[1, 1], [16, 1], [16, 12], [1, 12]];
+    }
+    var GATE = { x0: 7.6, x1: 10.4, y: 12 }; // 南辺のゲート開口
+
+    function resize() {
+      var r = stageEl.getBoundingClientRect();
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Math.max(1, Math.round(r.width * dpr));
+      cv.height = Math.max(1, Math.round(r.height * dpr));
+      view.w = r.width; view.h = r.height;
+      view.s = Math.min(r.width / WORLD_W, r.height / WORLD_H);
+      view.tx = (r.width - WORLD_W * view.s) / 2;
+      view.ty = (r.height - WORLD_H * view.s) / 2;
+      view.dpr = dpr;
+    }
+    window.addEventListener('resize', resize);
+
+    /* ---------- 4方向回転 ---------- */
+    var ROT = 0;
+    var RCX = 8.75, RCY = 6.5;
+    function rotXY(x, y) {
+      var dx = x - RCX, dy = y - RCY;
+      if (ROT === 0) return [x, y];
+      if (ROT === 1) return [RCX + dy, RCY - dx];
+      if (ROT === 2) return [RCX - dx, RCY - dy];
+      return [RCX - dy, RCY + dx];
+    }
+    var OX = 343, OY = 60;
+    function P(x, y, z) {
+      var r = rotXY(x, y);
+      return [OX + (r[0] - r[1]) * TW / 2, OY + (r[0] + r[1]) * TH / 2 - (z || 0)];
+    }
+    function worldToScreen(x, y, z) {
+      var p = P(x, y, z);
+      return [view.tx + p[0] * view.s, view.ty + p[1] * view.s];
+    }
+    function poly(pts, fill, stroke, alpha) {
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+      ctx.closePath();
+      if (fill) {
+        ctx.globalAlpha = alpha == null ? 1 : alpha;
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+      if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+    function shade(hex, amt) {
+      var n = parseInt(hex.slice(1), 16);
+      var r = Math.max(0, Math.min(255, (n >> 16) + amt));
+      var g = Math.max(0, Math.min(255, ((n >> 8) & 255) + amt));
+      var b = Math.max(0, Math.min(255, (n & 255) + amt));
+      return 'rgb(' + r + ',' + g + ',' + b + ')';
+    }
+    function mixHex(h1, h2, f) {
+      var a = parseInt(h1.slice(1), 16), b = parseInt(h2.slice(1), 16);
+      var r = Math.round((a >> 16) + ((b >> 16) - (a >> 16)) * f);
+      var g = Math.round(((a >> 8) & 255) + (((b >> 8) & 255) - ((a >> 8) & 255)) * f);
+      var bl = Math.round((a & 255) + ((b & 255) - (a & 255)) * f);
+      return 'rgb(' + r + ',' + g + ',' + bl + ')';
+    }
+    function drawBox(x0, y0, x1, y1, z0, z1, colors, opt) {
+      opt = opt || {};
+      var aTop = opt.aTop == null ? 1 : opt.aTop;
+      var aE = opt.aE == null ? 0.92 : opt.aE;
+      var aS = opt.aS == null ? 0.72 : opt.aS;
+      var edge = 'rgba(30,40,50,0.22)';
+      var cE = colors.east, cS = colors.south;
+      var cW = colors.west || shade(colors.east, -28);
+      var cN = colors.north || shade(colors.south, -28);
+      var right, front;
+      if (ROT === 0) { right = ['px', cE, aE]; front = ['py', cS, aS]; }
+      else if (ROT === 1) { right = ['py', cS, aE]; front = ['nx', cW, aS]; }
+      else if (ROT === 2) { right = ['nx', cW, aE]; front = ['ny', cN, aS]; }
+      else { right = ['ny', cN, aE]; front = ['px', cE, aS]; }
+      function face(kind) {
+        if (kind === 'px') return [P(x1, y0, z1), P(x1, y1, z1), P(x1, y1, z0), P(x1, y0, z0)];
+        if (kind === 'nx') return [P(x0, y1, z1), P(x0, y0, z1), P(x0, y0, z0), P(x0, y1, z0)];
+        if (kind === 'py') return [P(x0, y1, z1), P(x1, y1, z1), P(x1, y1, z0), P(x0, y1, z0)];
+        return [P(x1, y0, z1), P(x0, y0, z1), P(x0, y0, z0), P(x1, y0, z0)];
+      }
+      poly(face(right[0]), right[1], edge, right[2]);
+      poly(face(front[0]), front[1], edge, front[2]);
+      var top = [P(x0, y0, z1), P(x1, y0, z1), P(x1, y1, z1), P(x0, y1, z1)];
+      poly(top, colors.top, edge, aTop);
+      return top;
+    }
+
+    /* ---------- 状態 ---------- */
+    var day = 0;
+    var playing = false;
+    var speed = 1;
+    var ghostOn = true;
+    var selected = null;
+    var hover = null;
+    var hitPolys = [];
+    var lastTs = 0;
+    var sliderActive = false;
+
+    /* ---------- 階フォーカス / 屋根透過 ---------- */
+    var focusMode = 'auto';
+    var roofMode = 'auto';
+    var effFocus = null;
+    var fadeFloor = [1, 1, 1];
+    var fadeWall = [1, 1, 1];
+    var fadeRoof = 1;
+    var fadeSite = 1;
+    var G_ALPHA = 1, G_EXTRA = 1;
+    var G_REBAR_FRAC = 1;
+    var REBAR_LEAD = 0.35;
+
+    function computeFocus(t) {
+      if (focusMode === 'all') return null;
+      if (focusMode !== 'auto') return focusMode;
+      var best = null, bestScore = 0;
+      for (var f = 0; f < FLOORS; f++) {
+        var score = 0;
+        for (var i = 0; i < units.length; i++) {
+          var u = units[i];
+          if (u.f !== f) continue;
+          var ep = stageProg(u.stages.equip, t, true);
+          if (ep > 0 && ep < 1) score += 1.5;
+          if (u.stages.interior) {
+            var ip = stageProg(u.stages.interior, t, true);
+            if (ip > 0 && ip < 1) score += 2;
+          }
+        }
+        if (score > bestScore) { bestScore = score; best = f; }
+      }
+      return best;
+    }
+    function updateFades(dt) {
+      effFocus = computeFocus(day);
+      var k = Math.min(1, dt * 4.5);
+      for (var f = 0; f < FLOORS; f++) {
+        var tFloor = (effFocus === null || f === effFocus) ? 1 : 0;
+        var tWall = (effFocus === f) ? 0.20 : 1;
+        fadeFloor[f] += (tFloor - fadeFloor[f]) * k;
+        fadeWall[f] += (tWall - fadeWall[f]) * k;
+      }
+      var tRoof = roofMode === 'ghost' ? 0.13
+        : roofMode === 'solid' ? 1
+        : (effFocus === null ? 1 : effFocus === FLOORS - 1 ? 0.13 : 0);
+      fadeRoof += (tRoof - fadeRoof) * k;
+      var tSite = effFocus === null ? 1 : 0.4;
+      fadeSite += (tSite - fadeSite) * k;
+    }
+
+    /* ---------- 1日のリズム ---------- */
+    var TOD_LEN = 11000;
+    function todInfo() {
+      var p = (performance.now() % TOD_LEN) / TOD_LEN;
+      function band(a, b, w) {
+        if (p < a - w || p > b + w) return 0;
+        if (p >= a && p <= b) return 1;
+        if (p < a) return (p - (a - w)) / w;
+        return 1 - (p - b) / w;
+      }
+      return {
+        p: p,
+        gather: band(0.0, 0.10, 0.035),
+        rest: band(0.45, 0.55, 0.04),
+        yurei: band(0.90, 1.0, 0.03)
+      };
+    }
+    /* 集合・休憩の場所は仮設事務所（西フェンス際）の前。車両動線（南の縦ラインと
+       南レーン）には被らない位置に置く */
+    var OFFICE = { x0: 1.25, y0: 4.4, x1: 2.95, y1: 7.6 };
+    function blendPos(wx, wy, slotIdx, tod) {
+      var tx = wx, ty = wy, k = 0;
+      if (tod.gather > 0) {
+        tx = 3.15 + (slotIdx % 4) * 0.42; ty = 5.05 + Math.floor(slotIdx / 4) * 0.5;
+        k = tod.gather;
+      } else if (tod.yurei > 0) {
+        tx = 3.15 + (slotIdx % 4) * 0.42; ty = 5.05 + Math.floor(slotIdx / 4) * 0.5;
+        k = tod.yurei;
+      } else if (tod.rest > 0) {
+        tx = 3.15 + (slotIdx % 4) * 0.45; ty = 7.15 + Math.floor(slotIdx / 4) * 0.45;
+        k = tod.rest;
+      }
+      if (k <= 0) return [wx, wy];
+      var s = k * k * (3 - 2 * k);
+      return [wx + (tx - wx) * s, wy + (ty - wy) * s];
+    }
+
+    /* ---------- 立入禁止ゾーン（人配置の除外） ----------
+       柵が描かれる矩形をそのまま登録し、作業員・地面の作業員・巡回する担当者・
+       足場の地上員すべての配置をこの外へ押し出す。floor: -1=地上, 0..=その階の床 */
+    var NOENTRY = [];
+    function computeNoEntry(t) {
+      NOENTRY = [];
+      for (var i = 0; i < units.length; i++) {
+        var u = units[i];
+        var x0 = ZONE_X[u.z], x1 = ZONE_X[u.z + 1];
+        var frameP = stageProg(u.stages.steel, t, true);
+        if (u.f === 0 && frameP > 0 && frameP < 1)
+          NOENTRY.push({ x0: x0 - 0.1, x1: x1 + 0.1, y0: BLD.y1 - 0.05, y1: BLD.y1 + 0.95, floor: -1 }); // 作業直下
+        var extP = stageProg(u.stages.exterior, t, true);
+        if (extP > 0 && extP < 1)
+          NOENTRY.push({ x0: x0 - 0.1, x1: x1 + 0.1, y0: BLD.y1 + 0.25, y1: BLD.y1 + 1.15, floor: -1 }); // 上下作業の直下
+        if (u.atrium && u.f >= 1) { // 吹抜け周り（下階の床の上に柵）
+          var below = U(u.f - 1, u.z);
+          if (below && floorState(below, t).state === 'done')
+            NOENTRY.push({ x0: x0 + 0.05, x1: x1 - 0.05, y0: BLD.y0 + 0.05, y1: BLD.y1 - 0.05, floor: u.f });
+        }
+      }
+    }
+    function pushOut(x, y, floor) {
+      for (var i = 0; i < NOENTRY.length; i++) {
+        var r = NOENTRY[i];
+        if (r.floor !== floor) continue;
+        if (x > r.x0 && x < r.x1 && y > r.y0 && y < r.y1) {
+          // 一番近い辺の外へ押し出す
+          var dl = x - r.x0, dr = r.x1 - x, dn = y - r.y0, ds = r.y1 - y;
+          var m = Math.min(dl, dr, dn, ds);
+          if (m === dl) x = r.x0 - 0.18;
+          else if (m === dr) x = r.x1 + 0.18;
+          else if (m === dn) y = r.y0 - 0.18;
+          else y = r.y1 + 0.18;
+        }
+      }
+      return [x, y];
+    }
+
+    /* ---------- 会話の話者位置 ---------- */
+    var G_POS = { sup: null, mgr: null, insp: null, fore: {}, work: null, lift: null, office: null };
+
+    /* ---------- シーン描画 ---------- */
+    function draw() {
+      var t = day;
+      ctx.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
+      var sky = ctx.createLinearGradient(0, 0, 0, view.h);
+      sky.addColorStop(0, '#a8d4ea');
+      sky.addColorStop(1, '#dff0f7');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, view.w, view.h);
+      ctx.translate(view.tx, view.ty);
+      ctx.scale(view.s, view.s);
+      hitPolys = [];
+      G_POS.lift = null;
+      computeNoEntry(t);
+
+      drawScene(t);
+
+      if ((t >= RAIN.from && t < RAIN.to) || (t >= RAIN2.from && t < RAIN2.to)) drawRain();
+
+      ctx.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
+      var cx = view.w - 34, cy = 34;
+      ctx.beginPath(); ctx.arc(cx, cy, 17, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fill();
+      ctx.strokeStyle = 'rgba(30,50,70,0.35)'; ctx.stroke();
+      var na = -Math.PI / 2 - ROT * Math.PI / 2;
+      var nx2 = cx + Math.cos(na) * 11, ny2 = cy + Math.sin(na) * 11;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(nx2, ny2);
+      ctx.strokeStyle = '#d64545'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#17303f';
+      ctx.font = '700 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('N', cx + Math.cos(na) * 19, cy + Math.sin(na) * 19 + 4);
+    }
+
+    function drawRain() {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(70,120,170,0.5)';
+      ctx.lineWidth = 1.2;
+      var now = performance.now() / 1000;
+      ctx.beginPath();
+      for (var i = 0; i < 46; i++) {
+        var x = hash(i * 3.3) * WORLD_W;
+        var y = (hash(i * 7.7) * WORLD_H + now * 260 * (0.7 + hash(i))) % WORLD_H;
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 4, y + 13);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawScene(t) {
+      G_ALPHA = 1; G_EXTRA = 1;
+      poly([P(-1.5, -2.5, 0), P(19, -2.5, 0), P(19, 15.5, 0), P(-1.5, 15.5, 0)], '#9fbf8d');
+      poly([P(-1.5, 12.9, 0), P(19, 12.9, 0), P(19, 15.5, 0), P(-1.5, 15.5, 0)], '#7c858e');
+      poly([P(-1.3, 14.1, 0), P(18.8, 14.1, 0), P(18.8, 14.35, 0), P(-1.3, 14.35, 0)], 'rgba(255,255,255,0.5)');
+      var sp = sitePolygon();
+      var spts = [];
+      for (var si = 0; si < sp.length; si++) spts.push(P(sp[si][0], sp[si][1], 0));
+      poly(spts, '#cdbb9d', 'rgba(90,70,40,0.25)', fadeSite);
+
+      drawYard(t);
+
+      drawHouse(0.2, -2.4, 2.6, 1.9, '#e8e2d4');
+      drawHouse(15.2, -2.6, 2.8, 2.0, '#dde4ea');
+      drawHouse(18.6, 2.5, 2.4, 2.6, '#ead9c8');
+      drawTree(14.8, -1.2); drawTree(-0.6, 4.5); drawTree(18.9, 6.5);
+
+      drawEarthworks(t);
+
+      drawFenceBack();
+      drawRoutes(t);
+      drawOffice(t);
+
+      var ordered = units.slice().sort(function (a, b) { return (a.f - b.f) || (a.z - b.z); });
+      for (var i = 0; i < ordered.length; i++) drawUnit(ordered[i], t);
+      G_ALPHA = 1; G_EXTRA = 1;
+
+      drawEV(t);
+
+      if (units.length && stageProg(units[0].stages.steel, t, true) <= 0 && effFocus === null) drawGroundCrew(t);
+
+      drawMixerTrucks(t);
+      drawRoughCranes(t);
+      drawBackfillMachines(t);
+      drawPeopleGlobal(t);
+
+      drawFence();
+    }
+    /* 搬入動線：ゲート→建物、ゲート→資材エリア。事務所や置場が
+       この線を塞いでいないことが絵で確認できる */
+    function drawRoutes(t) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(37,99,235,0.55)';
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      var a = P(9, 12.6, 0.1), b = P(9, 10.55, 0.1);
+      ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+      var c = P(9, 11.55, 0.1), d = P(14.6, 11.55, 0.1);
+      ctx.moveTo(c[0], c[1]); ctx.lineTo(d[0], d[1]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(37,99,235,0.85)';
+      ctx.font = '600 8.5px sans-serif'; ctx.textAlign = 'center';
+      var lp = P(9.35, 11.0, 0);
+      ctx.fillText('搬入動線', lp[0], lp[1]);
+      var lp2 = P(11.8, 11.42, 0);
+      ctx.fillText('ゲート→資材エリア', lp2[0], lp2[1]);
+      ctx.restore();
+    }
+
+    function drawHouse(x, y, w, d, color) {
+      drawBox(x, y, x + w, y + d, 0, 17, { top: shade(color, -30), east: shade(color, -18), south: shade(color, -6) }, { aS: 0.95, aE: 0.95 });
+      drawBox(x + 0.25, y + 0.25, x + w - 0.25, y + d - 0.25, 17, 21, { top: '#8a5a4a', east: '#77503f', south: '#83564a' }, { aS: 0.95, aE: 0.95 });
+    }
+    function drawTree(x, y) {
+      var b = P(x, y, 0), tp = P(x, y, 9);
+      ctx.strokeStyle = '#6f4a29'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(tp[0], tp[1]); ctx.stroke();
+      ctx.beginPath(); ctx.arc(tp[0], tp[1] - 3, 7, 0, Math.PI * 2);
+      ctx.fillStyle = '#5e9950'; ctx.fill();
+      ctx.beginPath(); ctx.arc(tp[0] + 5, tp[1] + 1, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#6cab5c'; ctx.fill();
+    }
+    function drawMound(x, y, p) {
+      if (p <= 0) return;
+      var b = P(x, y, 0), tp = P(x, y, 6 * p);
+      poly([P(x - 0.9, y + 0.7, 0), P(x + 0.9, y + 0.7, 0), tp], '#a97c50');
+      poly([P(x - 0.9, y + 0.7, 0), tp, P(x, y - 0.8, 0)], '#8a613c');
+    }
+
+    /* ---------- 土工事・基礎 ---------- */
+    function drawEarthworks(t) {
+      var earthP = stageProg(EARTH, t, true);
+      var foundP = stageProg(FOUND, t, true);
+      var bf = prog(t, BACKFILL.from, BACKFILL.to);
+      if (earthP > 0) {
+        var digA = (0.25 + 0.55 * earthP) * (1 - bf * 0.88) * fadeSite;
+        poly([P(BLD.x0, BLD.y0, 0), P(BLD.x1, BLD.y0, 0), P(BLD.x1, BLD.y1, 0), P(BLD.x0, BLD.y1, 0)],
+          'rgba(122,84,50,' + Math.max(0, digA) + ')');
+        if (bf < 1) {
+          poly([P(BLD.x0, BLD.y1, 0), P(BLD.x1, BLD.y1, 0), P(BLD.x1 - 0.3, BLD.y1 - 0.4, 2.5 * earthP), P(BLD.x0 + 0.3, BLD.y1 - 0.4, 2.5 * earthP)],
+            'rgba(140,100,58,' + (0.55 * (1 - bf) * fadeSite) + ')');
+          poly([P(BLD.x1, BLD.y0, 0), P(BLD.x1, BLD.y1, 0), P(BLD.x1 - 0.3, BLD.y1 - 0.4, 2.5 * earthP), P(BLD.x1 - 0.3, BLD.y0 + 0.4, 2.5 * earthP)],
+            'rgba(110,76,42,' + (0.5 * (1 - bf) * fadeSite) + ')');
+          drawRetaining(BLD.x0, BLD.y0, BLD.x1, BLD.y0, earthP * (1 - bf));
+          drawRetainingY(BLD.x0, BLD.y0, BLD.x0, BLD.y1, earthP * (1 - bf));
+        }
+        if (earthP < 1 || foundP < 1) {
+          drawMound(14.6, 5.2, earthP);
+          drawMound(15.3, 7.4, earthP * 0.8);
+        }
+        if (selected === 'ground' || hover === 'ground') {
+          poly([P(BLD.x0, BLD.y0, 0), P(BLD.x1, BLD.y0, 0), P(BLD.x1, BLD.y1, 0), P(BLD.x0, BLD.y1, 0)], null, '#ffffff');
+        }
+        hitPolys.push({ poly: [P(BLD.x0, BLD.y0, 0), P(BLD.x1, BLD.y0, 0), P(BLD.x1, BLD.y1, 0), P(BLD.x0, BLD.y1, 0)], target: 'ground' });
+      }
+      if (foundP > 0 || stageProg(FOUND, t, false) > 0) {
+        G_ALPHA = fadeSite;
+        for (var fi = 0; fi < FOUND.items.length; fi++) {
+          var fit = FOUND.items[fi];
+          if (fit.act <= t) drawItem(fit, 0, 'solid');
+          else if (fit.k === 'fslab' && fit.act - t < 1.1) drawFormwork(fit, clamp01(1 - (fit.act - t) / 1.1));
+          else if (fit.plan <= t && ghostOn) drawItem(fit, 0, 'ghost');
+        }
+        G_ALPHA = 1;
+        drawSparks(FOUND, 0, t);
+        drawFormStack(t);
+      }
+      if (bf > 0 && bf < 1) {
+        poly([P(BLD.x0 - 0.7, BLD.y1, 0), P(BLD.x1 + 0.7, BLD.y1, 0), P(BLD.x1 + 0.7, BLD.y1 + 0.7, 0), P(BLD.x0 - 0.7, BLD.y1 + 0.7, 0)],
+          'rgba(160,130,90,' + (0.5 * bf * fadeSite) + ')');
+      }
+    }
+    function drawRetaining(x0, y0, x1, y1, h01) {
+      if (h01 <= 0.03) return;
+      var h = 5 * h01;
+      poly([P(x0, y0, 0), P(x1, y1, 0), P(x1, y1, h), P(x0, y0, h)], 'rgba(105,110,116,' + (0.85 * fadeSite) + ')');
+      ctx.save();
+      ctx.strokeStyle = 'rgba(60,64,70,0.55)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (var x = x0 + 0.35; x < x1; x += 0.35) {
+        var a = P(x, y0, 0), b = P(x, y0, h);
+        ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+    function drawRetainingY(x0, y0, x1, y1, h01) {
+      if (h01 <= 0.03) return;
+      var h = 5 * h01;
+      poly([P(x0, y0, 0), P(x1, y1, 0), P(x1, y1, h), P(x0, y0, h)], 'rgba(96,101,107,' + (0.85 * fadeSite) + ')');
+      ctx.save();
+      ctx.strokeStyle = 'rgba(60,64,70,0.55)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (var y = y0 + 0.35; y < y1; y += 0.35) {
+        var a = P(x0, y, 0), b = P(x0, y, h);
+        ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+    function drawBackfillMachines(t) {
+      var bf = prog(t, BACKFILL.from, BACKFILL.to);
+      if (bf <= 0 || bf >= 1 || effFocus !== null) return;
+      var cyc = (performance.now() / 1000 % 7) / 7;
+      var s = cyc < 0.5 ? cyc * 2 : 2 - cyc * 2;
+      var x = 5.2 + s * 7.4, y = BLD.y1 + 0.85;
+      var pp = pushOut(x, y, -1); x = pp[0]; y = Math.max(y, pp[1]);
+      drawBox(x - 0.55, y - 0.3, x + 0.55, y + 0.3, 1.1, 3.1,
+        { top: '#e8b93c', east: '#c99a26', south: '#dbad33' }, { aS: 0.95, aE: 0.95 });
+      var rp = P(x, y + 0.34, 1.0);
+      ctx.beginPath(); ctx.arc(rp[0], rp[1], 4.2, 0, Math.PI * 2);
+      ctx.fillStyle = '#5b6066'; ctx.fill();
+      var lp = P(x, y + 0.5, 0);
+      ctx.fillStyle = 'rgba(23,48,63,0.75)';
+      ctx.font = '600 9px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('転圧', lp[0], lp[1] + 11);
+    }
+
+    /* ---------- 仮囲い：敷地ポリゴンに沿って。南辺だけゲート開口を空ける ---------- */
+    function fenceSeg(x0, y0, x1, y1, h) {
+      var a = P(x0, y0, 0), b = P(x1, y1, 0), a2 = P(x0, y0, h), b2 = P(x1, y1, h);
+      poly([a, b, b2, a2], 'rgba(225,232,236,0.35)');
+      ctx.strokeStyle = 'rgba(240,244,246,0.9)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(a2[0], a2[1]); ctx.lineTo(b2[0], b2[1]); ctx.stroke();
+    }
+    function drawFenceBack() {
+      var H = 9, sp = sitePolygon();
+      for (var i = 0; i < sp.length; i++) {
+        var a = sp[i], b = sp[(i + 1) % sp.length];
+        if (a[1] === GATE.y && b[1] === GATE.y) continue; // 南辺は drawFence で
+        fenceSeg(a[0], a[1], b[0], b[1], H);
+      }
+    }
+    function drawFence() {
+      var H = 9, sp = sitePolygon();
+      for (var i = 0; i < sp.length; i++) {
+        var a = sp[i], b = sp[(i + 1) % sp.length];
+        if (!(a[1] === GATE.y && b[1] === GATE.y)) continue;
+        var xa = Math.min(a[0], b[0]), xb = Math.max(a[0], b[0]);
+        fenceSeg(xa, GATE.y, GATE.x0, GATE.y, H);
+        fenceSeg(GATE.x1, GATE.y, xb, GATE.y, H);
+        fenceSeg(GATE.x0, GATE.y, GATE.x0 - 0.6, GATE.y + 1.4, H);
+        fenceSeg(GATE.x1, GATE.y, GATE.x1 + 0.6, GATE.y + 1.2, H);
+      }
+      var g = P(9, SITE.y1 + 0.4, 0);
+      ctx.fillStyle = 'rgba(23,48,63,0.75)';
+      ctx.font = '600 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ゲート', g[0], g[1] + 12);
+    }
+    /* 仮設事務所：着工時に西フェンス際の隅へ設置され、最後まで常駐する。
+       フォーカスやフェーズで消えることはない。車両動線（南）・人の動線の外。 */
+    function drawOffice(t) {
+      var o = OFFICE;
+      drawBox(o.x0, o.y0, o.x1, o.y1, 0, 8.5,
+        { top: '#e9edf1', east: '#c3ccd4', south: '#d8dfe6' }, { aTop: 0.98, aS: 0.97, aE: 0.97 });
+      drawBox(o.x0, o.y0, o.x1, o.y1, 8.5, 9.6,
+        { top: '#7a8794', east: '#5d6873', south: '#6b7681' }, { aTop: 0.98, aS: 0.97, aE: 0.97 });
+      drawBox(o.x1 - 0.06, o.y0 + 1.2, o.x1, o.y0 + 1.9, 0.4, 5.4,
+        { top: '#8fb4cf', east: '#7ea9c6', south: '#8fb4cf' }, { aTop: 0.95, aS: 0.95, aE: 0.95 }); // 東面のドア
+      var lp = P((o.x0 + o.x1) / 2, o.y1 + 0.1, 0);
+      ctx.fillStyle = 'rgba(23,48,63,0.85)';
+      ctx.font = '700 9.5px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('現場事務所', lp[0], lp[1] + 12);
+      // 休憩所（ベンチ）：事務所の南脇
+      drawBox(o.x0 + 0.2, o.y1 + 0.35, o.x0 + 0.7, o.y1 + 0.7, 0, 1.1, { top: '#b98d5f', east: '#96703f', south: '#a87c4c' }, { aTop: 1, aS: 1, aE: 1 });
+      G_POS.office = [(o.x0 + o.x1) / 2, (o.y0 + o.y1) / 2, 0];
+    }
+
+    /* ---------- 部材の描画 ---------- */
+    function itemColors(it) {
+      switch (it.k) {
+        case 'col': case 'beam':
+          return { top: '#c07a4e', east: '#96592f', south: '#a9653a' };
+        case 'sbeam':
+          return { top: '#c98f61', east: '#a06c3e', south: '#b37c48' };
+        case 'plate':
+          return { top: '#c6ccd4', east: '#9aa1ab', south: '#aab0b9' };
+        case 'form': // 型枠は木の色
+          return { top: '#d9b57e', east: '#b8935a', south: '#c7a268' };
+        case 'conc': // 打設で生まれるコンクリート
+          return { top: '#cfccc2', east: '#a9a698', south: '#bcb9ad' };
+        case 'cage': // 配筋かご
+          return { top: '#8a5a36', east: '#6e4525', south: '#7a4e2c' };
+        case 'pccol': case 'pcbeam': case 'pcslab': // PCaは明るいプレキャスト色
+          return { top: '#e3e0d5', east: '#bdb9aa', south: '#cfccc0' };
+        case 'joint': // 接合部（目地・グラウト）
+          return { top: '#7d7466', east: '#5d564b', south: '#6b6357' };
+        case 'foot':
+          return { top: '#cfc8ba', east: '#aaa091', south: '#bcb3a2' };
+        case 'gbeam':
+          return { top: '#c4bdae', east: '#9d9687', south: '#afa697' };
+        case 'fslab': case 'found':
+          return { top: '#cac2b4', east: '#a89e90', south: '#bdb4a4' };
+        case 'panel':
+          return it.glass
+            ? { top: '#bcd9e8', east: '#8fb8cf', south: '#a5c9dc' }
+            : { top: '#d3d8c6', east: '#aeb69e', south: '#bfc7ae' };
+        case 'pipe': {
+          var c = TRADES[it.tr].color;
+          return { top: shade(c, 18), east: shade(c, -14), south: shade(c, 2) };
+        }
+        case 'fixture': {
+          var c2 = TRADES[it.tr].color;
+          return { top: shade(c2, 30), east: shade(c2, 2), south: shade(c2, 14) };
+        }
+        case 'board':
+          return { top: '#f4cfae', east: shade(TRADES.interior.color, -6), south: shade(TRADES.interior.color, 8) };
+        case 'tile':
+          return it.alt
+            ? { top: '#ead9bd', east: '#d8c6a4', south: '#e0d0b0' }
+            : { top: '#e2d5ba', east: '#cfbd97', south: '#d9c9a6' };
+        case 'sheet':
+          return { top: TRADES.roof.color, east: TRADES.roof.dark, south: shade(TRADES.roof.color, 8) };
+        case 'parapet':
+          return { top: '#7a838f', east: '#646c78', south: '#6d7582' };
+        case 'acunit':
+          return { top: '#d5dbe1', east: '#a7b0b9', south: '#bcc4cc' };
+        case 'cubicle':
+          return { top: '#8fa3b8', east: '#687d94', south: '#7b90a7' };
+        case 'evrail':
+          return { top: '#5b6169', east: '#3a3f46', south: '#484e57' };
+        case 'evcar':
+          return { top: '#e2e7ec', east: '#a9b2ba', south: '#c6ced5' };
+        case 'evdoor':
+          return { top: '#d3d9de', east: '#99a2ab', south: '#bcc3ca' };
+      }
+      return { top: '#ccc', east: '#aaa', south: '#bbb' };
+    }
+    function drawEVRail(it, zBase, mode) {
+      var z0 = zBase + it.dz0, z1 = zBase + it.dz1;
+      var cols = mode === 'ghost'
+        ? { top: '#6eaaff', east: '#6eaaff', south: '#6eaaff' }
+        : { top: '#5b6169', east: '#3a3f46', south: '#484e57' };
+      var o = mode === 'ghost'
+        ? { aTop: 0.30, aE: 0.20, aS: 0.14 }
+        : { aTop: G_ALPHA * G_EXTRA, aS: 0.92 * G_ALPHA * G_EXTRA, aE: 0.95 * G_ALPHA * G_EXTRA };
+      drawBox(it.x0, it.y0, it.x0 + 0.10, it.y1, z0, z1, cols, o);
+      drawBox(it.x1 - 0.10, it.y0, it.x1, it.y1, z0, z1, cols, o);
+    }
+    function drawEVCar(it, zBase, mode, zOff) {
+      var z0 = zBase + it.dz0 + zOff, z1 = zBase + it.dz1 + zOff;
+      if (mode === 'ghost') {
+        drawBox(it.x0, it.y0, it.x1, it.y1, z0, z1,
+          { top: '#6eaaff', east: '#6eaaff', south: '#6eaaff' }, { aTop: 0.30, aE: 0.20, aS: 0.14 });
+        return;
+      }
+      drawBox(it.x0, it.y0, it.x1, it.y1, z0, z1, itemColors(it),
+        { aTop: G_ALPHA * G_EXTRA, aS: 0.95 * G_ALPHA * G_EXTRA, aE: 0.97 * G_ALPHA * G_EXTRA });
+      if (ROT === 0 || ROT === 1) {
+        ctx.save();
+        ctx.globalAlpha = 0.55 * G_ALPHA * G_EXTRA;
+        ctx.strokeStyle = '#5d666e'; ctx.lineWidth = 1.1;
+        var cxm = (it.x0 + it.x1) / 2;
+        var a1 = P(cxm, it.y1 + 0.01, z0 + 1), b1 = P(cxm, it.y1 + 0.01, z1 - 1.5);
+        ctx.beginPath(); ctx.moveTo(a1[0], a1[1]); ctx.lineTo(b1[0], b1[1]); ctx.stroke();
+        var a2 = P(it.x0 + 0.03, it.y1 + 0.01, z1 - 1.5), b2 = P(it.x1 - 0.03, it.y1 + 0.01, z1 - 1.5);
+        ctx.beginPath(); ctx.moveTo(a2[0], a2[1]); ctx.lineTo(b2[0], b2[1]); ctx.stroke();
+        ctx.restore();
+      }
+    }
+    function drawItem(it, zBase, mode, zOff) {
+      if (it.k === 'pour') return;
+      if (it.k === 'rebar') { drawRebar(it, zBase, mode, zOff || 0); return; }
+      if (it.k === 'brace') { drawBrace(it, zBase, mode); return; }
+      if (it.k === 'evrail') { drawEVRail(it, zBase, mode); return; }
+      if (it.k === 'evcar') { drawEVCar(it, zBase, mode, zOff || 0); return; }
+      if (it.k === 'scaf') return;
+      var z0 = zBase + it.dz0 + (zOff || 0), z1 = zBase + it.dz1 + (zOff || 0);
+      if (mode === 'ghost') {
+        var top = drawBox(it.x0, it.y0, it.x1, it.y1, z0, z1,
+          { top: '#6eaaff', east: '#6eaaff', south: '#6eaaff' }, { aTop: 0.30, aE: 0.20, aS: 0.14 });
+        ctx.save();
+        ctx.strokeStyle = 'rgba(70,130,230,0.8)';
+        ctx.setLineDash([3, 3]);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(top[0][0], top[0][1]);
+        for (var i = 1; i < 4; i++) ctx.lineTo(top[i][0], top[i][1]);
+        ctx.closePath(); ctx.stroke();
+        ctx.restore();
+        return;
+      }
+      var opt = { aTop: G_ALPHA * G_EXTRA, aS: 0.92 * G_ALPHA * G_EXTRA, aE: 0.95 * G_ALPHA * G_EXTRA };
+      if (it.k === 'cage') { opt.aTop *= 0.85; opt.aS *= 0.85; opt.aE *= 0.85; }
+      drawBox(it.x0, it.y0, it.x1, it.y1, z0, z1, itemColors(it), opt);
+    }
+    function drawBrace(it, zBase, mode) {
+      var a = P(it.x0, it.y0, zBase + it.dz0), b = P(it.x1, it.y1, zBase + it.dz1);
+      ctx.save();
+      if (mode === 'ghost') {
+        ctx.strokeStyle = 'rgba(70,130,230,0.8)';
+        ctx.setLineDash([3, 3]);
+        ctx.globalAlpha = 0.7;
+      } else {
+        ctx.strokeStyle = '#8f5130';
+        ctx.globalAlpha = G_ALPHA * G_EXTRA;
+      }
+      ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      ctx.restore();
+    }
+    function drawRebar(it, zBase, mode, zOff) {
+      var z = zBase + it.dz1 + zOff;
+      var ghostR = mode === 'ghost';
+      var fr = ghostR ? 1 : G_REBAR_FRAC;
+      var corners = [P(it.x0, it.y0, z), P(it.x1, it.y0, z), P(it.x1, it.y1, z), P(it.x0, it.y1, z)];
+      poly(corners, ghostR ? '#6eaaff' : '#8a5a36', null, (ghostR ? 0.16 : 0.22 * (0.3 + 0.7 * fr)) * G_ALPHA * G_EXTRA);
+      ctx.save();
+      if (!ghostR) ctx.globalAlpha = G_ALPHA * G_EXTRA;
+      ctx.strokeStyle = ghostR ? 'rgba(70,130,230,0.9)' : '#6e4525';
+      ctx.lineWidth = ghostR ? 1 : 1.3;
+      if (ghostR) ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      var gi, ga, gb;
+      var maxGi = ghostR ? 3 : Math.max(0, Math.round(3 * fr));
+      for (gi = 0; gi <= maxGi; gi++) {
+        var gy = it.y0 + (it.y1 - it.y0) * gi / 3;
+        ga = P(it.x0, gy, z); gb = P(it.x1, gy, z);
+        ctx.moveTo(ga[0], ga[1]); ctx.lineTo(gb[0], gb[1]);
+        var gx = it.x0 + (it.x1 - it.x0) * gi / 3;
+        ga = P(gx, it.y0, z); gb = P(gx, it.y1, z);
+        ctx.moveTo(ga[0], ga[1]); ctx.lineTo(gb[0], gb[1]);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+    function drawStageItems(st, zBase, t) {
+      if (!st || !st.items) return;
+      for (var i = 0; i < st.items.length; i++) {
+        var it = st.items[i];
+        if (it.rmvA != null && t >= it.rmvA) continue; // 脱型・解体で消えた部材
+        if (it.act <= t) drawItem(it, zBase, 'solid');
+        else if (it.k === 'rebar' && it.act - t <= REBAR_LEAD) {
+          G_REBAR_FRAC = clamp01(1 - (it.act - t) / REBAR_LEAD);
+          drawItem(it, zBase, 'solid');
+          G_REBAR_FRAC = 1;
+        }
+      }
+    }
+    function drawStageItemsGhost(st, zBase, t) {
+      if (!st || !st.items) return;
+      if (G_ALPHA < 0.4) return;
+      for (var i = 0; i < st.items.length; i++) {
+        var it = st.items[i];
+        if (it.act > t && it.plan <= t) drawItem(it, zBase, 'ghost');
+      }
+    }
+    function drawSparks(st, zBase, t) {
+      if (!st || !st.items) return;
+      var now = performance.now() / 1000;
+      for (var i = 0; i < st.items.length; i++) {
+        var it = st.items[i];
+        var age = t - it.act;
+        if (age < 0 || age > 0.6) continue;
+        if (it.rmvA != null && t >= it.rmvA) continue;
+        var fade = 1 - age / 0.6;
+        for (var j = 0; j < it.sp.length; j++) {
+          var p = P(it.sp[j][0], it.sp[j][1], zBase + it.sp[j][2]);
+          var r = (3.5 + 2.5 * Math.sin(now * 10 + i * 1.3 + j)) * (0.6 + fade * 0.6);
+          ctx.save();
+          ctx.globalAlpha = 0.35 + 0.65 * fade;
+          ctx.strokeStyle = '#ffb400'; ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          for (var a = 0; a < 4; a++) {
+            var ang = a * Math.PI / 2 + 0.4;
+            ctx.moveTo(p[0] + Math.cos(ang) * r * 0.4, p[1] + Math.sin(ang) * r * 0.4);
+            ctx.lineTo(p[0] + Math.cos(ang) * r, p[1] + Math.sin(ang) * r);
+          }
+          ctx.stroke();
+          ctx.beginPath(); ctx.arc(p[0], p[1], 1.6, 0, Math.PI * 2);
+          ctx.fillStyle = '#fff3c4'; ctx.fill();
+          ctx.restore();
+        }
+      }
+    }
+
+    /* =========================================================
+       材料の3つの進み方
+       (a) 工場製品：ラフタークレーンが吊り込んで設置
+       (b) 現場加工型：材料の束/山が搬入され、現場の手で少しずつモノになる
+       (c) 流動型：生コン車が1台ずつ来て、1台分ずつ打設が進む
+       ========================================================= */
+    function drawRebarBundle(u, t, zBase) {
+      if (u.atrium) return;
+      var items = u.stages.steel.items || [];
+      var first = null, last = null, total = 0, used = 0, i, it;
+      for (i = 0; i < items.length; i++) {
+        it = items[i];
+        if (it.k !== 'rebar' && it.k !== 'cage') continue;
+        total++;
+        if (!first) first = it;
+        last = it;
+        if (it.act <= t) used += 1;
+        else if (it.act - t <= REBAR_LEAD) used += clamp01(1 - (it.act - t) / REBAR_LEAD);
+      }
+      if (!total || !first) return; // PCaでは束は出ない
+      if (t < first.act - 1.4 || t > last.act + 0.2) return;
+      var remain = 1 - used / total;
+      if (remain <= 0.02) return;
+      var bx0 = ZONE_X[u.z] + 0.25, by0 = BLD.y1 - 0.95, deckZ = zBase + FLOOR_H;
+      var h = 0.5 + 2.4 * remain;
+      drawBox(bx0, by0, bx0 + 2.1, by0 + 0.55, deckZ, deckZ + h,
+        { top: '#8a5a36', east: '#6e4525', south: '#7a4e2c' },
+        { aTop: G_ALPHA, aS: 0.95 * G_ALPHA, aE: 0.95 * G_ALPHA });
+      ctx.save();
+      ctx.globalAlpha = 0.55 * G_ALPHA;
+      ctx.strokeStyle = '#54371d';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (var s = 1; s <= 2; s++) {
+        var a = P(bx0 + 0.1, by0 + 0.55, deckZ + h * s / 3), b = P(bx0 + 2.0, by0 + 0.55, deckZ + h * s / 3);
+        ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+      }
+      ctx.stroke();
+      ctx.restore();
+      var lp = P(bx0 + 1.05, by0 + 0.62, deckZ);
+      ctx.fillStyle = 'rgba(23,48,63,0.75)';
+      ctx.font = '600 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('鉄筋の束', lp[0], lp[1] + 11);
+    }
+    function drawFormBundle(u, t, zBase) {
+      // RC/SRC：在来の型枠材は使う場所のそばに山で現れ、建て込みが進むと減る
+      if (u.atrium || PARAMS.method === 'pca') return;
+      var items = u.stages.steel.items || [];
+      var forms = [], i;
+      for (i = 0; i < items.length; i++) if (items[i].k === 'form') forms.push(items[i]);
+      if (!forms.length) return;
+      var first = forms[0], placed = 0;
+      for (i = 0; i < forms.length; i++) if (forms[i].act <= t) placed++;
+      if (t < first.act - 1.6 || placed >= forms.length) return;
+      var remain = 1 - placed / forms.length;
+      var bx0 = ZONE_X[u.z] + 0.2, by0 = BLD.y0 + 0.3, z = zBase;
+      var n = Math.max(1, Math.round(5 * remain));
+      var wood = { top: '#d9b57e', east: '#b8935a', south: '#c7a268' };
+      var opt = { aTop: G_ALPHA, aS: 0.95 * G_ALPHA, aE: 0.95 * G_ALPHA };
+      for (var j = 0; j < n; j++)
+        drawBox(bx0, by0, bx0 + 0.62, by0 + 0.5, z + j * 0.55, z + j * 0.55 + 0.5, wood, opt);
+      var lp = P(bx0 + 0.31, by0 + 0.62, z);
+      ctx.fillStyle = 'rgba(23,48,63,0.75)';
+      ctx.font = '600 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('型枠材の山', lp[0], lp[1] + 11);
+    }
+    function drawPipeBundle(u, t, zBase) {
+      if (u.atrium) return;
+      var st = u.stages.equip;
+      if (!st || !st.items) return;
+      var conc = st.items.filter(function (x) { return x.ph === 'conc'; });
+      if (!conc.length) return;
+      var placed = 0;
+      for (var i = 0; i < conc.length; i++) if (conc[i].act <= t) placed++;
+      if (placed <= 0 || placed >= conc.length) return;
+      var remain = 1 - placed / conc.length;
+      var bx0 = ZONE_X[u.z] + 0.3, by0 = BLD.y1 - 0.85, z = zBase + FLOOR_H;
+      var cols = { top: '#7d94a8', east: '#5b7286', south: '#6d869c' };
+      var opt = { aTop: G_ALPHA, aS: 0.95 * G_ALPHA, aE: 0.95 * G_ALPHA };
+      var n = Math.max(1, Math.round(3 * remain));
+      for (var j = 0; j < n; j++)
+        drawBox(bx0, by0, bx0 + 2.2, by0 + 0.34, z + Math.floor(j / 2) * 0.55, z + Math.floor(j / 2) * 0.55 + 0.5, cols, opt);
+    }
+    function drawFormwork(fit, frac) {
+      var wood = { top: '#d9b57e', east: '#b8935a', south: '#c7a268' };
+      var opt = { aTop: fadeSite, aS: 0.95 * fadeSite, aE: 0.95 * fadeSite };
+      var sides = Math.min(4, Math.floor(frac * 4) + 1);
+      if (sides >= 1) drawBox(fit.x0, fit.y1 - 0.14, fit.x1, fit.y1, 0, 5, wood, opt);
+      if (sides >= 2) drawBox(fit.x1 - 0.14, fit.y0, fit.x1, fit.y1, 0, 5, wood, opt);
+      if (sides >= 3) drawBox(fit.x0, fit.y0, fit.x1, fit.y0 + 0.14, 0, 5, wood, opt);
+      if (sides >= 4) drawBox(fit.x0, fit.y0, fit.x0 + 0.14, fit.y1, 0, 5, wood, opt);
+    }
+    function drawFormStack(t) {
+      var p = stageProg(FOUND, t, true);
+      var slabSoon = false;
+      for (var i = 0; i < units.length; i++) {
+        if (pourInfo(units[i], t).state === 'pouring') slabSoon = true;
+      }
+      if ((p <= 0 || p >= 1) && !slabSoon) return;
+      var n = slabSoon ? 4 : Math.max(1, Math.round(6 * (1 - p)));
+      var wood = { top: '#d9b57e', east: '#b8935a', south: '#c7a268' };
+      var opt = { aTop: fadeSite, aS: 0.95 * fadeSite, aE: 0.95 * fadeSite };
+      for (var j = 0; j < n; j++)
+        drawBox(14.04, 10.12, 14.6, 10.6, j * 0.55, j * 0.55 + 0.5, wood, opt);
+      var lp = P(14.32, 10.78, 0);
+      ctx.fillStyle = 'rgba(23,48,63,0.75)';
+      ctx.font = '600 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(slabSoon ? '型枠材（転用）' : '型枠材の山', lp[0], lp[1] + 11);
+    }
+
+    /* ---------- 生コン車 ---------- */
+    var TRUCK_EVENTS = null;
+    function truckEvents() {
+      if (TRUCK_EVENTS) return TRUCK_EVENTS;
+      var evs = [], i, j, k;
+      for (i = 0; i < FOUND.items.length; i++) {
+        var fit = FOUND.items[i];
+        if (fit.k !== 'fslab') continue;
+        evs.push({ s: fit.act - 0.85, e: fit.act, cx: (fit.x0 + fit.x1) / 2, slab: false, u: null });
+      }
+      for (j = 0; j < units.length; j++) {
+        var pit = pourItemOf(units[j]);
+        if (!pit) continue;
+        var wd = (pit.act - pit.aStart) / pit.trucks;
+        for (k = 0; k < pit.trucks; k++)
+          evs.push({ s: pit.aStart + k * wd, e: pit.aStart + (k + 1) * wd,
+            cx: (ZONE_X[units[j].z] + ZONE_X[units[j].z + 1]) / 2, slab: true, u: units[j] });
+      }
+      TRUCK_EVENTS = evs;
+      return evs;
+    }
+    function pathPos(pts, s) {
+      var lens = [], total = 0, i;
+      for (i = 0; i < pts.length - 1; i++) {
+        var dx = pts[i + 1][0] - pts[i][0], dy = pts[i + 1][1] - pts[i][1];
+        var L = Math.sqrt(dx * dx + dy * dy);
+        lens.push(L); total += L;
+      }
+      var d = s * total;
+      for (i = 0; i < lens.length; i++) {
+        if (d <= lens[i] || i === lens.length - 1) {
+          var f = lens[i] ? d / lens[i] : 0;
+          return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f];
+        }
+        d -= lens[i];
+      }
+      return pts[pts.length - 1];
+    }
+    function drawMixerTruck(x, y, pouring) {
+      drawBox(x - 1.15, y - 0.42, x + 1.15, y + 0.42, 0, 2.4,
+        { top: '#cfd6dd', east: '#a7b0b9', south: '#bcc4cc' }, { aS: 0.95, aE: 0.95 });
+      drawBox(x - 1.05, y - 0.34, x + 0.15, y + 0.34, 2.4, 5.4,
+        { top: '#eef1f4', east: '#c9d1d8', south: '#dde3e8' }, { aS: 0.95, aE: 0.95 });
+      drawBox(x + 0.3, y - 0.38, x + 1.1, y + 0.38, 2.4, 5.0,
+        { top: '#f0f3f6', east: '#d5dbe1', south: '#e4e9ed' }, { aS: 0.95, aE: 0.95 });
+      drawBox(x + 0.8, y - 0.39, x + 1.09, y + 0.39, 3.6, 4.9,
+        { top: '#9fc3dd', east: '#7ea9c6', south: '#8fb4cf' }, { aS: 0.95, aE: 0.95 });
+      if (pouring) {
+        var off = (performance.now() / 280) % 1;
+        var p1 = P(x - 0.95 + off * 0.95, y + 0.35, 5.1), p2 = P(x - 0.6 + off * 0.95, y - 0.35, 2.9);
+        ctx.save();
+        ctx.strokeStyle = '#8d99a4'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.stroke();
+        ctx.restore();
+      }
+      ctx.fillStyle = '#2c3136';
+      var w1 = P(x - 0.72, y + 0.44, 0.7), w2 = P(x + 0.72, y + 0.44, 0.7);
+      ctx.beginPath(); ctx.arc(w1[0], w1[1], 1.7, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(w2[0], w2[1], 1.7, 0, Math.PI * 2); ctx.fill();
+    }
+    function drawMixerTrucks(t) {
+      var evs = truckEvents();
+      for (var i = 0; i < evs.length; i++) {
+        var ev = evs[i];
+        if (t < ev.s || t >= ev.e) continue;
+        var ph = (t - ev.s) / (ev.e - ev.s);
+        var pts = [[9, 14.3], [9, 11.3], [ev.cx, 11.3], [ev.cx, 10.8]];
+        var pos, pouring = ph >= 0.22 && ph < 0.78;
+        if (ph < 0.22) pos = pathPos(pts, ph / 0.22);
+        else if (ph < 0.78) pos = pts[3];
+        else pos = pathPos(pts, 1 - (ph - 0.78) / 0.22);
+        drawMixerTruck(pos[0], pos[1], pouring);
+        if (ev.slab && pouring) {
+          drawBox(ev.cx + 0.7, 10.45, ev.cx + 1.3, 11.15, 0, 3.4,
+            { top: '#d8b13c', east: '#b8932c', south: '#c7a234' }, { aS: 0.95, aE: 0.95 });
+          var u = ev.u, pinf = pourInfo(u, t);
+          var frontX = ZONE_X[u.z] + 3 * Math.max(0.04, pinf.frac);
+          var pp0 = P(ev.cx + 1.0, 10.8, 3.4);
+          var pp1 = P(frontX, 6.5, FOUND_H + u.f * FLOOR_H + FLOOR_H);
+          ctx.save();
+          ctx.strokeStyle = 'rgba(60,60,60,0.6)';
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(pp0[0], pp0[1]); ctx.lineTo(pp1[0], pp1[1]); ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+
+    /* ---------- ラフタークレーン（移動式） ----------
+       建物の高さで決まる：50m程度まで＝ラフター、それ以上＝タワークレーン。
+       この規模（2〜4階・高さ最大でも約25m）では全パラメータでラフターが派生する。 */
+    var CRANE_DAYS = null;
+    var CRANE_RADIUS = 6.8;
+    function craneDaySet() {
+      if (CRANE_DAYS) return CRANE_DAYS;
+      var map = {}, count = {}, i, s, j;
+      for (i = 0; i < units.length; i++) {
+        var sts = [units[i].stages.steel, units[i].stages.exterior, units[i].roof, units[i].roofEq];
+        for (s = 0; s < sts.length; s++) {
+          var st = sts[s];
+          if (!st || !st.items) continue;
+          for (j = 0; j < st.items.length; j++) {
+            if (!FACTORY_KINDS[st.items[j].k]) continue;
+            var d = Math.floor(st.items[j].act);
+            map[d] = 1;
+            count[d] = (count[d] || 0) + 1;
+          }
+        }
+      }
+      for (i = 0; i < MOBILE_CRANE_DAYS.length; i++) map[MOBILE_CRANE_DAYS[i]] = 1;
+      CRANE_DAYS = { map: map, count: count };
+      return CRANE_DAYS;
+    }
+    function liftCandidates(t) {
+      var arr = [], i, s, j;
+      for (i = 0; i < units.length; i++) {
+        var u = units[i];
+        var sts = [u.stages.steel, u.scaffold, u.stages.exterior, u.stages.equip, u.stages.interior, u.roof, u.roofEq];
+        for (s = 0; s < sts.length; s++) {
+          var st = sts[s];
+          if (!st || !st.items) continue;
+          for (j = 0; j < st.items.length; j++) {
+            var it = st.items[j];
+            if (FACTORY_KINDS[it.k] && it.act > t) arr.push({ u: u, it: it });
+          }
+        }
+      }
+      arr.sort(function (a, b) { return a.it.act - b.it.act; });
+      return arr;
+    }
+    function drawRoughCranes(t) {
+      if (t >= WIND.from && t < WIND.to + 0.6) return;
+      var set = craneDaySet();
+      var d = Math.floor(t);
+      if (!set.map[d]) return;
+      var fd = t - d;
+      var cands = liftCandidates(t);
+      var t0 = null, t1 = null, i;
+      for (i = 0; i < cands.length; i++)
+        if (Math.floor(cands[i].it.act) === d) { t0 = cands[i]; break; }
+      if (t0 && (set.count[d] || 0) >= 7) {
+        for (i = 0; i < cands.length; i++)
+          if (Math.floor(cands[i].it.act) === d && cands[i].u !== t0.u) { t1 = cands[i]; break; }
+      }
+      drawRoughCrane(t0, fd, t, 0);
+      if (t1) drawRoughCrane(t1, fd, t, 1);
+    }
+    function drawRoughCrane(lift, fd, t, idx) {
+      var arr = clamp01(fd / 0.06), dep = clamp01((fd - 0.94) / 0.06);
+      if (dep >= 1) return;
+      var tx, ty, tzTop, bx;
+      if (lift) {
+        tx = (lift.it.x0 + lift.it.x1) / 2;
+        ty = (lift.it.y0 + lift.it.y1) / 2;
+        tzTop = FOUND_H + lift.u.f * FLOOR_H + lift.it.dz1;
+        bx = Math.max(5.4, Math.min(12.4, tx + (idx ? 1.8 : 0)));
+      } else { tx = 12.9; ty = 10.4; tzTop = 4; bx = 11.6; }
+      var by = 11.15;
+      var dxT = tx - bx, dyT = ty - by;
+      var distT = Math.sqrt(dxT * dxT + dyT * dyT);
+      if (distT > CRANE_RADIUS) {
+        bx = tx - dxT / distT * (CRANE_RADIUS - 0.6);
+        by = ty - dyT / distT * (CRANE_RADIUS - 0.6);
+        by = Math.max(10.6, Math.min(11.9, by));
+      }
+      var px = 9 + (bx - 9) * arr; px += (9 - px) * dep;
+      var py = 12.7 + (by - 12.7) * arr; py += (12.7 - py) * dep;
+      if (arr >= 1 && dep <= 0) {
+        ctx.save();
+        ctx.beginPath();
+        for (var a = 0; a <= 40; a++) {
+          var an = a / 40 * Math.PI * 2;
+          var cp = P(px + Math.cos(an) * CRANE_RADIUS, py + Math.sin(an) * CRANE_RADIUS, 0.15);
+          if (a === 0) ctx.moveTo(cp[0], cp[1]); else ctx.lineTo(cp[0], cp[1]);
+        }
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(255,176,0,0.06)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(200,140,0,0.5)';
+        ctx.setLineDash([5, 4]);
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+        ctx.restore();
+        var rl = P(px + CRANE_RADIUS * 0.72, py + CRANE_RADIUS * 0.72, 0.2);
+        ctx.fillStyle = 'rgba(140,95,0,0.9)';
+        ctx.font = '600 8.5px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('作業半径', rl[0], rl[1]);
+      }
+      drawBox(px - 1.15, py - 0.5, px + 1.15, py + 0.5, 0, 4.2,
+        { top: '#e8b93c', east: '#c99a26', south: '#dbad33' }, { aS: 0.97, aE: 0.97 });
+      drawBox(px - 0.5, py - 0.42, px + 0.55, py + 0.42, 4.2, 6.4,
+        { top: '#f2c94c', east: '#d3a92e', south: '#e3ba35' }, { aS: 0.97, aE: 0.97 });
+      var baseTop = P(px, py, 6);
+      var tip = P(tx, ty, tzTop + 24);
+      ctx.save();
+      ctx.strokeStyle = '#8a6d1f'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(baseTop[0], baseTop[1]); ctx.lineTo(tip[0], tip[1]); ctx.stroke();
+      var carrying = lift && (lift.it.act - t) < 0.9 && dep <= 0 && arr >= 1;
+      if (carrying) {
+        var frac = clamp01(1 - (lift.it.act - t) / 0.9);
+        var liftBase = FOUND_H + lift.u.f * FLOOR_H;
+        var liftOff = (1 - frac) * 26;
+        var hook = P(tx, ty, liftBase + lift.it.dz1 + liftOff);
+        ctx.strokeStyle = 'rgba(40,40,40,0.75)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(tip[0], tip[1]); ctx.lineTo(hook[0], hook[1]); ctx.stroke();
+        drawItem(lift.it, liftBase, 'carry', liftOff);
+        G_POS.lift = [tx, ty, liftBase + lift.it.dz1 + liftOff + 4];
+        ctx.restore();
+        if (fadeFloor[lift.u.f] > 0.5 || lift.u.f === 0) {
+          var sp1 = pushOut(px + 1.5, py + 0.75, -1);
+          drawWorker(sp1[0], sp1[1], 0, TRADES.scaffold, false);
+          drawWorker(tx + 0.55, ty + 0.55, liftBase + lift.it.dz1, TRADES.scaffold, false);
+        }
+      } else if (!lift && fd > 0.25 && fd < 0.8 && dep <= 0) {
+        var hy = 13 - Math.sin((fd - 0.25) / 0.55 * Math.PI) * 5;
+        var hk = P(tx, ty, hy);
+        ctx.strokeStyle = 'rgba(40,40,40,0.75)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(tip[0], tip[1]); ctx.lineTo(hk[0], hk[1]); ctx.stroke();
+        drawBox(tx - 0.55, ty - 0.3, tx + 0.55, ty + 0.3, hy - 3, hy,
+          { top: '#b9bec6', east: '#8d949e', south: '#a3aab3' }, { aS: 0.95, aE: 0.95 });
+        ctx.restore();
+      } else {
+        ctx.restore();
+      }
+      if (idx === 0) {
+        var lp = P(px, py + 1.05, 0);
+        ctx.fillStyle = 'rgba(23,48,63,0.8)';
+        ctx.font = '600 9px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('ラフタークレーン（揚重の日だけ来て夕方帰る）', lp[0], lp[1] + 11);
+      }
+    }
+
+    /* ---------- 仮設資材と二段階搬送＋逆向き物流 ---------- */
+    var MAT_ITEMS = null;
+    function collectMatItems() {
+      var rb = [], pn = [], pp = [], sc = [], fm = [], i, j, items;
+      for (i = 0; i < units.length; i++) {
+        var u = units[i];
+        items = u.stages.steel.items || [];
+        for (j = 0; j < items.length; j++) {
+          if (items[j].k === 'rebar' || items[j].k === 'cage') rb.push(items[j]);
+          if (items[j].k === 'form') fm.push(items[j]);
+        }
+        pn = pn.concat(u.stages.exterior.items || []);
+        pp = pp.concat((u.stages.equip.items || []).filter(function (x) { return x.ph === 'conc'; }));
+        if (u.scaffold) sc = sc.concat(u.scaffold.items);
+      }
+      MAT_ITEMS = { rebar: rb, panel: pn, pipe: pp, scaf: sc, form: fm };
+    }
+    function stockAt(items, t, leadIn, leadOut) {
+      var a = 0, b = 0;
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].act <= t + leadIn) a++;
+        if (items[i].act <= t + leadOut) b++;
+      }
+      return a - b;
+    }
+    function returnedPending(t) {
+      if (!MAT_ITEMS) collectMatItems();
+      var n = 0;
+      for (var i = 0; i < MAT_ITEMS.scaf.length; i++) {
+        var it = MAT_ITEMS.scaf[i];
+        if (it.rmvA <= t && t < it.rmvA + 1.6) n++;
+      }
+      return n;
+    }
+    function deliveryActive(t) {
+      if (!MAT_ITEMS) collectMatItems();
+      var sets = [[MAT_ITEMS.rebar, 3.0], [MAT_ITEMS.panel, 2.2], [MAT_ITEMS.pipe, 2.2], [MAT_ITEMS.scaf, 2.6], [MAT_ITEMS.form, 2.6]];
+      for (var s = 0; s < sets.length; s++) {
+        var items = sets[s][0], lead = sets[s][1];
+        for (var i = 0; i < items.length; i++) {
+          var d = items[i].act - lead;
+          if (d <= t && t < d + 0.7) return true;
+        }
+      }
+      for (var j = 0; j < MAT_ITEMS.scaf.length; j++) {
+        var rp = MAT_ITEMS.scaf[j].rmvA + 1.1;
+        if (rp <= t && t < rp + 0.5) return true;
+      }
+      return false;
+    }
+    function wasteLevel(t) {
+      var gen = 0;
+      for (var i = 0; i < units.length; i++) {
+        gen += stageProg(units[i].stages.exterior, t, true) * 0.5;
+        if (units[i].stages.interior) gen += stageProg(units[i].stages.interior, t, true) * 0.9;
+      }
+      gen = gen / Math.max(1, units.length) * 9;
+      var out = 0;
+      for (var j = 0; j < WASTE_DAYS.length; j++) if (t >= WASTE_DAYS[j]) out += 1.9;
+      return Math.max(0, Math.min(5, gen - out + (t > 8 ? 0.8 : 0)));
+    }
+    function wasteTruckActive(t) {
+      for (var j = 0; j < WASTE_DAYS.length; j++)
+        if (t >= WASTE_DAYS[j] && t < WASTE_DAYS[j] + 0.8) return true;
+      return false;
+    }
+    function drawPile(x0, y0, x1, y1, layers, cols, hEach) {
+      if (layers <= 0) return;
+      var opt = { aTop: fadeSite, aS: 0.95 * fadeSite, aE: 0.95 * fadeSite };
+      for (var i = 0; i < layers; i++)
+        drawBox(x0, y0, x1, y1, i * hEach, i * hEach + hEach * 0.8, cols, opt);
+    }
+    function drawFlatbed(x, y, waste) {
+      drawBox(x - 1.25, y - 0.4, x + 1.25, y + 0.4, 0, 1.7,
+        { top: '#b9c2ca', east: '#939ea8', south: '#a7b0b9' }, { aS: 0.97, aE: 0.97 });
+      drawBox(x + 0.8, y - 0.38, x + 1.3, y + 0.38, 1.7, 3.8,
+        { top: '#eef1f4', east: '#c9d1d8', south: '#dde3e8' }, { aS: 0.97, aE: 0.97 });
+      drawBox(x - 1.15, y - 0.26, x + 0.55, y + 0.26, 1.7, 2.7,
+        waste ? { top: '#8a7a5c', east: '#6e5f45', south: '#7d6c4e' }
+              : { top: '#97a5b1', east: '#75828e', south: '#8593a0' }, { aS: 0.97, aE: 0.97 });
+      ctx.fillStyle = '#2c3136';
+      var w1 = P(x - 0.75, y + 0.42, 0.7), w2 = P(x + 0.85, y + 0.42, 0.7);
+      ctx.beginPath(); ctx.arc(w1[0], w1[1], 1.7, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(w2[0], w2[1], 1.7, 0, Math.PI * 2); ctx.fill();
+    }
+    function drawYard(t) {
+      var Y = { x0: 13.95, y0: 9.95, x1: 16.0, y1: 11.95 };
+      poly([P(Y.x0, Y.y0, 0), P(Y.x1, Y.y0, 0), P(Y.x1, Y.y1, 0), P(Y.x0, Y.y1, 0)], '#ded3b8', 'rgba(90,70,40,0.4)', fadeSite);
+      if (!MAT_ITEMS) collectMatItems();
+      var rb = stockAt(MAT_ITEMS.rebar, t, 3.0, 1.4);
+      var pn = stockAt(MAT_ITEMS.panel, t, 2.2, 0.9);
+      var pp = stockAt(MAT_ITEMS.pipe, t, 2.2, 1.0);
+      var sc = stockAt(MAT_ITEMS.scaf, t, 2.6, 0.2);
+      var fm = stockAt(MAT_ITEMS.form, t, 2.6, 1.2);
+      var rt = returnedPending(t);
+      drawPile(14.74, 10.12, 15.3, 10.6, Math.min(4, Math.ceil(rb / 7)),
+        { top: '#8a5a36', east: '#6e4525', south: '#7a4e2c' }, 0.55);
+      drawPile(15.44, 10.12, 15.93, 10.6, Math.min(5, Math.ceil(sc / 6)),
+        { top: '#97a5b1', east: '#75828e', south: '#8593a0' }, 0.5);
+      drawPile(14.04, 10.84, 14.6, 11.32, Math.min(5, Math.ceil(pn / 6)),
+        { top: '#d3d8c6', east: '#aeb69e', south: '#bfc7ae' }, 0.42);
+      drawPile(14.74, 10.84, 15.3, 11.32, Math.min(4, Math.ceil(pp / 5)),
+        { top: '#7d94a8', east: '#5b7286', south: '#6d869c' }, 0.5);
+      drawPile(15.44, 10.84, 15.93, 11.32, Math.min(3, Math.ceil(fm / 8)),
+        { top: '#d9b57e', east: '#b8935a', south: '#c7a268' }, 0.5);
+      drawPile(15.44, 11.5, 15.93, 11.9, Math.min(5, Math.ceil(rt / 6)),
+        { top: '#a8b3bd', east: '#828f9b', south: '#95a2ad' }, 0.5);
+      var wl = wasteLevel(t);
+      if (wl > 0.15) {
+        var wlayers = Math.max(1, Math.round(wl));
+        drawPile(14.04, 11.5, 14.6, 11.9, Math.min(3, wlayers),
+          { top: '#8a7a5c', east: '#6e5f45', south: '#7d6c4e' }, 0.5);
+        var wp = P(14.32, 11.94, 0);
+        ctx.fillStyle = 'rgba(23,48,63,0.8)';
+        ctx.font = '600 8.5px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('産廃置場', wp[0], wp[1] + 10);
+      }
+      ctx.save();
+      ctx.globalAlpha = fadeSite;
+      drawCone(Y.x0 + 0.08, Y.y0 + 0.08, 0); drawCone(Y.x1 - 0.08, Y.y0 + 0.08, 0);
+      drawCone(Y.x0 + 0.08, Y.y1 - 0.08, 0); drawCone(Y.x1 - 0.08, Y.y1 - 0.08, 0);
+      var lp = P(14.95, Y.y1 + 0.05, 0);
+      ctx.fillStyle = 'rgba(23,48,63,0.85)';
+      ctx.font = '700 9.5px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('資材エリア（一次搬入）', lp[0], lp[1] + 12);
+      ctx.restore();
+      if (deliveryActive(t)) drawFlatbed(15.0, 11.62, false);
+      if (wasteTruckActive(t)) drawFlatbed(14.2, 12.35, true);
+    }
+
+    /* ---------- 外部足場の描画 ---------- */
+    function drawScaffoldFrame(it, zBase, ghost) {
+      var cols = ghost
+        ? { top: '#6eaaff', east: '#6eaaff', south: '#6eaaff' }
+        : { top: '#97a5b1', east: '#75828e', south: '#8593a0' };
+      var opt = ghost
+        ? { aTop: 0.30 * G_ALPHA, aE: 0.20 * G_ALPHA, aS: 0.14 * G_ALPHA }
+        : { aTop: G_ALPHA, aE: 0.95 * G_ALPHA, aS: 0.92 * G_ALPHA };
+      var plank = { top: '#d3af74', east: '#b28e52', south: '#c39e5e' };
+      var z0 = zBase + it.dz0, z1 = zBase + it.dz1;
+      var horiz = (it.face === 'S' || it.face === 'N');
+      var fixed = it.face === 'S' ? it.y0 + 0.45 : it.face === 'N' ? it.y0 - 0.45 : it.face === 'E' ? it.x0 + 0.45 : it.x0 - 0.45;
+      var a0 = horiz ? it.x0 : it.y0, a1 = horiz ? it.x1 : it.y1;
+      function bx(xa, ya, xb, yb, za, zb, c, o) { drawBox(xa, ya, xb, yb, za, zb, c, o); }
+      if (horiz) {
+        bx(a0 - 0.05, fixed - 0.05, a0 + 0.05, fixed + 0.05, z0, z1, cols, opt);
+        bx(a1 - 0.05, fixed - 0.05, a1 + 0.05, fixed + 0.05, z0, z1, cols, opt);
+        bx(a0, fixed - 0.04, a1, fixed + 0.04, z0 + 5, z0 + 5.6, cols, opt);
+        bx(a0, fixed - 0.04, a1, fixed + 0.04, z0 + 10, z0 + 10.6, cols, opt);
+        if (!ghost) bx(a0, fixed - 0.3, a1, fixed + 0.3, z1 - 1.4, z1 - 0.9, plank, opt);
+        if (!ghost) {
+          var wy = it.face === 'S' ? it.y0 - 0.05 : it.y0 + 0.05;
+          bx(a0 + 0.2, Math.min(fixed, wy), a0 + 0.3, Math.max(fixed, wy), z0 + 8, z0 + 8.5, cols, opt);
+        }
+      } else {
+        bx(fixed - 0.05, a0 - 0.05, fixed + 0.05, a0 + 0.05, z0, z1, cols, opt);
+        bx(fixed - 0.05, a1 - 0.05, fixed + 0.05, a1 + 0.05, z0, z1, cols, opt);
+        bx(fixed - 0.04, a0, fixed + 0.04, a1, z0 + 5, z0 + 5.6, cols, opt);
+        bx(fixed - 0.04, a0, fixed + 0.04, a1, z0 + 10, z0 + 10.6, cols, opt);
+        if (!ghost) bx(fixed - 0.3, a0, fixed + 0.3, a1, z1 - 1.4, z1 - 0.9, plank, opt);
+        if (!ghost) {
+          var wx = it.face === 'E' ? it.x0 - 0.05 : it.x0 + 0.05;
+          bx(Math.min(fixed, wx), a0 + 0.2, Math.max(fixed, wx), a0 + 0.3, z0 + 8, z0 + 8.5, cols, opt);
+        }
+      }
+    }
+    function drawScaffoldItems(u, zBase, t) {
+      if (!u.scaffold) return;
+      var items = u.scaffold.items;
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        if (it.act <= t && t < it.rmvA) drawScaffoldFrame(it, zBase, false);
+        else if (ghostOn && it.plan <= t && it.act > t && G_ALPHA >= 0.4) drawScaffoldFrame(it, zBase, true);
+      }
+    }
+    function drawScaffoldSheet(u, zBase, t) {
+      var ep = stageProg(u.stages.exterior, t, true);
+      if (ep <= 0.02 || ep >= 0.8) return;
+      var sp = stageProg(u.scaffold, t, true);
+      if (sp < 0.9) return;
+      var x0 = ZONE_X[u.z], x1 = ZONE_X[u.z + 1], y1 = BLD.y1, y0 = BLD.y0;
+      var top = zBase + FLOOR_H;
+      var a = 0.42 * G_ALPHA;
+      poly([P(x0, y1 + 0.5, zBase), P(x1, y1 + 0.5, zBase), P(x1, y1 + 0.5, top), P(x0, y1 + 0.5, top)],
+        'rgba(238,242,236,' + a + ')', 'rgba(120,140,120,0.5)');
+      poly([P(x1 + 0.5, y0, zBase), P(x1 + 0.5, y1, zBase), P(x1 + 0.5, y1, top), P(x1 + 0.5, y0, top)],
+        'rgba(232,238,232,' + (a * 0.9) + ')', 'rgba(120,140,120,0.5)');
+      poly([P(x0, y0 - 0.5, zBase), P(x1, y0 - 0.5, zBase), P(x1, y0 - 0.5, top), P(x0, y0 - 0.5, top)],
+        'rgba(238,242,236,' + (a * 0.85) + ')', 'rgba(120,140,120,0.5)');
+      poly([P(x0 - 0.5, y0, zBase), P(x0 - 0.5, y1, zBase), P(x0 - 0.5, y1, top), P(x0 - 0.5, y0, top)],
+        'rgba(232,238,232,' + (a * 0.8) + ')', 'rgba(120,140,120,0.5)');
+      var lp = P(x0 + 1.5, y1 + 0.55, top - 4);
+      ctx.fillStyle = 'rgba(70,95,70,0.85)';
+      ctx.font = '600 8.5px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('養生シート（全周）', lp[0], lp[1]);
+    }
+    function drawScaffoldWorkers(u, t, zBase) {
+      if (!u.scaffold) return;
+      var ep = stageProg(u.scaffold, t, true);
+      var dn = scaffoldDownCount(u, t), tot = u.scaffold.items.length;
+      var frac = null;
+      if (ep > 0 && ep < 1) frac = ep;
+      else if (dn > 0 && dn < tot) frac = 1 - dn / tot;
+      if (frac === null) return;
+      var wz = zBase + 3 + frac * (FLOOR_H - 5);
+      var trade = TRADES.scaffold;
+      drawWorker(ZONE_X[u.z] + 0.7, BLD.y1 + 0.45, wz, trade, false);
+      drawWorker(ZONE_X[u.z] + 2.1, BLD.y1 + 0.45, wz, trade, false);
+      var gp = pushOut(ZONE_X[u.z] + 0.45, BLD.y1 + 1.05, -1); // 地上員は立入禁止の外
+      drawWorker(gp[0], gp[1], 0, trade, true);
+    }
+
+    /* ---------- 屋内の仮設資材 ---------- */
+    function drawCone(x, y, z) {
+      var p = P(x, y, z);
+      ctx.save();
+      ctx.fillStyle = '#c2571a';
+      ctx.fillRect(p[0] - 5, p[1] - 1.5, 10, 2);
+      ctx.beginPath();
+      ctx.moveTo(p[0] - 4.2, p[1] - 1); ctx.lineTo(p[0] + 4.2, p[1] - 1); ctx.lineTo(p[0], p[1] - 10.5);
+      ctx.closePath(); ctx.fillStyle = '#ef7d31'; ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(p[0] - 2.4, p[1] - 4.6); ctx.lineTo(p[0] + 2.4, p[1] - 4.6); ctx.lineTo(p[0], p[1] - 7.6);
+      ctx.closePath(); ctx.fillStyle = '#f5f2ec'; ctx.fill();
+      ctx.restore();
+    }
+    function drawDrum(x, y, z, tx, ty, tz) {
+      var p = P(x, y, z + 1.2), tp = P(tx, ty, tz);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(45,45,45,0.85)'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(p[0], p[1]);
+      ctx.quadraticCurveTo((p[0] + tp[0]) / 2, Math.max(p[1], tp[1]) + 6, tp[0], tp[1]);
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(p[0], p[1], 5.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#e8762c'; ctx.fill();
+      ctx.strokeStyle = '#9c4d15'; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.beginPath(); ctx.arc(p[0], p[1], 2, 0, Math.PI * 2);
+      ctx.fillStyle = '#5b3a1e'; ctx.fill();
+      ctx.restore();
+    }
+    function drawCart(x, y, z, load) {
+      drawBox(x - 0.45, y - 0.32, x + 0.45, y + 0.32, z + 0.6, z + 1.0,
+        { top: '#93a1ad', east: '#707c88', south: '#828f9b' }, { aTop: 1, aS: 0.95, aE: 0.95 });
+      if (load === 'pipe')
+        drawBox(x - 0.85, y - 0.13, x + 0.85, y + 0.13, z + 1.0, z + 1.42,
+          { top: '#a8c4de', east: '#7ea6c9', south: '#93b4d2' }, { aTop: 1, aS: 0.95, aE: 0.95 });
+      else
+        drawBox(x - 0.42, y - 0.3, x + 0.42, y + 0.3, z + 1.0, z + 1.5,
+          { top: '#f4cfae', east: '#d89a68', south: '#eab98c' }, { aTop: 1, aS: 0.95, aE: 0.95 });
+      ctx.fillStyle = '#2c3136';
+      var wps = [[x - 0.3, y + 0.34], [x + 0.3, y + 0.34], [x - 0.3, y - 0.05], [x + 0.3, y - 0.05]];
+      for (var i = 0; i < 4; i++) {
+        var wp = P(wps[i][0], wps[i][1], z + 0.35);
+        ctx.beginPath(); ctx.arc(wp[0], wp[1], 1.6, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    function lastPlacedPos(st, t) {
+      var best = null, items = (st && st.items) || [];
+      for (var i = 0; i < items.length; i++)
+        if (items[i].act <= t && (!best || items[i].act > best.act)) best = items[i];
+      if (!best) return null;
+      return [(best.x0 + best.x1) / 2, (best.y0 + best.y1) / 2];
+    }
+    function drawInteriorProps(u, t, floorZ) {
+      var x0 = ZONE_X[u.z], x1 = ZONE_X[u.z + 1], y0 = BLD.y0;
+      var eqP = stageProg(u.stages.equip, t, true);
+      var inP = u.stages.interior ? stageProg(u.stages.interior, t, true) : 0;
+      var steelP = stageProg(u.stages.steel, t, true);
+      if (steelP <= 0 && eqP <= 0 && inP <= 0) return;
+      var sx0 = x0 + 0.25, sy0 = y0 + 0.25, sx1 = x0 + 1.55, sy1 = y0 + 1.55;
+      var boardCols = { top: '#f4cfae', east: '#d89a68', south: '#eab98c' };
+      for (var i = 0; i < 3; i++)
+        drawBox(sx0 + 0.18, sy0 + 0.18, sx1 - 0.18, sy1 - 0.18, floorZ + i * 0.5, floorZ + i * 0.5 + 0.42,
+          boardCols, { aTop: 1, aS: 0.95, aE: 0.95 });
+      drawCone(sx0, sy0, floorZ); drawCone(sx1, sy0, floorZ);
+      drawCone(sx0, sy1, floorZ); drawCone(sx1, sy1, floorZ);
+      var lp = P((sx0 + sx1) / 2, sy1 + 0.15, floorZ);
+      ctx.fillStyle = 'rgba(23,48,63,0.8)';
+      ctx.font = '600 9px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('資材置場', lp[0], lp[1] + 11);
+      var act = activeStage(u, t);
+      if (act && act.p > 0 && act.p < 1 &&
+          ['steel', 'frame', 'elec', 'plumb', 'hvac', 'interior'].indexOf(act.st.trade) >= 0) {
+        var tgt = null;
+        if (act.st.trade === 'interior') tgt = lastPlacedPos(u.stages.interior, t);
+        else if (act.st.trade === 'steel' || act.st.trade === 'frame') tgt = [x0 + 0.2, y0 + 0.2];
+        else tgt = [x0 + 2.7, y0 + 1.3];
+        if (!tgt) tgt = [x0 + 1.5, y0 + 3];
+        drawDrum(x1 - 0.5, y0 + 0.45, floorZ, tgt[0], tgt[1], floorZ + 1);
+        var dl = P(x1 - 0.5, y0 + 0.6, floorZ);
+        ctx.fillStyle = 'rgba(23,48,63,0.75)';
+        ctx.font = '600 8.5px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('コードドラム', dl[0], dl[1] + 10);
+      }
+      if ((inP > 0 && inP < 1) || (eqP > 0 && eqP < 1)) {
+        var tp2 = (inP > 0 && inP < 1) ? lastPlacedPos(u.stages.interior, t) : null;
+        if (!tp2) tp2 = [x0 + 1.6, y0 + 1.3];
+        var cyc = (performance.now() / 1000 % 9) / 9;
+        var s = cyc < 0.5 ? cyc * 2 : 2 - cyc * 2;
+        s = s * s * (3 - 2 * s);
+        var scx = (sx0 + sx1) / 2, scy = (sy0 + sy1) / 2;
+        drawCart(scx + (tp2[0] - scx) * s, scy + (tp2[1] - scy) * s, floorZ,
+          (inP > 0 && inP < 1) ? 'board' : 'pipe');
+      }
+    }
+
+    /* ---------- 立入禁止の単管パイプ柵（矩形は NOENTRY と一致させる） ---------- */
+    function pipeCols() { return { top: '#97a5b1', east: '#75828e', south: '#8593a0' }; }
+    function drawFenceSign(mx, y, z, text) {
+      var sp = P(mx, y, z + 7.6);
+      var w = 12 + text.length * 8.5;
+      ctx.save();
+      ctx.fillStyle = '#d64545';
+      ctx.fillRect(sp[0] - w / 2, sp[1] - 7, w, 11);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 8px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(text, sp[0], sp[1] + 1.5);
+      ctx.restore();
+    }
+    function drawPipeFenceX(xa, xb, y, z, sign) {
+      var cols = pipeCols(), opt = { aTop: 1, aS: 0.95, aE: 0.95 };
+      for (var px = xa; px <= xb + 0.01; px += 1)
+        drawBox(px - 0.045, y - 0.045, px + 0.045, y + 0.045, z, z + 5.5, cols, opt);
+      drawBox(xa, y - 0.04, xb, y + 0.04, z + 2.4, z + 2.9, cols, opt);
+      drawBox(xa, y - 0.04, xb, y + 0.04, z + 4.9, z + 5.4, cols, opt);
+      if (sign) drawFenceSign((xa + xb) / 2, y, z, sign);
+    }
+    function drawPipeFenceY(x, ya, yb, z, sign) {
+      var cols = pipeCols(), opt = { aTop: 1, aS: 0.95, aE: 0.95 };
+      for (var py = ya; py <= yb + 0.01; py += 1)
+        drawBox(x - 0.045, py - 0.045, x + 0.045, py + 0.045, z, z + 5.5, cols, opt);
+      drawBox(x - 0.04, ya, x + 0.04, yb, z + 2.4, z + 2.9, cols, opt);
+      drawBox(x - 0.04, ya, x + 0.04, yb, z + 4.9, z + 5.4, cols, opt);
+      if (sign) drawFenceSign(x, (ya + yb) / 2, z, sign);
+    }
+
+    /* ---------- 検査ゲートのマーカー ---------- */
+    function foremanOfGate(g) {
+      if (!g) return 'plumb';
+      if (g.kind === 'rebar' || g.kind === 'torque' || g.kind === 'product' || g.kind === 'joint' || g.kind === 'strength')
+        return PARAMS.frame === 'S' ? 'steel' : 'frame';
+      return 'plumb';
+    }
+    function drawGateMarker(u, t, zBase) {
+      var g = activeGate(u, t);
+      var cx = ZONE_X[u.z] + 1.5, cy = 6.5;
+      if (g) {
+        var now = performance.now() / 1000;
+        var rr = 10 + 2.5 * Math.sin(now * 4);
+        var cp = P(cx, cy, zBase + FLOOR_H + 1);
+        ctx.save();
+        ctx.strokeStyle = 'rgba(214,69,69,0.85)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(cp[0], cp[1], rr, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = '#d64545';
+        var label = '検査中：' + g.label;
+        var w = 16 + label.length * 9;
+        ctx.fillRect(cp[0] - w / 2, cp[1] - rr - 20, w, 14);
+        ctx.fillStyle = '#fff';
+        ctx.font = '700 9.5px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(label, cp[0], cp[1] - rr - 9.5);
+        ctx.restore();
+        var fk = foremanOfGate(g);
+        drawPerson(cx - 0.55, cy + 0.75, zBase + FLOOR_H, 'insp', false);
+        drawPerson(cx + 0.15, cy + 0.95, zBase + FLOOR_H, 'sup', false);
+        drawPerson(cx + 0.8, cy + 0.7, zBase + FLOOR_H, fk, true);
+        G_POS.insp = [cx - 0.55, cy + 0.75, zBase + FLOOR_H + 12];
+        G_POS.fore[fk] = [cx + 0.8, cy + 0.7, zBase + FLOOR_H + 14];
+        return;
+      }
+      for (var i = 0; i < GATE_KEYS.length; i++) {
+        var gg = u.gates[GATE_KEYS[i]];
+        if (gg && gateState(gg, t, true) === 'before') {
+          var prevDone = GATE_KEYS[i] === 'frame'
+            ? stageProg(u.stages.steel, t, true) > 0.05
+            : GATE_KEYS[i] === 'rebar'
+            ? countPlaced(u.stages.steel, t, true) > 0 && floorState(u, t).state === ''
+            : GATE_KEYS[i] === 'press'
+            ? stageProg(u.stages.equip, t, true) > 0.5
+            : false;
+          if (!prevDone) continue;
+          var wp = P(cx, cy, zBase + FLOOR_H + 1);
+          ctx.save();
+          ctx.fillStyle = 'rgba(230,150,30,0.95)';
+          var label2 = gg.label + ' 待ち';
+          var w2 = 14 + label2.length * 8.5;
+          ctx.fillRect(wp[0] - w2 / 2, wp[1] - 8, w2, 13);
+          ctx.fillStyle = '#fff';
+          ctx.font = '700 9px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText(label2, wp[0], wp[1] + 2);
+          ctx.restore();
+          return;
+        }
+      }
+    }
+
+    /* ---------- ユニット描画（部材単位） ---------- */
+    function drawUnit(u, t) {
+      var x0 = ZONE_X[u.z], x1 = ZONE_X[u.z + 1];
+      var y0 = BLD.y0, y1 = BLD.y1;
+      var zBase = FOUND_H + u.f * FLOOR_H;
+      var frameTop = zBase + FLOOR_H;
+      var sts = [u.stages.steel, u.scaffold, u.stages.exterior, u.stages.equip, u.stages.interior, u.roof, u.roofEq];
+      var any = false;
+      for (var s = 0; s < sts.length && !any; s++) {
+        var st0 = sts[s];
+        if (st0 && st0.items) {
+          for (var j = 0; j < st0.items.length; j++) {
+            if (st0.items[j].plan <= t || st0.items[j].act <= t) { any = true; break; }
+          }
+        }
+      }
+      if (!any) return;
+      G_ALPHA = fadeFloor[u.f];
+      G_EXTRA = 1;
+      if (G_ALPHA < 0.03) { G_ALPHA = 1; return; }
+
+      var pit = pourItemOf(u);
+      var pinf = floorState(u, t);
+
+      if (ghostOn) drawStageItemsGhost(u.stages.steel, zBase, t);
+      drawStageItems(u.stages.steel, zBase, t);
+      drawRebarBundle(u, t, zBase);
+      drawFormBundle(u, t, zBase);
+      // 建方中の仮設ワイヤー（S/SRC のみ）
+      var steelP = stageProg(u.stages.steel, t, true);
+      if (PARAMS.method !== 'pca' && PARAMS.frame !== 'RC' && steelP > 0.02 && steelP < 0.55 && fadeFloor[u.f] > 0.5) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(70,70,70,0.55)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 3]);
+        var tops = [[x0, y0], [x1, y0]];
+        for (var wi = 0; wi < tops.length; wi++) {
+          var tp = P(tops[wi][0], tops[wi][1], frameTop - 3), ap = P(tops[wi][0] + (wi ? 0.9 : -0.9), y0 - 1.1, 0);
+          ctx.beginPath(); ctx.moveTo(tp[0], tp[1]); ctx.lineTo(ap[0], ap[1]); ctx.stroke();
+        }
+        ctx.restore();
+      }
+      // 打設（流動型）＋養生：打設で床が実体化し、色は濃い→薄いへ
+      if (pit && (pinf.state === 'done' || pinf.state === 'pouring')) {
+        var px1 = x0 + (x1 - x0) * pinf.frac;
+        if (px1 > x0 + 0.02) {
+          var cureF = pinf.state === 'done' ? clamp01((t - pit.act) / Math.max(0.1, u.cureAct - pit.act)) : 0;
+          var slabTop = mixHex('#878d94', '#ccd0d6', cureF);
+          drawBox(x0, y0, px1, y1, frameTop - 2.6, frameTop,
+            { top: slabTop, east: '#a9aeb6', south: '#bcc0c7' },
+            { aTop: G_ALPHA, aS: 0.95 * G_ALPHA, aE: 0.95 * G_ALPHA });
+          ctx.save();
+          ctx.globalAlpha = 0.4 * G_ALPHA;
+          ctx.strokeStyle = '#7d838c';
+          ctx.lineWidth = 1;
+          for (var tj = 1; tj < pit.trucks; tj++) {
+            var jx = x0 + (x1 - x0) * tj / pit.trucks;
+            if (jx > px1) break;
+            var ja = P(jx, y0, frameTop), jb = P(jx, y1, frameTop);
+            ctx.beginPath(); ctx.moveTo(ja[0], ja[1]); ctx.lineTo(jb[0], jb[1]); ctx.stroke();
+          }
+          ctx.restore();
+          if (pinf.state === 'done' && t < u.cureAct && fadeFloor[u.f] > 0.5) {
+            var wood = { top: '#d9b57e', east: '#b8935a', south: '#c7a268' };
+            drawBox(x0, y1 - 0.1, px1, y1, frameTop - 2.6, frameTop + 0.5, wood,
+              { aTop: G_ALPHA * 0.9, aS: 0.9 * G_ALPHA, aE: 0.9 * G_ALPHA });
+            var cl = P(x0 + 1.5, 6.5, frameTop + 1);
+            ctx.fillStyle = 'rgba(90,110,140,0.92)';
+            ctx.font = '700 9px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillRect(cl[0] - 16, cl[1] - 8, 32, 12);
+            ctx.fillStyle = '#fff';
+            ctx.fillText('養生中', cl[0], cl[1] + 2);
+          }
+        }
+        if (pinf.state === 'pouring' && fadeFloor[u.f] > 0.5) {
+          drawWorker(px1 - 0.3, 5.1, frameTop, TRADES.found, false);
+          drawWorker(px1 - 0.3, 7.9, frameTop, TRADES.found, false);
+        }
+      } else if (pit && pinf.state === 'ghost' && ghostOn && G_ALPHA >= 0.4) {
+        drawBox(x0, y0, x1, y1, frameTop - 2.6, frameTop,
+          { top: '#6eaaff', east: '#6eaaff', south: '#6eaaff' }, { aTop: 0.28, aE: 0.18, aS: 0.12 });
+      }
+      // 支保工：デッキ/型枠〜打設〜養生の間、床の下に支保工の列が残る
+      if (effFocus === u.f && !u.atrium) {
+        var deckN = 0, deckItems = (u.stages.steel.items || []).filter(function (x) { return x.k === 'plate' || x.k === 'pcslab' || x.k === 'form'; });
+        for (var pk = 0; pk < deckItems.length; pk++) if (deckItems[pk].act <= t) deckN++;
+        var curing = pinf.state === 'done' && t < u.cureAct;
+        if ((deckN > 0 && pinf.state !== 'done') || curing) {
+          var propCols = { top: '#b9bec6', east: '#8d949e', south: '#a3aab3' };
+          for (var gx = 0; gx < 3; gx++) for (var gy = 0; gy < 2; gy++)
+            drawBox(x0 + 0.6 + gx * 1.0 - 0.05, y0 + 1.2 + gy * 3.4 - 0.05,
+              x0 + 0.6 + gx * 1.0 + 0.05, y0 + 1.2 + gy * 3.4 + 0.05,
+              zBase, frameTop - 2.6, propCols, { aTop: 0.9, aS: 0.9, aE: 0.9 });
+        }
+      }
+      // 外装パネル・サッシ（全4面。フォーカス階では手前の壁を透かす）
+      G_EXTRA = fadeWall[u.f];
+      if (ghostOn) drawStageItemsGhost(u.stages.exterior, zBase, t);
+      drawStageItems(u.stages.exterior, zBase, t);
+      G_EXTRA = 1;
+      drawScaffoldItems(u, zBase, t);
+      drawScaffoldSheet(u, zBase, t);
+      // 上下作業：足場上の外装と真下の作業が重なる時、直下に養生ネット＋立入禁止
+      var extP = stageProg(u.stages.exterior, t, true);
+      if (extP > 0 && extP < 1 && fadeFloor[u.f] > 0.5) {
+        poly([P(x0, y1 + 0.52, zBase + 1), P(x1, y1 + 0.52, zBase + 1), P(x1, y1 + 0.52, zBase + 5), P(x0, y1 + 0.52, zBase + 5)],
+          'rgba(240,120,40,' + (0.4 * G_ALPHA) + ')', 'rgba(200,90,20,0.7)');
+        if (u.f === 0) drawPipeFenceX(x0, x1, y1 + 1.15, 0, '上下作業 立入禁止');
+      }
+      // 設備：3系統×3段階
+      if (!u.atrium) {
+        if (ghostOn) drawStageItemsGhost(u.stages.equip, zBase, t);
+        drawStageItems(u.stages.equip, zBase, t);
+        drawPipeBundle(u, t, zBase);
+      }
+      if (ghostOn) drawStageItemsGhost(u.stages.interior, zBase, t);
+      drawStageItems(u.stages.interior, zBase, t);
+      if (!u.atrium && effFocus === u.f)
+        drawInteriorProps(u, t, pinf.state === 'done' ? frameTop : zBase);
+      if (fadeRoof > 0.03) {
+        G_EXTRA = fadeRoof;
+        if (ghostOn) drawStageItemsGhost(u.roof, zBase, t);
+        drawStageItems(u.roof, zBase, t);
+        if (ghostOn) drawStageItemsGhost(u.roofEq, zBase, t);
+        drawStageItems(u.roofEq, zBase, t);
+        G_EXTRA = 1;
+      }
+
+      if (u.atrium && u.f >= 1) {
+        var belowU = U(u.f - 1, u.z);
+        if (belowU && floorState(belowU, t).state === 'done') {
+          drawPipeFenceX(x0, x1, y1 - 0.02, zBase, '立入禁止');
+          drawPipeFenceY(x1 - 0.02, y0, y1, zBase, null);
+        }
+      }
+      if (u.f === 0) {
+        var frameP0 = stageProg(u.stages.steel, t, true);
+        if (frameP0 > 0 && frameP0 < 1) drawPipeFenceX(x0, x1, y1 + 0.95, 0, '作業直下 立入禁止');
+      }
+      if (fadeFloor[u.f] > 0.5) drawGateMarker(u, t, zBase);
+
+      if (fadeFloor[u.f] > 0.5)
+        for (var s2 = 0; s2 < sts.length; s2++) drawSparks(sts[s2], zBase, t);
+
+      var topPoly = [P(x0, y0, frameTop), P(x1, y0, frameTop), P(x1, y1, frameTop), P(x0, y1, frameTop)];
+      if (selected === u || hover === u) {
+        poly(topPoly, 'rgba(255,255,255,0.18)', '#ffffff');
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(topPoly[0][0], topPoly[0][1]);
+        for (var q = 1; q < 4; q++) ctx.lineTo(topPoly[q][0], topPoly[q][1]);
+        ctx.closePath(); ctx.stroke();
+      }
+      if (fadeFloor[u.f] > 0.5) hitPolys.push({ poly: topPoly, target: u });
+
+      if (fadeFloor[u.f] > 0.5)
+        drawPeople(u, t, pinf.state === 'done' ? frameTop : zBase);
+      if (fadeFloor[u.f] > 0.5)
+        drawScaffoldWorkers(u, t, zBase);
+      G_ALPHA = 1;
+    }
+
+    /* ---------- エレベーター：シャフトはピットから最上階天井まで連続した1本。
+       壁・レール・かご・ドアはすべて絶対 z で描く（zBase は 0 固定） ---------- */
+    var EV_WALL_COLS = { top: '#c9c2b2', east: '#a79e8d', south: '#bab2a1' };
+    function drawEVShaftBox(x0, y0, x1, y1, z0, z1, mode, alpha) {
+      if (mode === 'ghost') {
+        drawBox(x0, y0, x1, y1, z0, z1,
+          { top: '#6eaaff', east: '#6eaaff', south: '#6eaaff' }, { aTop: 0.26 * alpha, aE: 0.16 * alpha, aS: 0.11 * alpha });
+        return;
+      }
+      drawBox(x0, y0, x1, y1, z0, z1, EV_WALL_COLS, { aTop: alpha, aE: 0.95 * alpha, aS: 0.92 * alpha });
+    }
+    function drawEV(t) {
+      if (!EVST || !EVST.items) return;
+      var g = EVST.testGate;
+      var carOff = 0;
+      if (gateState(g, t, true) === 'during') {
+        var ph = (performance.now() / 1000 % 7) / 7;
+        var tri = ph < 0.5 ? ph * 2 : 2 - ph * 2;
+        carOff = (tri * tri * (3 - 2 * tri)) * (FLOORS - 1) * FLOOR_H;
+      }
+      var carFloor = Math.round(carOff / FLOOR_H);
+      G_ALPHA = 1; G_EXTRA = 1;
+      if (EVSHAFT) {
+        // ピット：1F床（z=FOUND_H）の下にある暗い底＋緩衝器。シャフトの起点は常にここ
+        if (effFocus === null || effFocus === 0) {
+          var pit = EVSHAFT.pit;
+          if (pit.act <= t || (ghostOn && pit.plan <= t)) {
+            var pa = effFocus === 0 ? 0.55 : 1;
+            poly([P(8.56, 3.82, 1.2), P(9.44, 3.82, 1.2), P(9.44, 4.74, 1.2), P(8.56, 4.74, 1.2)],
+              pit.act <= t ? '#57524b' : '#6eaaff', null, pit.act <= t ? pa : 0.3);
+            if (pit.act <= t)
+              drawBox(8.86, 4.08, 9.14, 4.36, 1.2, 3.4,
+                { top: '#4c4a45', east: '#37352f', south: '#413f3a' }, { aTop: pa, aE: pa, aS: pa });
+          }
+        }
+        // シャフト壁：各階セグメントは z0=その階の床高 から z1=z0+FH（絶対z・一回だけ積む）。
+        // 乗場開口（opening）は格納データには無く、ここでだけ袖壁＋まぐさに分割して描く
+        for (var w = 0; w < EVSHAFT.walls.length; w++) {
+          var wl = EVSHAFT.walls[w];
+          if (effFocus !== null && wl.fl !== effFocus) continue;
+          var wmode = wl.act <= t ? 'solid' : (ghostOn && wl.plan <= t ? 'ghost' : null);
+          if (!wmode) continue;
+          var wa2 = effFocus === wl.fl ? 0.16 : 1;
+          if (wl.opening) {
+            drawEVShaftBox(wl.x0, wl.y0, 8.68, wl.y1, wl.z0, wl.z1, wmode, wa2);
+            drawEVShaftBox(9.32, wl.y0, wl.x1, wl.y1, wl.z0, wl.z1, wmode, wa2);
+            drawEVShaftBox(8.68, wl.y0, 9.32, wl.y1, wl.z0 + 16, wl.z1, wmode, wa2);
+          } else {
+            drawEVShaftBox(wl.x0, wl.y0, wl.x1, wl.y1, wl.z0, wl.z1, wmode, wa2);
+          }
+        }
+        // シャフト天井＋巻上機（最上階の天井の上）
+        if (effFocus === null || effFocus === FLOORS - 1) {
+          var topZ = FOUND_H + FLOORS * FLOOR_H;
+          var cap = EVSHAFT.cap;
+          if (cap.act <= t || (ghostOn && cap.plan <= t))
+            drawEVShaftBox(8.34, 3.60, 9.66, 4.96, topZ, topZ + 3, cap.act <= t ? 'solid' : 'ghost', 1);
+          var mc = EVSHAFT.machine;
+          if (mc.act <= t || (ghostOn && mc.plan <= t))
+            drawBox(8.78, 3.98, 9.22, 4.42, topZ + 3, topZ + 9,
+              mc.act <= t ? { top: '#596068', east: '#3c4249', south: '#4a5058' } : { top: '#6eaaff', east: '#6eaaff', south: '#6eaaff' },
+              mc.act <= t ? { aTop: 1, aE: 0.95, aS: 0.92 } : { aTop: 0.26, aE: 0.16, aS: 0.11 });
+        }
+      }
+      // レール・かご・乗場ドア（絶対z。かごは試運転中だけ昇降オフセットが乗る）
+      for (var i = 0; i < EVST.items.length; i++) {
+        var it = EVST.items[i];
+        if (it.k === 'evcar') {
+          if (effFocus !== null && carFloor !== effFocus) continue;
+          if (it.act <= t) drawItem(it, 0, 'solid', carOff);
+          else if (ghostOn && it.plan <= t) drawItem(it, 0, 'ghost', 0);
+        } else {
+          if (effFocus !== null && (it.fl || 0) !== effFocus) continue;
+          if (it.act <= t) drawItem(it, 0, 'solid');
+          else if (ghostOn && it.plan <= t) drawItem(it, 0, 'ghost');
+        }
+      }
+      if (gateState(g, t, true) === 'during' && (effFocus === null || effFocus === FLOORS - 1)) {
+        drawPerson(9.7, 5.1, FOUND_H + (FLOORS - 1) * FLOOR_H, 'insp', false);
+        var cp = P(9, 4.2, FOUND_H + (FLOORS - 1) * FLOOR_H + 20);
+        ctx.save();
+        ctx.fillStyle = '#d64545';
+        ctx.font = '700 9.5px sans-serif'; ctx.textAlign = 'center';
+        var label = '検査中：EV試運転';
+        var w2 = 16 + label.length * 9;
+        ctx.fillRect(cp[0] - w2 / 2, cp[1] - 24, w2, 14);
+        ctx.fillStyle = '#fff';
+        ctx.fillText(label, cp[0], cp[1] - 13.5);
+        ctx.restore();
+      }
+      var ep = stageProg(EVST, t, true);
+      if (ep > 0 && ep < 1 && t < g.act) {
+        var fl = Math.min(FLOORS - 1, Math.floor(ep * FLOORS));
+        if (effFocus === null || effFocus === fl) {
+          drawWorker(9.0, 5.15, FOUND_H + fl * FLOOR_H + 2, TRADES.ev, false);
+          drawWorker(9.75, 5.3, FOUND_H + fl * FLOOR_H + 2, TRADES.ev, true);
+          G_POS.fore.ev = [9.75, 5.3, FOUND_H + fl * FLOOR_H + 14];
+        }
+      }
+      G_ALPHA = 1; G_EXTRA = 1;
+    }
+
+    /* ---------- 人 ---------- */
+    function drawPerson(x, y, z, kind, isForeman) {
+      var p = P(x, y, z);
+      var s = isForeman ? 1.45 : 1;
+      ctx.save();
+      ctx.translate(p[0], p[1]);
+      ctx.scale(s, s);
+      ctx.beginPath(); ctx.ellipse(0, 0.5, 3.4, 1.4, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(30,40,30,0.25)'; ctx.fill();
+      var body, helm;
+      if (kind === 'sup') { body = '#2c4a7c'; helm = '#ffffff'; }
+      else if (kind === 'mgr') { body = '#4a4a52'; helm = '#f5c542'; }
+      else if (kind === 'insp') { body = '#37474f'; helm = '#cfd8dc'; }
+      else { body = TRADES[kind].dark; helm = isForeman ? '#ffffff' : TRADES[kind].color; }
+      ctx.fillStyle = body;
+      ctx.fillRect(-2.2, -6.4, 4.4, 6);
+      ctx.beginPath(); ctx.arc(0, -8.6, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#f0c8a0'; ctx.fill();
+      if (isForeman || kind === 'sup' || kind === 'mgr' || kind === 'insp') {
+        ctx.fillStyle = '#333';
+        ctx.fillRect(-1.3, -8.9, 0.9, 0.9);
+        ctx.fillRect(0.5, -8.9, 0.9, 0.9);
+      }
+      ctx.beginPath(); ctx.arc(0, -9.2, 2.8, Math.PI, Math.PI * 2);
+      ctx.fillStyle = helm;
+      ctx.fill();
+      ctx.fillRect(-3, -9.4, 6, 0.9);
+      ctx.restore();
+    }
+    function drawWorker(x, y, z, trade, isForeman) {
+      drawPerson(x, y, z, tradeKeyOf(trade), isForeman);
+    }
+    function tradeKeyOf(trade) {
+      for (var k in TRADES) if (TRADES[k] === trade) return k;
+      return 'steel';
+    }
+
+    function drawPeople(u, t, workZ) {
+      if (u.atrium) return;
+      var act = activeStage(u, t);
+      if (!act || act.p <= 0 || act.p >= 1) return;
+      if (act.gate) return;
+      var st = act.st;
+      var trade = TRADES[st.trade];
+      var di = Math.floor(t);
+      var seed = u.z * 31 + u.f * 57 + di * 3;
+      var n = Math.max(2, Math.round(st.crew + (hash(seed) * 4 - 2)));
+      var now = performance.now() / 1000;
+      var tod = todInfo();
+      var floorKey = workZ >= FOUND_H + u.f * FLOOR_H + FLOOR_H - 1 ? u.f : (u.f === 0 ? -1 : u.f);
+      if (st.trade === 'exterior') {
+        var zb2 = FOUND_H + u.f * FLOOR_H;
+        for (var e = 0; e < n; e++) {
+          var ex = ZONE_X[u.z] + 0.4 + hash(seed + e * 7.1) * 2.2;
+          var ey = BLD.y1 + 0.45;
+          var wz2 = zb2 + 13 + (hash(seed + e * 3.7) < act.p ? 16 : 0);
+          drawWorker(ex, ey, wz2, trade, false);
+        }
+        // 職長は地上だが、上下作業の立入禁止エリアの外に立つ
+        var fp = pushOut(ZONE_X[u.z] + 0.5, BLD.y1 + 1.05, -1);
+        drawWorker(fp[0], fp[1], 0, trade, true);
+        G_POS.fore[st.trade] = [fp[0], fp[1], 12];
+        return;
+      }
+      if (st === u.stages.steel && !u.atrium) {
+        // 配筋・かご組立の最中は、束のそばと組立先端に人が寄る（PCaでは発生しない）
+        var curRb = null, rbAllDone = true, rj, rit;
+        var sItems = st.items || [];
+        for (rj = 0; rj < sItems.length; rj++) {
+          rit = sItems[rj];
+          if (rit.k !== 'rebar' && rit.k !== 'cage') continue;
+          if (rit.act <= t || rit.act - t <= REBAR_LEAD) curRb = rit;
+          if (rit.act > t) rbAllDone = false;
+        }
+        if (curRb && !rbAllDone) {
+          var deckZ = FOUND_H + u.f * FLOOR_H + FLOOR_H;
+          var crx = (curRb.x0 + curRb.x1) / 2, cry = (curRb.y0 + curRb.y1) / 2;
+          for (var wi = 0; wi < n; wi++) {
+            var nearBundle = wi % 2 === 1;
+            var wx2 = nearBundle ? ZONE_X[u.z] + 0.8 + hash(seed + wi * 3.3) * 1.1
+              : crx + (hash(seed + wi * 7.1) - 0.5) * 1.3;
+            var wy2 = nearBundle ? BLD.y1 - 0.55
+              : cry + (hash(seed + wi * 13.7) - 0.5) * 1.5;
+            var bp = blendPos(wx2, wy2, u.f * 9 + u.z * 3 + wi, tod);
+            bp = pushOut(bp[0], bp[1], u.f);
+            drawWorker(bp[0], bp[1], deckZ, trade, false);
+            if (wi === 0) G_POS.work = [bp[0], bp[1], deckZ + 12];
+          }
+          drawWorker(ZONE_X[u.z] + 0.55, BLD.y1 - 0.5, deckZ, trade, true);
+          G_POS.fore[st.trade] = [ZONE_X[u.z] + 0.55, BLD.y1 - 0.5, deckZ + 14];
+          return;
+        }
+      }
+      var x0 = ZONE_X[u.z] + 0.45, x1 = ZONE_X[u.z + 1] - 0.45;
+      var y0 = BLD.y0 + 0.5, y1 = BLD.y1 - 0.5;
+      for (var i = 0; i < n; i++) {
+        var wx = x0 + hash(seed + i * 7.1) * (x1 - x0);
+        var wy = y0 + hash(seed + i * 13.7) * (y1 - y0);
+        var bob = Math.sin(now * 2.6 + i * 1.7 + seed) * 0.9;
+        var bp2 = blendPos(wx, wy, u.f * 9 + u.z * 3 + i, tod);
+        bp2 = pushOut(bp2[0], bp2[1], floorKey);
+        drawWorker(bp2[0], bp2[1], workZ + bob * 0.4, trade, false);
+        if (i === 0) G_POS.work = [bp2[0], bp2[1], workZ + 12];
+      }
+      var fx = x0 + 0.35 + hash(seed + 99) * 0.5;
+      var fy = y1 - 0.35;
+      var fp2 = pushOut(fx, fy, floorKey);
+      drawWorker(fp2[0], fp2[1], workZ, trade, true);
+      G_POS.fore[st.trade] = [fp2[0], fp2[1], workZ + 14];
+    }
+
+    function drawGroundCrew(t) {
+      var st = null;
+      if (stageProg(EARTH, t, true) > 0 && stageProg(EARTH, t, true) < 1) st = EARTH;
+      else if (stageProg(FOUND, t, true) > 0 && stageProg(FOUND, t, true) < 1) st = FOUND;
+      if (!st) return;
+      var di = Math.floor(t);
+      var n = st.crew;
+      var tod = todInfo();
+      for (var i = 0; i < n; i++) {
+        var wx = BLD.x0 + 0.6 + hash(di * 5 + i * 9.3) * (BLD.x1 - BLD.x0 - 1.2);
+        var wy = BLD.y0 + 0.6 + hash(di * 5 + i * 4.1) * (BLD.y1 - BLD.y0 - 1.2);
+        var bp = blendPos(wx, wy, 40 + i, tod);
+        bp = pushOut(bp[0], bp[1], -1);
+        drawWorker(bp[0], bp[1], 0, TRADES[st.trade], i === 0);
+        if (i === 0) { G_POS.work = [bp[0], bp[1], 12]; G_POS.fore[st.trade] = [bp[0], bp[1], 14]; }
+      }
+    }
+
+    /* ---------- 担当者・課長・監理者 ---------- */
+    function drawPeopleGlobal(t) {
+      var tod = todInfo();
+      var nowS = performance.now() / 1000;
+      var supPos;
+      if (tod.gather > 0.5 || tod.yurei > 0.5) supPos = [3.45, 6.15, 0]; // 事務所前（西フェンス際）
+      else if (tod.rest > 0.5) supPos = [3.3, 7.35, 0];
+      else {
+        var actives = [];
+        for (var i = 0; i < units.length; i++) {
+          var a = activeStage(units[i], t);
+          if (a && a.p > 0 && a.p < 1) actives.push(units[i]);
+        }
+        if (effFocus !== null) {
+          var fu = null;
+          for (var j = 0; j < units.length; j++)
+            if (units[j].f === effFocus) { var aa = activeStage(units[j], t); if (aa && aa.p > 0 && aa.p < 1) { fu = units[j]; break; } }
+          if (fu) {
+            var fs = floorState(fu, t);
+            supPos = [ZONE_X[fu.z] + 2.5, BLD.y1 - 0.6, FOUND_H + fu.f * FLOOR_H + (fs.state === 'done' ? FLOOR_H : 0)];
+          } else supPos = [3.45, 6.15, 0];
+        } else if (actives.length) {
+          var idx = Math.floor(nowS / 5) % actives.length;
+          var au = actives[idx];
+          supPos = [ZONE_X[au.z] + 1.5, BLD.y1 + 1.5, 0]; // 立入禁止エリアの外（南側）から見る
+        } else supPos = [3.45, 6.15, 0];
+      }
+      if (supPos[2] === 0) {
+        var so = pushOut(supPos[0], supPos[1], -1);
+        supPos = [so[0], so[1], 0];
+      }
+      var siteStarted = t > 0.3;
+      if (siteStarted) {
+        drawPerson(supPos[0], supPos[1], supPos[2], 'sup', true);
+        G_POS.sup = [supPos[0], supPos[1], supPos[2] + 14];
+      }
+      var mgrShow = tod.gather > 0.5 || tod.yurei > 0.5 || (nowS % 29) < 7;
+      if (siteStarted && mgrShow && effFocus === null) {
+        drawPerson(3.35, 5.55, 0, 'mgr', true);
+        G_POS.mgr = [3.35, 5.55, 14];
+      } else if (!mgrShow) G_POS.mgr = null;
+      if (tod.yurei > 0.5 && effFocus === null && siteStarted) {
+        var tradesNow = ['steel', 'scaffold', 'exterior', 'interior'];
+        for (var k = 0; k < 4; k++) {
+          var yy = 4.85 + k * 0.52;
+          drawPerson(3.95 + (k % 2) * 0.3, yy, 0, tradesNow[k], true);
+        }
+      }
+    }
+
+    /* ---------- UI ---------- */
+    var dayNum = document.getElementById('dayNum');
+    var totalDaysEl = document.getElementById('totalDays');
+    var phaseEl = document.getElementById('phaseName');
+    var planFill = document.getElementById('planFill');
+    var actFill = document.getElementById('actFill');
+    var planPct = document.getElementById('planPct');
+    var actPct = document.getElementById('actPct');
+    var lagBadge = document.getElementById('lagBadge');
+    var memCount = document.getElementById('memCount');
+    var slider = document.getElementById('slider');
+    var eventCap = document.getElementById('eventCap');
+    var focusStatus = document.getElementById('focusStatus');
+    var hint = document.getElementById('hint');
+    var card = document.getElementById('card');
+
+    var lastUiKey = '';
+    function refreshUI() {
+      var key = Math.round(day * 4) + '|' + (selected ? 's' : '');
+      dayNum.textContent = Math.floor(day);
+      phaseEl.textContent = phaseName(day);
+      var pp = Math.round(overallProgress(day, false) * 100);
+      var ap = Math.round(overallProgress(day, true) * 100);
+      planFill.style.width = pp + '%';
+      actFill.style.width = ap + '%';
+      planPct.textContent = pp + '%';
+      actPct.textContent = ap + '%';
+      memCount.textContent = membersPlaced(day, true) + ' / ' + MEM_TOTAL +
+        '（計画 ' + membersPlaced(day, false) + '）';
+      var lagDays = 0;
+      if (pp - ap > 2) {
+        for (var d = 0; d <= day; d += 0.25) {
+          if (overallProgress(d, false) >= overallProgress(day, true)) { lagDays = day - d; break; }
+        }
+      }
+      if (lagDays >= 1) {
+        lagBadge.textContent = '計画より約' + Math.round(lagDays) + '日遅れ';
+        lagBadge.classList.add('on');
+      } else lagBadge.classList.remove('on');
+      if (!sliderActive) {
+        slider.value = Math.round(day * 10);
+        slider.style.setProperty('--p', (day / Math.max(1, TOTAL_DAYS) * 100) + '%');
+      }
+      var cap = eventCaption(day);
+      if (cap) { eventCap.textContent = cap; eventCap.classList.add('on'); }
+      else eventCap.classList.remove('on');
+      focusStatus.textContent =
+        focusMode === 'auto'
+          ? (effFocus === null ? '自動：全体（外観）を表示中' : '自動：' + (effFocus + 1) + 'Fだけ表示中（屋内が主戦場）')
+          : focusMode === 'all' ? '全体（外観）を表示中'
+          : (focusMode + 1) + 'Fだけを表示中';
+      if (key !== lastUiKey) {
+        lastUiKey = key;
+        if (selected) fillCard();
+      }
+    }
+
+    function unitTitle(target) {
+      if (target === 'ground') return '敷地・建物基礎部';
+      return (target.f + 1) + 'F ' + ZONE_NAMES[target.z] + '工区' + (target.atrium ? '（吹抜け）' : '');
+    }
+    function setCnt(rowId, cntId, st, t) {
+      var row = document.getElementById(rowId);
+      if (!st || !st.items) { row.style.display = 'none'; return; }
+      row.style.display = '';
+      document.getElementById(cntId).textContent =
+        countPlaced(st, t, true) + ' / ' + st.items.length + ' 部材';
+    }
+    function gateSummary(u, t) {
+      var list = [];
+      var labels = { frame: null, rebar: '配筋検査', strength: '強度確認', joint: '接合確認', press: '隠蔽前試験' };
+      for (var i = 0; i < GATE_KEYS.length; i++) {
+        var g = u.gates[GATE_KEYS[i]];
+        if (g) list.push({ g: g, label: g.label || labels[GATE_KEYS[i]] });
+      }
+      if (LAYER_GATES[u.f]) list.push({ g: LAYER_GATES[u.f], label: '層間ふさぎ確認' });
+      for (var j = 0; j < list.length; j++) {
+        var s = gateState(list[j].g, t, true);
+        if (s === 'during') return { text: list[j].label + ' 検査中（作業停止）', hot: true };
+        if (s === 'before') return { text: list[j].label + ' 待ち', hot: false };
+      }
+      return { text: '全ゲート合格', hot: false };
+    }
+    function frameRowLabel() {
+      if (PARAMS.method === 'pca') return '躯体（PCa部材・接合）';
+      if (PARAMS.frame === 'RC') return '躯体（型枠・配筋・打設）';
+      if (PARAMS.frame === 'SRC') return '躯体（鉄骨＋型枠・配筋・打設）';
+      return '躯体（柱・梁・床版・配筋）';
+    }
+    function fillCard() {
+      var t = day;
+      document.getElementById('cardTitle').textContent = unitTitle(selected);
+      document.getElementById('lblSteel').textContent = frameRowLabel();
+      var workEl = document.getElementById('cardWork');
+      var avatar = document.getElementById('cardAvatar');
+      var who = document.getElementById('cardWho');
+      var tag = document.getElementById('cardTag');
+      var crew = document.getElementById('cardCrew');
+      var pct = document.getElementById('cardPct');
+      var state = document.getElementById('cardState');
+      var foremanBox = document.getElementById('cardForeman');
+      var rowIds = ['rowSteel', 'rowExt', 'rowScaf', 'rowEquip', 'rowInt', 'rowGate', 'rowRoofEq', 'rowEV'];
+
+      if (selected === 'ground') {
+        var st = stageProg(EARTH, t, true) < 1 ? EARTH : FOUND;
+        var p = stageProg(st, t, true);
+        workEl.textContent = st.work + '（' + TRADES[st.trade].name + '）';
+        var fm = FOREMEN[st.trade];
+        avatar.textContent = fm.name[0];
+        avatar.style.background = TRADES[st.trade].color;
+        who.textContent = '職長 ' + fm.name;
+        tag.textContent = fm.tag;
+        crew.textContent = (p > 0 && p < 1) ? st.crew + '人' : '—';
+        var pa = Math.round(p * 100), pl = Math.round(stageProg(st, t, false) * 100);
+        document.getElementById('cardAct').style.width = pa + '%';
+        document.getElementById('cardPlan').style.width = pl + '%';
+        pct.textContent = pa + '% / ' + pl + '%';
+        state.textContent = p >= 1 ? '完了' : p > 0 ? '作業中' : '未着手';
+        for (var ri = 0; ri < rowIds.length; ri++)
+          document.getElementById(rowIds[ri]).style.display = 'none';
+        document.getElementById('rowEV').style.display = '';
+        document.getElementById('cntEV').textContent =
+          countPlaced(EVST, t, true) + ' / ' + EVST.items.length + ' 部材' +
+          (gateState(EVST.testGate, t, true) === 'during' ? '・試運転検査中' : '');
+        return;
+      }
+      var u = selected;
+      setCnt('rowSteel', 'cntSteel', u.stages.steel, t);
+      setCnt('rowExt', 'cntExt', u.stages.exterior, t);
+      (function () {
+        var row = document.getElementById('rowScaf');
+        if (!u.scaffold) { row.style.display = 'none'; return; }
+        row.style.display = '';
+        document.getElementById('cntScaf').textContent =
+          '組立 ' + countPlaced(u.scaffold, t, true) + ' / ' + u.scaffold.items.length +
+          ' 枠 ・ 解体 ' + scaffoldDownCount(u, t) + ' 枠';
+      })();
+      (function () {
+        var row = document.getElementById('rowEquip');
+        var st = u.stages.equip;
+        if (!st || !st.items) { row.style.display = 'none'; return; }
+        row.style.display = '';
+        var ph = { pre: [0, 0], conc: [0, 0], fix: [0, 0] };
+        for (var i = 0; i < st.items.length; i++) {
+          var it = st.items[i];
+          if (!ph[it.ph]) continue;
+          ph[it.ph][1]++;
+          if (it.act <= t) ph[it.ph][0]++;
+        }
+        document.getElementById('cntEquip').textContent =
+          '先行 ' + ph.pre[0] + '/' + ph.pre[1] + ' ・ 隠蔽 ' + ph.conc[0] + '/' + ph.conc[1] + ' ・ 器具 ' + ph.fix[0] + '/' + ph.fix[1];
+      })();
+      setCnt('rowInt', 'cntInt', u.stages.interior, t);
+      setCnt('rowRoofEq', 'cntRoofEq', u.roofEq, t);
+      (function () {
+        var gs = gateSummary(u, t);
+        document.getElementById('rowGate').style.display = '';
+        var b = document.getElementById('cntGate');
+        b.textContent = gs.text;
+        b.className = gs.hot ? 'gate' : '';
+      })();
+      (function () {
+        var row = document.getElementById('rowEV');
+        if (u.z !== 1) { row.style.display = 'none'; return; }
+        row.style.display = '';
+        document.getElementById('cntEV').textContent =
+          countPlaced(EVST, t, true) + ' / ' + EVST.items.length + ' 部材' +
+          (gateState(EVST.testGate, t, true) === 'during' ? '・試運転検査中' : '');
+      })();
+      var act = activeStage(u, t);
+      var ap = Math.round(unitProgress(u, t, true) * 100);
+      var pp = Math.round(unitProgress(u, t, false) * 100);
+      document.getElementById('cardAct').style.width = ap + '%';
+      document.getElementById('cardPlan').style.width = pp + '%';
+      pct.textContent = ap + '% / ' + pp + '%';
+      if (act && act.gate) {
+        workEl.textContent = act.st.work;
+        avatar.textContent = '田';
+        avatar.style.background = TRADES.insp.color;
+        who.textContent = '監理者 ' + INSPECTOR.name + '（検査）';
+        tag.textContent = INSPECTOR.tag;
+        foremanBox.style.display = '';
+        crew.textContent = '立会い中';
+        state.textContent = '検査中 — 合格まで次工程は停止';
+        return;
+      }
+      if (u.atrium && (!act || act.st.trade === 'steel' || act.st.trade === 'exterior')) {
+        workEl.textContent = act ? act.st.work : '吹抜け（ボイド）';
+        who.textContent = act ? '職長 ' + FOREMEN[act.st.trade].name : '—';
+        tag.textContent = '上下階がつながる吹抜け空間。EVシャフトは北側';
+        avatar.textContent = act ? FOREMEN[act.st.trade].name[0] : '吹';
+        avatar.style.background = '#8d949e';
+        crew.textContent = (act && act.p > 0 && act.p < 1) ? act.st.crew + '人' : '—';
+        state.textContent = ap >= 100 ? '完了' : act && act.p > 0 && act.p < 1 ? '作業中' : ap > 0 ? '施工済み' : '未着手';
+        return;
+      }
+      if (!act) {
+        workEl.textContent = '未着手';
+        foremanBox.style.display = 'none';
+        crew.textContent = '—';
+        state.textContent = '未着手';
+        return;
+      }
+      foremanBox.style.display = '';
+      var fm2 = FOREMEN[act.st.trade];
+      workEl.textContent = act.st.work;
+      avatar.textContent = fm2.name[0];
+      avatar.style.background = TRADES[act.st.trade].color;
+      who.textContent = '職長 ' + fm2.name + '（' + TRADES[act.st.trade].name + '）';
+      tag.textContent = fm2.tag;
+      var di = Math.floor(t);
+      var n = (act.p > 0 && act.p < 1)
+        ? Math.max(2, Math.round(act.st.crew + (hash(u.z * 31 + u.f * 57 + di * 3) * 4 - 2))) : 0;
+      crew.textContent = n ? n + '人' : '—';
+      state.textContent = act.p >= 1 ? '完了' : '作業中' + (pp - ap >= 8 ? '（遅れ気味）' : '');
+    }
+
+    function select(target) {
+      selected = target;
+      if (target) {
+        card.classList.add('on');
+        hint.classList.add('gone');
+        fillCard();
+      } else {
+        card.classList.remove('on');
+      }
+    }
+    document.getElementById('cardClose').addEventListener('click', function () { select(null); });
+
+    /* ---------- 入力 ---------- */
+    function toWorld(ev) {
+      var r = cv.getBoundingClientRect();
+      var px = ev.clientX - r.left, py = ev.clientY - r.top;
+      return [(px - view.tx) / view.s, (py - view.ty) / view.s];
+    }
+    function pick(ev) {
+      var w = toWorld(ev);
+      for (var i = hitPolys.length - 1; i >= 0; i--) {
+        var pl = hitPolys[i];
+        if (pointInPoly(w[0], w[1], pl.poly)) return pl.target;
+      }
+      return null;
+    }
+    function pointInPoly(x, y, pts) {
+      var inside = false;
+      for (var i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+        var xi = pts[i][0], yi = pts[i][1], xj = pts[j][0], yj = pts[j][1];
+        if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+      }
+      return inside;
+    }
+    var downPos = null;
+    cv.addEventListener('pointerdown', function (ev) { downPos = [ev.clientX, ev.clientY]; });
+    cv.addEventListener('pointerup', function (ev) {
+      if (!downPos) return;
+      var dx = ev.clientX - downPos[0], dy = ev.clientY - downPos[1];
+      downPos = null;
+      if (dx * dx + dy * dy > 36) return;
+      var target = pick(ev);
+      if (target) select(target);
+    });
+    cv.addEventListener('pointermove', function (ev) {
+      if (ev.pointerType !== 'mouse') return;
+      hover = pick(ev);
+      cv.style.cursor = hover ? 'pointer' : 'default';
+    });
+
+    var playBtn = document.getElementById('playBtn');
+    var playIco = document.getElementById('playIco');
+    function setPlaying(v) {
+      playing = v;
+      playIco.innerHTML = v
+        ? '<rect x="2.5" y="1.5" width="4" height="13" fill="currentColor"/><rect x="9.5" y="1.5" width="4" height="13" fill="currentColor"/>'
+        : '<path d="M3 1.5v13l11-6.5z" fill="currentColor"/>';
+      playBtn.setAttribute('aria-label', v ? '停止' : '再生');
+    }
+    playBtn.addEventListener('click', function () {
+      if (!playing && day >= TOTAL_DAYS) day = 0;
+      setPlaying(!playing);
+    });
+    document.getElementById('restartBtn').addEventListener('click', function () {
+      day = 0; setPlaying(true);
+    });
+    slider.addEventListener('input', function () {
+      sliderActive = true;
+      day = parseInt(slider.value, 10) / 10;
+      slider.style.setProperty('--p', (day / Math.max(1, TOTAL_DAYS) * 100) + '%');
+      clearBubbles();
+    });
+    slider.addEventListener('change', function () { sliderActive = false; });
+    var speeds = [1, 2, 4], speedIdx = 0;
+    var speedBtn = document.getElementById('speedBtn');
+    speedBtn.addEventListener('click', function () {
+      speedIdx = (speedIdx + 1) % speeds.length;
+      speed = speeds[speedIdx];
+      speedBtn.textContent = '×' + speed;
+      if (speed > 2) clearBubbles();
+    });
+    var ghostBtn = document.getElementById('ghostBtn');
+    ghostBtn.addEventListener('click', function () {
+      ghostOn = !ghostOn;
+      ghostBtn.setAttribute('aria-pressed', ghostOn ? 'true' : 'false');
+    });
+
+    /* ---------- 階フォーカス（階数に合わせてボタンを作り直す） / 屋根 / 回転 / 会話 ---------- */
+    var focusBtnsEl = document.getElementById('focusBtns');
+    function buildFocusButtons() {
+      focusBtnsEl.innerHTML = '';
+      var defs = [{ v: 'auto', label: '自動' }, { v: 'all', label: '全体' }];
+      for (var f = FLOORS - 1; f >= 0; f--) defs.push({ v: String(f), label: (f + 1) + 'F' });
+      for (var i = 0; i < defs.length; i++) {
+        var b = document.createElement('button');
+        b.className = 'btn fbtn';
+        b.setAttribute('data-focus', defs[i].v);
+        b.textContent = defs[i].label;
+        b.addEventListener('click', function () {
+          var v = this.getAttribute('data-focus');
+          focusMode = v === 'auto' ? 'auto' : v === 'all' ? 'all' : parseInt(v, 10);
+          if (typeof focusMode === 'number' && focusMode >= FLOORS) focusMode = 'auto';
+          syncFocusBtns();
+        });
+        focusBtnsEl.appendChild(b);
+      }
+      if (typeof focusMode === 'number' && focusMode >= FLOORS) focusMode = 'auto';
+      syncFocusBtns();
+    }
+    function syncFocusBtns() {
+      var btns = focusBtnsEl.querySelectorAll('.fbtn[data-focus]');
+      for (var i = 0; i < btns.length; i++) {
+        var v = btns[i].getAttribute('data-focus');
+        var on = (v === 'auto' && focusMode === 'auto') ||
+                 (v === 'all' && focusMode === 'all') ||
+                 (v !== 'auto' && v !== 'all' && focusMode === parseInt(v, 10));
+        btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    }
+    var roofBtn = document.getElementById('roofBtn');
+    var roofModes = ['auto', 'ghost', 'solid'];
+    var roofLabels = { auto: '屋根：自動', ghost: '屋根：透過', solid: '屋根：実体' };
+    roofBtn.addEventListener('click', function () {
+      roofMode = roofModes[(roofModes.indexOf(roofMode) + 1) % roofModes.length];
+      roofBtn.textContent = roofLabels[roofMode];
+      roofBtn.setAttribute('aria-pressed', roofMode === 'ghost' ? 'true' : 'false');
+    });
+    var rotBtn = document.getElementById('rotBtn');
+    var rotLabels = ['南東から', '南西から', '北西から', '北東から'];
+    rotBtn.addEventListener('click', function () {
+      ROT = (ROT + 1) % 4;
+      rotBtn.textContent = '回転：' + rotLabels[ROT];
+    });
+    var bubBtn = document.getElementById('bubBtn');
+    bubBtn.addEventListener('click', function () {
+      bubblesOn = !bubblesOn;
+      bubBtn.textContent = bubblesOn ? '会話：ON' : '会話：OFF';
+      bubBtn.setAttribute('aria-pressed', bubblesOn ? 'true' : 'false');
+      if (!bubblesOn) clearBubbles();
+    });
+    window.addEventListener('keydown', function (ev) {
+      if (ev.code === 'Space' && ev.target === document.body) {
+        ev.preventDefault();
+        playBtn.click();
+      }
+    });
+
+    /* ---------- 物件パラメータのパネル ---------- */
+    var prmSite = document.getElementById('prmSite');
+    var prmShape = document.getElementById('prmShape');
+    var prmFloors = document.getElementById('prmFloors');
+    var prmFrame = document.getElementById('prmFrame');
+    var prmMethod = document.getElementById('prmMethod');
+    var prmSummary = document.getElementById('prmSummary');
+    var prmRule = document.getElementById('prmRule');
+    function summaryText() {
+      var frameLabel = PARAMS.frame === 'S' ? 'S造' : PARAMS.frame === 'RC' ? 'RC造' : 'SRC造';
+      var methodLabel = PARAMS.method === 'pca' ? 'PCa' : '在来';
+      var height = (4 + FLOORS * 5.8).toFixed(0);
+      return 'この物件：' + frameLabel + ' ' + PARAMS.floors + '階・' + SHAPE_LABEL[PARAMS.shape] + '・' + methodLabel +
+        ' <span class="sub">／ 敷地：' + SITE_LABEL[PARAMS.site] +
+        ' ／ 工区 ' + units.length + '（存在するセルのみ）' +
+        ' ／ 部材 ' + MEM_TOTAL + '点' +
+        ' ／ 工期 ' + TOTAL_DAYS + '日' +
+        ' ／ 高さ約' + height + 'm → クレーンはラフター（50mルール）</span>';
+    }
+    function syncParamUI() {
+      prmSite.value = PARAMS.site;
+      prmShape.value = PARAMS.shape;
+      prmFloors.value = String(PARAMS.floors);
+      prmFrame.value = PARAMS.frame;
+      prmMethod.value = PARAMS.method;
+      // P-rule P3：PCa は RC・SRC のみ。S造では選べない
+      var pcaOpt = prmMethod.querySelector('option[value="pca"]');
+      if (pcaOpt) pcaOpt.disabled = (PARAMS.frame === 'S');
+      prmSummary.innerHTML = summaryText();
+    }
+    function showRule(msg) {
+      if (msg) { prmRule.textContent = msg; prmRule.classList.add('on'); }
+      else prmRule.classList.remove('on');
+    }
+    function regenerate() {
+      buildModel();
+      day = 0;
+      selected = null;
+      card.classList.remove('on');
+      clearBubbles();
+      slider.max = String(TOTAL_DAYS * 10);
+      slider.value = '0';
+      slider.style.setProperty('--p', '0%');
+      totalDaysEl.textContent = TOTAL_DAYS;
+      buildFocusButtons();
+      syncParamUI();
+      lastUiKey = '';
+      setPlaying(true);
+    }
+    function onParamChange() {
+      showRule('');
+      PARAMS.site = prmSite.value;
+      PARAMS.shape = prmShape.value;
+      PARAMS.floors = parseInt(prmFloors.value, 10);
+      PARAMS.frame = prmFrame.value;
+      PARAMS.method = prmMethod.value;
+      // P-rule P3：S造で PCa は無効 → 在来へ戻して警告を出す
+      if (PARAMS.method === 'pca' && PARAMS.frame === 'S') {
+        PARAMS.method = 'conv';
+        showRule('P-rule P3：PCa（プレキャスト）は RC・SRC のときだけ選べます。S造では躯体工法を「在来」に戻しました。');
+      }
+      regenerate();
+    }
+    prmSite.addEventListener('change', onParamChange);
+    prmShape.addEventListener('change', onParamChange);
+    prmFloors.addEventListener('change', onParamChange);
+    prmFrame.addEventListener('change', onParamChange);
+    prmMethod.addEventListener('change', onParamChange);
+
+    /* =========================================================
+       会話の可視化（吹き出し）
+       ========================================================= */
+    var bubLayer = document.getElementById('bubLayer');
+    var callerChip = document.getElementById('callerChip');
+    var bubblesOn = true;
+    var BUB_MAX = 3;
+    var bubActive = [];
+    var bubQueue = [];
+    var bubNextSpawn = 0;
+    var bubLastCycle = -1;
+    var bubLastYuCycle = -1;
+    var bubLastGateKey = '';
+    var bubSeq = 0;
+
+    function speakerInfo(key) {
+      if (key === 'sup') return { name: '担当者', color: '#2c4a7c', pos: G_POS.sup };
+      if (key === 'mgr') return { name: '課長', color: '#4a4a52', pos: G_POS.mgr };
+      if (key === 'insp') return { name: '監理者・田辺', color: '#37474f', pos: G_POS.insp };
+      if (key === 'work') return { name: '職人', color: '#8a6d1f', pos: G_POS.work };
+      if (key.indexOf('fore:') === 0) {
+        var tr = key.slice(5);
+        return { name: '職長・' + FOREMEN[tr].name, color: TRADES[tr].dark, pos: G_POS.fore[tr] };
+      }
+      if (key.indexOf('work:') === 0) {
+        var tr2 = key.slice(5);
+        return { name: TRADES[tr2].name + 'の職人', color: TRADES[tr2].dark, pos: G_POS.work };
+      }
+      return { name: '担当者', color: '#2c4a7c', pos: G_POS.sup };
+    }
+    function pick1(arr) { return arr[Math.floor(hash(bubSeq * 7.3 + performance.now() / 977) * arr.length) % arr.length]; }
+
+    function activeUnitNow() {
+      var best = null;
+      for (var i = 0; i < units.length; i++) {
+        var a = activeStage(units[i], day);
+        if (a && a.p > 0 && a.p < 1) { best = { u: units[i], a: a }; break; }
+      }
+      return best;
+    }
+    function convAsa() {
+      var rainy = (day >= RAIN.from && day < RAIN.to) || (day >= RAIN2.from && day < RAIN2.to);
+      var windy = day >= WIND.from && day < WIND.to + 0.6;
+      var ky = rainy ? '雨で足元が悪い。打設とシーリングは中止。転倒に注意'
+        : windy ? '今日は強風。揚重は中止、飛散防止を徹底'
+        : pick1(['本日のKY：足場の上は三点支持で', '本日のKY：揚重の下には絶対入らない', '本日のKY：上下作業の区画を確認', '本日のKY：熱中症、水分と塩分をこまめに']);
+      return { prio: 3, lines: [
+        { who: 'sup', text: 'おはようございます。朝礼を始めます' },
+        { who: 'sup', text: ky },
+        { who: 'fore:steel', text: '了解です。持ち場に散ります' }
+      ] };
+    }
+    function convYu() {
+      return { prio: 3, lines: [
+        { who: 'sup', text: '夕礼です。明日の段取りを確認します' },
+        { who: pick1(['fore:steel', 'fore:interior', 'fore:exterior', 'fore:elec']), text: pick1(['明日は予定通り入ります', '明日、生コン4台で打設です', '明日の搬入は朝イチで来ます']) },
+        { who: 'sup', text: '了解。変更があれば朝礼で共有して' }
+      ] };
+    }
+    function convGate(g, u) {
+      var fk = u ? foremanOfGate(g) : 'ev';
+      if (g.kind === 'rebar') return { prio: 3, lines: [
+        { who: 'insp', text: '配筋検査を始めます。ピッチと継手を見せて' },
+        { who: 'fore:' + fk, text: '結束も補強筋も終わってます' },
+        { who: 'insp', text: 'よし、合格。打設に進んでいいよ' }
+      ] };
+      if (g.kind === 'torque') return { prio: 3, lines: [
+        { who: 'insp', text: '本締めと建入れの確認だね。トルクの記録は？' },
+        { who: 'fore:steel', text: 'マーキング済みです。建入れも±3mm以内' },
+        { who: 'insp', text: '合格。デッキに進んでいいよ' }
+      ] };
+      if (g.kind === 'strength') return { prio: 3, lines: [
+        { who: 'insp', text: '強度確認、テストピースの結果は？' },
+        { who: 'fore:' + fk, text: '材齢7日で設計強度クリアしてます' },
+        { who: 'sup', text: 'では上の階の躯体を始めます' }
+      ] };
+      if (g.kind === 'product') return { prio: 3, lines: [
+        { who: 'insp', text: 'PCaの受入検査。寸法と仕口を見せて' },
+        { who: 'fore:' + fk, text: '工場の検査票も揃ってます' },
+        { who: 'insp', text: '合格。吊り込みを始めて' }
+      ] };
+      if (g.kind === 'joint') return { prio: 3, lines: [
+        { who: 'insp', text: '接合確認。目地のグラウト、充填は？' },
+        { who: 'fore:' + fk, text: 'スリーブ継手も締め切りました' },
+        { who: 'sup', text: '合格なら内装に渡します' }
+      ] };
+      if (g.kind === 'press') return { prio: 3, lines: [
+        { who: 'insp', text: '隠蔽前の試験だね。圧力、保持できてる？' },
+        { who: 'fore:plumb', text: '水圧かけて30分、落ちてません' },
+        { who: 'sup', text: '合格なら写真を撮って、内装に渡します' }
+      ] };
+      if (g.kind === 'evtest') return { prio: 3, lines: [
+        { who: 'insp', text: 'EVの試運転検査、各階の着床を見ます' },
+        { who: 'fore:ev', text: '受電も済んで、調整は終わってます' },
+        { who: 'insp', text: 'うん、静かだね。この調子で' }
+      ] };
+      return { prio: 3, lines: [
+        { who: 'insp', text: '層間ふさぎ、確認します' },
+        { who: 'sup', text: '区画まわり、全部ふさいであります' }
+      ] };
+    }
+    function convWeather() {
+      var windy = day >= WIND.from && day < WIND.to + 0.6;
+      if (windy) return { prio: 2, lines: [
+        { who: 'fore:scaffold', text: '風が強い。今日は揚重なしでいくぞ' },
+        { who: 'work', text: '了解。地上の作業に切り替えます' }
+      ] };
+      return { prio: 2, lines: [
+        { who: 'fore:exterior', text: '雨だ。シーリングは中止、養生を先にやる' },
+        { who: 'work', text: '材料、濡れないようシート掛けます' }
+      ] };
+    }
+    function convWork() {
+      var au = activeUnitNow();
+      var tr = au ? au.a.st.trade : 'steel';
+      var lines = {
+        steel: [['次は西側の柱いくぞ', '玉掛けOK、合図見てて'], ['本締め終わったらデッキだ', 'トルク確認、マーキングした？']],
+        frame: [['型枠、あと2枚でこの面終わる', '配筋は束から持ってくる'], ['打設は明日の朝イチ、生コン4台', '配筋検査の立会い、段取り済み？']],
+        interior: [['ボード、置場からあと2枚', '台車で運ぶわ'], ['墨、出てる？', 'ここ、基準線から追ってる']],
+        elec: [['この配管、先に通しておく？', 'うん、隠蔽前に試験があるから急ごう']],
+        plumb: [['継手、もう一回締め確認', '水圧かける前に写真も頼む']],
+        hvac: [['ダクト、吊りバンドのピッチ見て', 'あと一区間で繋がる']],
+        exterior: [['パネル、あと1枚でこの面終わる', 'シーリングは下段から']],
+        scaffold: [['次の段、枠を持ってきて', '壁つなぎ忘れるなよ']],
+        roof: [['シートの重ね、こっちから', '風で飛ばないよう押さえて']]
+      };
+      var pair = pick1(lines[tr] || lines.steel);
+      return { prio: 1, lines: [
+        { who: 'work:' + tr, text: pair[0] },
+        { who: 'work:' + tr, text: pair[1] }
+      ] };
+    }
+    function convFore() {
+      var au = activeUnitNow();
+      var tr = au ? au.a.st.trade : 'steel';
+      return { prio: 1, lines: [
+        { who: 'fore:' + tr, text: pick1(['次は奥から詰めていくぞ', '材料は置場にある。二次搬送頼む', '今日中にこの面は終わらせる']) },
+        { who: 'work:' + tr, text: pick1(['終わりました。次いきます', '了解です', 'あと少しで区間が繋がります']) }
+      ] };
+    }
+    function convSup() {
+      var au = activeUnitNow();
+      if (!au) return null;
+      var tr = au.a.st.trade;
+      var gRebar = au.u.gates.rebar, gPress = au.u.gates.press;
+      if (gRebar && gateState(gRebar, day, true) === 'before' && gRebar.act - day < 1.6)
+        return { prio: 2, lines: [
+          { who: 'fore:' + foremanOfGate(gRebar), text: '配筋が終わります。検査の立会いをお願いします' },
+          { who: 'sup', text: '監理者に連絡済み。明日の午前で段取りするよ' }
+        ] };
+      if (gPress && gateState(gPress, day, true) === 'before' && gPress.act - day < 1.6)
+        return { prio: 2, lines: [
+          { who: 'fore:plumb', text: '隠蔽前の試験、明日できます' },
+          { who: 'sup', text: 'じゃあ内装は合格が出てから。写真も忘れずに' }
+        ] };
+      var u02 = U(0, 2);
+      if (u02 && au.u === u02 && day > EST_DAYS * 0.35 && day < EST_DAYS * 0.55)
+        return { prio: 2, lines: [
+          { who: 'fore:interior', text: '内装材の搬入が遅れてて…この工区だけ止まってます' },
+          { who: 'sup', text: '先にできる所から回そう。工程は組み替える' }
+        ] };
+      return { prio: 2, lines: [
+        { who: 'fore:' + tr, text: pick1(['進捗、予定通りです', 'この調子なら明日には次の段へ', '少し詰まってますが巻き返します']) },
+        { who: 'sup', text: pick1(['無理はしないで。詰まったら声かけて', '了解。写真だけ頼むね', 'いいね。その調子で']) }
+      ] };
+    }
+    function convMgr() {
+      return { prio: 2, lines: [
+        { who: 'sup', text: '課長、来月の工程表、チェックをお願いします' },
+        { who: 'mgr', text: pick1(['明日の朝までに見るよ', '検査の日程だけ先に押さえて', '原価は枠内だね、この調子で']) }
+      ] };
+    }
+    var CALLERS = [
+      { name: '施主', av: '施', lines: ['引渡しの日程、予定通りいけそうですか？', 'はい、試運転まで含めて間に合います'] },
+      { name: '設計者', av: '設', lines: ['仕上げの色番、決まったので共有します', '了解です。職長に展開します'] },
+      { name: '本社', av: '本', lines: '月次の進捗写真、今日中に送って', lines2: '承知しました。夕方までに送ります' },
+      { name: '業者代理人', av: '業', lines: ['納期、来週の頭で確定しました', '助かります。搬入経路は前日に確認します'] }
+    ];
+    function convPhone() {
+      var c = CALLERS[Math.floor(hash(day * 3.7 + bubSeq) * CALLERS.length) % CALLERS.length];
+      var l1 = Array.isArray(c.lines) ? c.lines[0] : c.lines;
+      var l2 = Array.isArray(c.lines) ? c.lines[1] : c.lines2;
+      return { prio: 2, phone: c, lines: [
+        { who: 'sup', phone: true, text: '📞 ' + l1 },
+        { who: 'sup', phone: true, text: l2 }
+      ] };
+    }
+
+    /* ---------- 吹き出し配置：保護矩形と衝突判定 ---------- */
+    function protectedRects() {
+      var rs = [];
+      if (card.classList.contains('on'))
+        rs.push({ x: card.offsetLeft, y: card.offsetTop, w: card.offsetWidth, h: card.offsetHeight });
+      if (callerChip.classList.contains('on'))
+        rs.push({ x: callerChip.offsetLeft, y: callerChip.offsetTop, w: callerChip.offsetWidth, h: callerChip.offsetHeight });
+      if (G_POS.lift) {
+        var ls = worldToScreen(G_POS.lift[0], G_POS.lift[1], G_POS.lift[2]);
+        rs.push({ x: ls[0] - 46, y: ls[1] - 46, w: 92, h: 92 });
+      }
+      if (eventCap.classList.contains('on')) {
+        var sr = stageEl.getBoundingClientRect(), er = eventCap.getBoundingClientRect();
+        rs.push({ x: er.left - sr.left, y: er.top - sr.top, w: er.width, h: er.height });
+      }
+      return rs;
+    }
+    function rectHit(a, b, m) {
+      return a.x - m < b.x + b.w && a.x + a.w + m > b.x && a.y - m < b.y + b.h && a.y + a.h + m > b.y;
+    }
+    function tryPlace(el, ax, ay) {
+      var w = el.offsetWidth, h = el.offsetHeight;
+      var W = view.w, H = view.h;
+      var cands = [
+        [ax - w / 2, ay - h - 18],
+        [ax - w - 10, ay - h - 12],
+        [ax + 10, ay - h - 12],
+        [ax - w - 14, ay - h / 2],
+        [ax + 14, ay - h / 2],
+        [ax - w / 2, ay - h - 52]
+      ];
+      var prot = protectedRects();
+      var placed = bubActive.map(function (b) { return { x: b.x, y: b.y, w: b.w, h: b.h }; });
+      for (var i = 0; i < cands.length; i++) {
+        var x = Math.max(4, Math.min(W - w - 4, cands[i][0]));
+        var y = Math.max(4, Math.min(H - h - 4, cands[i][1]));
+        var r = { x: x, y: y, w: w, h: h };
+        var ok = true;
+        for (var j = 0; j < prot.length && ok; j++) if (rectHit(r, prot[j], 5)) ok = false;
+        for (var k = 0; k < placed.length && ok; k++) if (rectHit(r, placed[k], 6)) ok = false;
+        if (ok) return { x: x, y: y, dx: x - ax, dy: y - ay };
+      }
+      return null;
+    }
+    function showMini(anchorPos) {
+      var s = worldToScreen(anchorPos[0], anchorPos[1], anchorPos[2]);
+      var el = document.createElement('div');
+      el.className = 'bubmini';
+      el.textContent = '💬';
+      el.style.left = (s[0] + 8) + 'px';
+      el.style.top = (s[1] - 26) + 'px';
+      bubLayer.appendChild(el);
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 1300);
+    }
+    function spawnConv(conv) {
+      if (!conv || !conv.lines || !conv.lines.length) return;
+      if (bubActive.length >= BUB_MAX) {
+        if (conv.prio >= 2 && bubQueue.length < 2) bubQueue.push(conv);
+        return;
+      }
+      var first = speakerInfo(conv.lines[0].who);
+      if (!first.pos) { if (conv.prio >= 2 && bubQueue.length < 2) bubQueue.push(conv); return; }
+      var el = document.createElement('div');
+      el.className = 'bub' + (conv.phone ? ' phone' : '');
+      el.style.visibility = 'hidden';
+      bubLayer.appendChild(el);
+      var b = { conv: conv, el: el, idx: -1, until: 0, x: 0, y: 0, w: 0, h: 0, dx: 0, dy: 0, anchorKey: conv.lines[0].who };
+      bubActive.push(b);
+      advanceBubble(b, performance.now(), true);
+    }
+    function advanceBubble(b, now, firstTry) {
+      b.idx++;
+      if (b.idx >= b.conv.lines.length) { endBubble(b); return; }
+      var line = b.conv.lines[b.idx];
+      var info = speakerInfo(line.who);
+      if (!info.pos) { endBubble(b); return; }
+      b.anchorKey = line.who;
+      b.el.innerHTML = '<span class="who" style="background:' + info.color + '">' + info.name + '</span><br>' +
+        line.text.replace(/</g, '&lt;') + '<span class="tail"></span>';
+      var s = worldToScreen(info.pos[0], info.pos[1], info.pos[2]);
+      b.el.style.visibility = 'hidden';
+      b.el.style.left = '0px'; b.el.style.top = '0px';
+      var placed = tryPlace(b.el, s[0], s[1]);
+      if (!placed) {
+        if (firstTry && b.conv.prio <= 1) {
+          showMini(info.pos);
+          endBubble(b);
+          return;
+        }
+        placed = { x: Math.max(4, s[0] - 60), y: Math.max(4, s[1] - 120), dx: 0, dy: -120 };
+        placed.dx = placed.x - s[0]; placed.dy = placed.y - s[1];
+      }
+      b.x = placed.x; b.y = placed.y; b.dx = placed.dx; b.dy = placed.dy;
+      b.w = b.el.offsetWidth; b.h = b.el.offsetHeight;
+      b.el.style.left = b.x + 'px';
+      b.el.style.top = b.y + 'px';
+      b.el.style.visibility = 'visible';
+      var tail = b.el.querySelector('.tail');
+      if (tail) {
+        var txx = Math.max(8, Math.min(b.w - 16, s[0] - b.x - 4));
+        tail.style.left = txx + 'px';
+        tail.style.top = (b.h - 6) + 'px';
+      }
+      if (b.conv.phone) {
+        callerChip.classList.add('on');
+        document.getElementById('callerAv').textContent = b.conv.phone.av;
+        document.getElementById('callerName').textContent = b.conv.phone.name + ' から電話';
+      }
+      b.until = now + 1500 + line.text.length * 42;
+    }
+    function endBubble(b) {
+      var i = bubActive.indexOf(b);
+      if (i >= 0) bubActive.splice(i, 1);
+      if (b.el.parentNode) b.el.parentNode.removeChild(b.el);
+      if (b.conv.phone) callerChip.classList.remove('on');
+      if (bubQueue.length && bubActive.length < BUB_MAX) {
+        var q = bubQueue.shift();
+        setTimeout(function () { spawnConv(q); }, 250);
+      }
+    }
+    function clearBubbles() {
+      for (var i = bubActive.length - 1; i >= 0; i--) endBubble(bubActive[i]);
+      bubQueue = [];
+      bubActive = [];
+      callerChip.classList.remove('on');
+    }
+    function tickBubbles(now) {
+      if (!bubblesOn) return;
+      for (var i = bubActive.length - 1; i >= 0; i--) {
+        var b = bubActive[i];
+        if (now >= b.until) { advanceBubble(b, now, false); continue; }
+        var info = speakerInfo(b.anchorKey);
+        if (info.pos) {
+          var s = worldToScreen(info.pos[0], info.pos[1], info.pos[2]);
+          b.x = s[0] + b.dx; b.y = s[1] + b.dy;
+          b.el.style.left = b.x + 'px';
+          b.el.style.top = b.y + 'px';
+        }
+      }
+      if (!playing || speed > 2 || sliderActive || day <= 0.2) return;
+      var tod = todInfo();
+      var cyc = Math.floor(now / TOD_LEN);
+      if (tod.gather > 0.75 && bubLastCycle !== cyc && day > 1) { bubLastCycle = cyc; spawnConv(convAsa()); return; }
+      if (tod.yurei > 0.75 && bubLastYuCycle !== cyc && day > 1) { bubLastYuCycle = cyc; spawnConv(convYu()); return; }
+      var ag = anyGateDuring(day);
+      var gk = ag ? ag.g.kind + '@' + Math.floor(day * 2) : '';
+      if (ag && gk !== bubLastGateKey) { bubLastGateKey = gk; spawnConv(convGate(ag.g, ag.u)); return; }
+      if (EVST && gateState(EVST.testGate, day, true) === 'during' && bubLastGateKey !== 'evt') {
+        bubLastGateKey = 'evt'; spawnConv(convGate(EVST.testGate, null)); return;
+      }
+      if (now < bubNextSpawn) return;
+      bubNextSpawn = now + 3400 + hash(now / 613) * 2600;
+      bubSeq++;
+      var r = hash(bubSeq * 3.17 + day);
+      var rainy = (day >= RAIN.from && day < RAIN.to) || (day >= RAIN2.from && day < RAIN2.to);
+      var windy = day >= WIND.from && day < WIND.to + 0.6;
+      if ((rainy || windy) && r < 0.30) spawnConv(convWeather());
+      else if (r < 0.42 && G_POS.mgr) spawnConv(convMgr());
+      else if (r < 0.54) spawnConv(convPhone());
+      else if (r < 0.72) { var cs = convSup(); if (cs) spawnConv(cs); else spawnConv(convFore()); }
+      else if (r < 0.87) spawnConv(convFore());
+      else spawnConv(convWork());
+    }
+
+    /* ---------- 凡例 ---------- */
+    (function buildLegend() {
+      var el = document.getElementById('legend');
+      var keys = ['earth', 'steel', 'frame', 'scaffold', 'elec', 'plumb', 'hvac', 'interior', 'exterior', 'insp', 'ev'];
+      var html = '';
+      for (var i = 0; i < keys.length; i++) {
+        html += '<span class="li"><span class="dot" style="background:' + TRADES[keys[i]].color + '"></span>' + TRADES[keys[i]].name + '</span>';
+      }
+      html += '<span class="li"><span class="ghostdot"></span>計画ゴースト（まだ付いていない部材）</span>';
+      html += '<span class="li">パラメータを変えると現場が再生成される（P-rule：PCaはRC/SRCのみ）</span>';
+      html += '<span class="li">躯体テンプレート：S＝節建方＋本締め確認／RC＝型枠→配筋→検査→打設→養生→脱型・強度確認／PCa＝吊り込み＋接合確認</span>';
+      html += '<span class="li">外装・足場は全4面。どの回転でも見える2面が描かれる</span>';
+      html += '<span class="li">立入禁止エリア（柵の中）には人を配置しない。事務所は西フェンス際に常駐し、搬入動線（青破線）を塞がない</span>';
+      html += '<span class="li">EVシャフトはピット（1F床下）から最上階天井まで連続した1本</span>';
+      html += '<span class="li">雨は打設・シーリングだけ、強風は揚重だけを止める。産廃は搬出され、型枠は転用される</span>';
+      html += '<span class="li">日内リズム：朝礼→作業→昼休み→作業→夕礼。会話の吹き出しは状況連動</span>';
+      html += '<span class="li">「回転」ボタンで視点を4方向に切り替えられます</span>';
+      el.innerHTML = html;
+    })();
+
+    /* ---------- 初期生成とメインループ ---------- */
+    buildModel();
+    slider.max = String(TOTAL_DAYS * 10);
+    totalDaysEl.textContent = TOTAL_DAYS;
+    buildFocusButtons();
+    syncParamUI();
+
+    function frame(ts) {
+      var dt = Math.min(0.05, (ts - lastTs) / 1000 || 0);
+      lastTs = ts;
+      if (playing) {
+        day += dt * 1.15 * speed;
+        if (day >= TOTAL_DAYS) { day = TOTAL_DAYS; setPlaying(false); }
+      }
+      updateFades(dt);
+      draw();
+      refreshUI();
+      tickBubbles(ts);
+      requestAnimationFrame(frame);
+    }
+    resize();
+    requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

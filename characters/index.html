@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>キャラプロファイル（ドット絵）— 全キャスト</title>
+<style>
+  body { font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; background:#f4f1ea; color:#2b2b33; margin:0; padding:24px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:#6b6f7a; font-size:13px; margin-bottom:20px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:16px; }
+  .card { background:#fff; border-radius:12px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+  .head { display:flex; gap:14px; align-items:flex-start; }
+  .head img.face { width:96px; height:96px; image-rendering:pixelated; }
+  .name { font-size:18px; font-weight:700; }
+  .role { color:#6b6f7a; font-size:12px; margin:2px 0 6px; }
+  .tag { background:#fdf3d8; border-radius:6px; padding:6px 8px; font-size:13px; }
+  .desc { font-size:13px; line-height:1.6; margin:10px 0; }
+  table { border-collapse:collapse; font-size:12px; }
+  td { padding:2px 6px 2px 0; } td.k { color:#6b6f7a; white-space:nowrap; }
+  .expr { width:100%; image-rendering:pixelated; margin-top:10px; background:#20242c; border-radius:8px; }
+  .exprlabel { font-size:11px; color:#6b6f7a; margin-top:8px; }
+</style>
+</head>
+<body>
+<h1>キャラプロファイル（ドット絵）— 全キャスト（22名）</h1>
+<div class="sub">48×48pxグリッド・顔は6:4横長／視点はやや斜め上／目は小さい縦バー・口と鼻なし・通常時眉なし／表情4種（通常・笑顔・困り・怒り）／ヘルメットの色＝工種カラー（本編固定色）。人物像の正は model/FOREMAN_CHARACTERS.md。名前はサンプル。</div>
+<div class="grid">
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/hero_normal.png" alt="主人公">
+    <div><div class="name">主人公（担当者）</div><div class="role">プレイヤー／20代後半</div>
+    <div class="tag">「段取りはまだ半人前。現場を走る足だけは一人前」</div></div></div>
+  <p class="desc">若手担当者。真面目で報告は早いが、忙しくなると抱え込みがち。白ヘルメットに青緑ライン。表情は本編の監督の感情（余裕→焦り→限界）と対応させる想定。</p>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/hero_expressions.png" alt="主人公の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/kacho_normal.png" alt="課長">
+    <div><div class="name">黒田 誠一</div><div class="role">課長／48歳 ※名前はサンプル</div>
+    <div class="tag">「怖いけど、最後は背中を押してくれる」</div></div></div>
+  <p class="desc">眼鏡＋厳しい眉。チェックは細かいが「悪い報告ほど早く」が信条。1ヶ月工程のチェックと段取りの組み直しが主戦場。</p>
+  <table><tr><td class="k">チェックの厳しさ</td><td>4</td><td class="k">報告のしやすさ</td><td>3</td></tr>
+  <tr><td class="k">育成姿勢</td><td>4</td><td class="k">繁忙度</td><td>高めに出やすい</td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/kacho_expressions.png" alt="課長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/shocho_normal.png" alt="所長">
+    <div><div class="name">堂本 巌</div><div class="role">所長／59歳 ※名前はサンプル</div>
+    <div class="tag">「普段は静か。一言で現場が締まる」</div></div></div>
+  <p class="desc">白髪混じりの眉と口髭。決断が速く業者からの信用が厚い。本社圧力は現場側で受け止める型。登場は少ないが一手が重い。</p>
+  <table><tr><td class="k">決断の速さ</td><td>5</td><td class="k">業者からの信用</td><td>5</td></tr>
+  <tr><td class="k">本社圧力の受け止め</td><td>現場を守る型</td><td class="k">懐</td><td>3</td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/shocho_expressions.png" alt="所長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/tobi_normal.png" alt="鳶職長">
+    <div><div class="name">赤羽 剛</div><div class="role">鳶職長（足場・鉄骨建方）／44歳 ※名前はサンプル</div>
+    <div class="tag">「言うことは聞かない。でも高所の仕事は誰より確か」</div></div></div>
+  <p class="desc">日焼け＋無精髭＋首タオル、紫ヘルメット。外部足場の組立・解体と建方が主戦場。仲良くなるまで長いが、信頼を積んだ終盤のリターンが大きい。</p>
+  <table><tr><td class="k">腕</td><td>4</td><td class="k">段取り</td><td>3</td><td class="k">協調性</td><td>1</td></tr>
+  <tr><td class="k">積極性</td><td>2</td><td class="k">動員力</td><td>3</td><td class="k">残業嫌悪</td><td>4</td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/tobi_expressions.png" alt="鳶職長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/denki_normal.png" alt="電気職長">
+    <div><div class="name">青山 光</div><div class="role">電気職長（設備）／38歳 ※名前はサンプル</div>
+    <div class="tag">「気になると自分から聞きに来る、設備の相談窓口」</div></div></div>
+  <p class="desc">黄色ヘルメット＋耳ペン。協調的で、図面の疑問や取り合いの気になり点を小さいうちに持ってくる。頼られ好き。</p>
+  <table><tr><td class="k">腕</td><td>4</td><td class="k">段取り</td><td>4</td><td class="k">協調性</td><td>4</td></tr>
+  <tr><td class="k">積極性</td><td>4</td><td class="k">動員力</td><td>3</td><td class="k">頼られ好き</td><td>4</td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/denki_expressions.png" alt="電気職長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/eisei_normal.png" alt="衛生職長">
+    <div><div class="name">水野 潤</div><div class="role">衛生職長（設備）／41歳 ※名前はサンプル</div>
+    <div class="tag">「試験も立会いも、段取りは水のように漏れなく」</div></div></div>
+  <p class="desc">青ヘルメット＋ネッカチーフ。穏やかで段取りが堅く、水圧・満水試験など隠蔽前のゲートをきっちり支える。</p>
+  <table><tr><td class="k">腕</td><td>3</td><td class="k">段取り</td><td>4</td><td class="k">協調性</td><td>4</td></tr>
+  <tr><td class="k">積極性</td><td>4</td><td class="k">動員力</td><td>3</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/eisei_expressions.png" alt="衛生職長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/tekkin_normal.png" alt="鉄筋職長">
+    <div><div class="name">結城 猛</div><div class="role">鉄筋職長／44歳 ※名前はサンプル</div>
+    <div class="tag">「手は早い、人数も集まる。言うことは聞かない」</div></div></div>
+  <p class="desc">鉄系グレーのヘルメット＋無精髭。結束の速さは現場一で応援の人数も集まるが、鳶と並ぶ「聞かない」代表格。工程の心臓部の親方で、機嫌と信頼の管理がそのまま工程管理になる。</p>
+  <table><tr><td class="k">腕</td><td>4</td><td class="k">段取り</td><td>3</td><td class="k">協調性</td><td>2</td></tr>
+  <tr><td class="k">積極性</td><td>2</td><td class="k">動員力</td><td>4</td><td class="k">残業嫌悪</td><td>4</td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/tekkin_expressions.png" alt="鉄筋職長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/katawaku_normal.png" alt="型枠職長">
+    <div><div class="name">形部 堅</div><div class="role">型枠職長／49歳 ※名前はサンプル</div>
+    <div class="tag">「職人気質。でも段取りだけは絶対に崩さない」</div></div></div>
+  <p class="desc">グレーベージュのヘルメット＋耳ペン。墨出しと型枠の精度にうるさいベテラン大工。頑固だが段取りは堅く、一度決めた手順が崩れない安心感がある。</p>
+  <table><tr><td class="k">腕</td><td>4</td><td class="k">段取り</td><td>4</td><td class="k">協調性</td><td>3</td></tr>
+  <tr><td class="k">積極性</td><td>3</td><td class="k">動員力</td><td>3</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/katawaku_expressions.png" alt="型枠職長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/tekko_normal.png" alt="鉄骨職長">
+    <div><div class="name">鉄原 鋼太</div><div class="role">鉄骨職長／39歳 ※名前はサンプル</div>
+    <div class="tag">「風を読む男。揚重が危ない日は誰より先に止める」</div></div></div>
+  <p class="desc">鋼青のヘルメット＋顎髭。S造躯体の主役で建方の段取りを握る。鳶系の気質で協調性は低めだが、強風で揚重を止める判断は現場一早い。</p>
+  <table><tr><td class="k">腕</td><td>4</td><td class="k">段取り</td><td>3</td><td class="k">協調性</td><td>2</td></tr>
+  <tr><td class="k">積極性</td><td>2</td><td class="k">動員力</td><td>3</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/tekko_expressions.png" alt="鉄骨職長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/doko_normal.png" alt="土工職長">
+    <div><div class="name">土屋 大地</div><div class="role">土工職長／45歳 ※名前はサンプル</div>
+    <div class="tag">「打設日は絶対。人数ならいくらでも集める」</div></div></div>
+  <p class="desc">茶ヘルメット＋首タオル。根切り・埋戻しからコンクリート打設の実行までを担う、人数勝負の親方。打設日を動かされるのを何より嫌うが、当日の動員は絶対に外さない。</p>
+  <table><tr><td class="k">腕</td><td>3</td><td class="k">段取り</td><td>3</td><td class="k">協調性</td><td>3</td></tr>
+  <tr><td class="k">積極性</td><td>2</td><td class="k">動員力</td><td>4</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/doko_expressions.png" alt="土工職長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/kucho_normal.png" alt="空調職長">
+    <div><div class="name">風間 涼</div><div class="role">空調職長（設備）／36歳 ※名前はサンプル</div>
+    <div class="tag">「試運転の時期になると、相談の数が倍になる」</div></div></div>
+  <p class="desc">水色ヘルメット＋耳ペン。設備系らしく協調的で、ダクトの納まりや受電後の試運転の段取りを早めに相談してくる。終盤の山場で頼りになる。</p>
+  <table><tr><td class="k">腕</td><td>4</td><td class="k">段取り</td><td>3</td><td class="k">協調性</td><td>4</td></tr>
+  <tr><td class="k">積極性</td><td>4</td><td class="k">動員力</td><td>3</td><td class="k">頼られ好き</td><td>4</td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/kucho_expressions.png" alt="空調職長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/naiso_normal.png" alt="内装職長">
+    <div><div class="name">天野 駆</div><div class="role">内装職長（軽天・ボード）／34歳 ※名前はサンプル</div>
+    <div class="tag">「現場の端から端まで、段取りは足で稼ぐ」</div></div></div>
+  <p class="desc">暖色（オレンジ）のヘルメット。9工区を巡回する機動力が持ち味。ベストに付いたボード粉の汚れが勲章。</p>
+  <table><tr><td class="k">腕</td><td>3</td><td class="k">段取り</td><td>3</td><td class="k">協調性</td><td>3</td></tr>
+  <tr><td class="k">積極性</td><td>3</td><td class="k">動員力</td><td>4</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/naiso_expressions.png" alt="内装職長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/gaiso_normal.png" alt="外装職長">
+    <div><div class="name">外崎 守</div><div class="role">外装職長（ALC・外装）／47歳 ※名前はサンプル</div>
+    <div class="tag">「面ごとに黙々と。終わった面はピカピカ」</div></div></div>
+  <p class="desc">緑ヘルメット＋眼鏡。ALCパネルからシーリング・仕上げまで立面を追う。目視確認が細かく、足場解体＝その面の外装完了の宣言を背負う責任感の強いタイプ。</p>
+  <table><tr><td class="k">腕</td><td>3</td><td class="k">段取り</td><td>3</td><td class="k">協調性</td><td>3</td></tr>
+  <tr><td class="k">積極性</td><td>3</td><td class="k">動員力</td><td>3</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/gaiso_expressions.png" alt="外装職長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/ev_normal.png" alt="EV職長">
+    <div><div class="name">木暮 律</div><div class="role">EV職長（昇降機）／52歳 ※名前はサンプル</div>
+    <div class="tag">「手順は一歩も譲らない。その代わり絶対に間違えない」</div></div></div>
+  <p class="desc">銀ヘルメット＋眼鏡。昇降機メーカー系の職長で、手順と検査の厳格さは全業種一。融通は利かないが任せた仕事に狂いはない。単線工程の番人。</p>
+  <table><tr><td class="k">腕</td><td>5</td><td class="k">段取り</td><td>4</td><td class="k">協調性</td><td>3</td></tr>
+  <tr><td class="k">積極性</td><td>3</td><td class="k">動員力</td><td>1</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/ev_expressions.png" alt="EV職長の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/kanrisha_normal.png" alt="監理者">
+    <div><div class="name">厳島 徹</div><div class="role">監理者／56歳 ※名前はサンプル</div>
+    <div class="tag">「指摘は細かい。でも合格の判は迷わず押す」</div></div></div>
+  <p class="desc">設計事務所の監理者。白ヘルメットに紺ライン＋眼鏡。立会いの目は厳しいが、記録の丁寧な現場には信頼を寄せる。関係の積み重ねで態度が少しずつ変わる相手。</p>
+  <table><tr><td class="k">厳格さ</td><td>5</td><td class="k">融通</td><td>2</td></tr>
+  <tr><td class="k">立会いの腰の軽さ</td><td>3</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/kanrisha_expressions.png" alt="監理者の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/seshu_normal.png" alt="施主担当">
+    <div><div class="name">園田 美咲</div><div class="role">施主担当／35歳 ※名前はサンプル</div>
+    <div class="tag">「決めるのは早い。現場のこともよく分かってる」</div></div></div>
+  <p class="desc">商業施設オーナー側の担当者（女性）。栗色の長髪＋白ヘルメット（現場訪問時）。決断が速く現場理解もあるが、テナント側の要望を背負って無理筋を持ち込むこともある。</p>
+  <table><tr><td class="k">決断の速さ</td><td>4</td><td class="k">予算感覚</td><td>3</td></tr>
+  <tr><td class="k">現場理解</td><td>4</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/seshu_expressions.png" alt="施主担当の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/sekkeisha_normal.png" alt="設計者">
+    <div><div class="name">作田 匠</div><div class="role">設計者（意匠）／43歳 ※名前はサンプル</div>
+    <div class="tag">「質疑の回答は丁寧。意匠の線だけは一歩も引かない」</div></div></div>
+  <p class="desc">意匠設計者。眼鏡＋耳ペン。質疑への回答は丁寧で変更にも条件次第で応じるが、意匠のこだわりどころでは絶対に譲らない。</p>
+  <table><tr><td class="k">回答速度</td><td>3</td><td class="k">変更への柔軟さ</td><td>3</td></tr>
+  <tr><td class="k">意匠へのこだわり</td><td>5</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/sekkeisha_expressions.png" alt="設計者の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/honsha_anzen_normal.png" alt="本社・安全担当">
+    <div><div class="name">本郷 守</div><div class="role">本社・安全担当／50歳 ※名前はサンプル</div>
+    <div class="tag">「パトロールの目は厳しい。現場の味方でもある」</div></div></div>
+  <p class="desc">本社の安全担当。緑ラインの白ヘルメット＋緑のベスト。抜き打ちパトロールで現場を震え上がらせるが、現場の地力が上がればきちんと認める。</p>
+  <table><tr><td class="k">パトロールの厳しさ</td><td>5</td><td class="k">頻度</td><td>3</td></tr>
+  <tr><td class="k">コスト圧力</td><td>2</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/honsha_anzen_expressions.png" alt="本社・安全担当の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/honsha_genka_normal.png" alt="本社・原価担当">
+    <div><div class="name">金田 勘助</div><div class="role">本社・原価担当／47歳 ※名前はサンプル</div>
+    <div class="tag">「1円の説明がつかない見積は、通らない」</div></div></div>
+  <p class="desc">本社の原価担当。眼鏡の奥の目は見積書の数字にしか興味がない。査定は全ステークホルダーで一番厳しいが、根拠のある金額にはきちんと頷く。</p>
+  <table><tr><td class="k">コスト圧力</td><td>5</td><td class="k">見積査定の厳しさ</td><td>5</td></tr>
+  <tr><td class="k">現場理解</td><td>2</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/honsha_genka_expressions.png" alt="本社・原価担当の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/kinrin_normal.png" alt="近隣代表">
+    <div><div class="name">近藤 梅子</div><div class="role">近隣代表／68歳 ※名前はサンプル</div>
+    <div class="tag">「早朝の音と、コンビニの駐車場が気になる」</div></div></div>
+  <p class="desc">北側住宅地の代表住民（女性）。ヘルメットではなく小豆色の帽子＋白髪の長髪という、現場の外の人の見た目。挨拶と説明を欠かさなければ話は通じるが、素行の悪い職人がいると真っ先に気づく。</p>
+  <table><tr><td class="k">神経質さ</td><td>4</td><td class="k">話の通じやすさ</td><td>3</td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/kinrin_expressions.png" alt="近隣代表の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/dairinin_normal.png" alt="業者代理人">
+    <div><div class="name">仲代 修</div><div class="role">業者代理人（サブコン社員）／38歳 ※名前はサンプル</div>
+    <div class="tag">「この人が休むと、書類も見積も止まる」</div></div></div>
+  <p class="desc">協力会社の社員側の顔。職長とは別に見積交渉と書類の相手を務める。仕事は誠実だが属人化が強く、休むと全てが止まる危うさがある。</p>
+  <table><tr><td class="k">属人化</td><td>4</td><td class="k">誠実さ</td><td>4</td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/dairinin_expressions.png" alt="業者代理人の表情">
+</div>
+
+<div class="card">
+  <div class="head"><img class="face" src="sprites/senpai_normal.png" alt="先輩担当者">
+    <div><div class="name">二木 悠太</div><div class="role">先輩担当者／32歳 ※名前はサンプル</div>
+    <div class="tag">「詰まったらまず聞ける。伝言ゲームの近道」</div></div></div>
+  <p class="desc">同じ現場事務所の先輩担当者。白ヘルメットにオレンジライン（主人公の青緑と区別）。肩代わりの助っ人であり、課長への伝言ゲームの近道にもなる相談相手。</p>
+  <table><tr><td class="k">相談のしやすさ</td><td>5</td><td class="k">肩代わり効率</td><td>4</td></tr>
+  <tr><td class="k">経験</td><td>4</td><td class="k"></td><td></td></tr></table>
+  <div class="exprlabel">表情：通常／笑顔／困り／怒り</div><img class="expr" src="sheets/senpai_expressions.png" alt="先輩担当者の表情">
+</div>
+
+</div>
+</body>
+</html>

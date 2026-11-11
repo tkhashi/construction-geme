@@ -1,0 +1,1214 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>工事計画タイムラプス アイソメ図</title>
+<style>
+  :root{
+    --bg:#f4f2ec; --panel:#fffdf8; --panel2:#ece8dc; --ink:#1d2733; --ink2:#54606d;
+    --line:#d8d2c2; --accent:#c8500a; --accent-ink:#fff; --steel:#33566e;
+    --chip:#e9e2cf; --good:#2e7d46; --warn:#b3261e;
+    --shadow:0 1px 3px rgba(30,35,40,.14), 0 8px 24px rgba(30,35,40,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#14181d; --panel:#1d232b; --panel2:#262d37; --ink:#e8e6df; --ink2:#a7b0bc;
+      --line:#39424e; --accent:#e8710a; --chip:#2c333e; --good:#5cb877; --warn:#f08a80;
+      --shadow:0 1px 3px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Noto Sans JP",system-ui,sans-serif;
+    font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+  button,select,input{font:inherit;color:inherit}
+  button,[role="button"],select,summary{min-height:2.25rem}
+  .wrap{max-width:1440px;margin:0 auto;padding:14px 14px 40px}
+  h1{font-size:clamp(20px,3.4vw,30px);line-height:1.25;margin:2px 0 4px;font-weight:800;letter-spacing:.01em}
+  .lead{color:var(--ink2);margin:0 0 12px;font-size:14px;max-width:72em}
+  /* building tabs */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+  .tab{appearance:none;border:1.5px solid var(--line);background:var(--panel);border-radius:10px;
+    padding:8px 14px;cursor:pointer;text-align:left;box-shadow:var(--shadow)}
+  .tab b{display:block;font-size:15px}
+  .tab span{display:block;font-size:12px;color:var(--ink2)}
+  .tab[aria-pressed="true"]{border-color:var(--accent);outline:2px solid var(--accent);outline-offset:-1px}
+  .tab[aria-pressed="true"] b{color:var(--accent)}
+  /* layout */
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}
+  @media (max-width:960px){.layout{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+  .stage{padding:10px 10px 6px;position:relative}
+  .stage-head{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;padding:2px 4px 8px}
+  .stage-head .bname{font-weight:800;font-size:17px}
+  .stage-head .ov{color:var(--ink2);font-size:13px}
+  .canvasbox{position:relative;border-radius:8px;overflow:hidden;background:
+    linear-gradient(180deg, color-mix(in srgb, var(--steel) 10%, transparent), transparent 55%)}
+  canvas#iso{display:block;width:100%;height:min(58vh,560px)}
+  @media (max-width:640px){canvas#iso{height:46vh}}
+  .hud{position:absolute;left:10px;top:10px;background:color-mix(in srgb, var(--panel) 88%, transparent);
+    border:1px solid var(--line);border-radius:10px;padding:8px 12px;backdrop-filter:blur(3px);max-width:min(78%,352px)}
+  .hud .day{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.15}
+  .hud .day small{font-size:13px;font-weight:600;color:var(--ink2)}
+  .hud .cal{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .hud .phase{font-size:14px;font-weight:700;color:var(--accent)}
+  .hud .cnt{font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .ms-pop{position:absolute;right:10px;top:10px;background:var(--accent);color:var(--accent-ink);
+    border-radius:10px;padding:8px 12px;font-weight:700;font-size:14px;box-shadow:var(--shadow);
+    opacity:0;transform:translateY(-4px);transition:opacity .3s,transform .3s;pointer-events:none;max-width:60%}
+  .ms-pop.show{opacity:1;transform:none}
+  /* machine chips */
+  .mchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 4px 2px;min-height:30px}
+  .mchips .mlab{font-size:12px;font-weight:700;color:var(--ink2)}
+  .mchip{display:inline-flex;gap:6px;align-items:center;background:var(--chip);border:1px solid var(--line);
+    border-radius:999px;padding:2px 10px 2px 6px;font-size:12.5px;font-weight:700}
+  .mchip .mdot{flex:none;width:11px;height:11px;border-radius:3px;border:1px solid rgba(0,0,0,.25)}
+  .mchips .none{font-size:12.5px;color:var(--ink2)}
+  /* controls */
+  .controls{padding:10px 12px 12px;border-top:1px solid var(--line)}
+  .crow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .btn{appearance:none;border:1.5px solid var(--line);background:var(--panel2);border-radius:9px;
+    padding:6px 14px;cursor:pointer;font-weight:700;min-width:44px}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);min-width:104px}
+  .btn[aria-pressed="true"]{background:var(--steel);border-color:var(--steel);color:#fff}
+  .speeds{display:flex;gap:4px;flex-wrap:wrap}
+  .speeds .btn{padding:6px 10px;min-width:52px;font-variant-numeric:tabular-nums}
+  .sliderow{display:flex;gap:10px;align-items:center;margin-top:10px}
+  .sliderow label{font-size:13px;color:var(--ink2);white-space:nowrap;font-weight:700}
+  input[type="range"]{flex:1;accent-color:var(--accent);height:36px;min-width:120px}
+  .sliderow .val{font-variant-numeric:tabular-nums;font-weight:800;white-space:nowrap;min-width:118px;text-align:right}
+  .toggles{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px}
+  .toggles label{display:inline-flex;gap:7px;align-items:center;padding:6px 2px;cursor:pointer;font-size:14px;min-height:36px}
+  .toggles input{width:20px;height:20px;accent-color:var(--accent)}
+  /* gantt */
+  .gantt{padding:12px 14px;margin-top:14px}
+  .gantt h2,.side h2{font-size:15px;margin:0 0 8px;font-weight:800}
+  .gantt .note{font-size:12px;color:var(--ink2);margin:6px 0 0}
+  .grow{display:grid;grid-template-columns:168px 1fr;gap:8px;align-items:center;margin:3px 0}
+  .grow .gl{font-size:12.5px;text-align:right;color:var(--ink2);white-space:normal;line-height:1.3}
+  .grow .gt{position:relative;height:14px;background:var(--panel2);border-radius:4px}
+  .grow .gb{position:absolute;top:2px;bottom:2px;border-radius:3px;background:var(--steel);opacity:.75}
+  .grow.cur .gl{color:var(--accent);font-weight:800}
+  .grow.cur .gb{background:var(--accent);opacity:1}
+  .nowline{position:absolute;top:-3px;bottom:-3px;width:2.5px;background:var(--accent);border-radius:2px}
+  .nowline::after{content:"";position:absolute;top:-5px;left:-3.5px;border:5px solid transparent;border-top:6px solid var(--accent)}
+  .gticks{display:grid;grid-template-columns:168px 1fr;gap:8px;font-size:11px;color:var(--ink2);margin-top:4px}
+  .gticks .tk{position:relative;height:14px}
+  .gticks .tk span{position:absolute;transform:translateX(-50%);font-variant-numeric:tabular-nums;white-space:nowrap}
+  /* side */
+  .side{display:flex;flex-direction:column;gap:14px}
+  .side .card{padding:12px 14px}
+  .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .stat{background:var(--panel2);border-radius:9px;padding:8px 10px}
+  .stat .k{font-size:11.5px;color:var(--ink2)}
+  .stat .v{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.3}
+  .progbar{height:10px;background:var(--panel2);border-radius:5px;overflow:hidden;margin-top:10px}
+  .progbar i{display:block;height:100%;background:var(--accent);width:0%}
+  .tasklist{list-style:none;margin:0;padding:0;max-height:300px;overflow:auto}
+  .tasklist li{border-top:1px solid var(--line)}
+  .tasklist li:first-child{border-top:none}
+  .tasklist button{appearance:none;background:none;border:none;width:100%;text-align:left;cursor:pointer;
+    padding:8px 4px;display:block}
+  .tasklist button:hover{background:var(--panel2)}
+  .tasklist .tn{font-weight:700;font-size:13.5px;line-height:1.4}
+  .tasklist .tm{font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .gate{display:inline-block;background:var(--warn);color:#fff;font-size:11px;font-weight:700;
+    border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px}
+  .empty{color:var(--ink2);font-size:13.5px;padding:6px 0}
+  .detail{background:var(--panel2);border-radius:9px;padding:10px 12px;margin-top:10px;font-size:13.5px}
+  .detail b{font-size:14.5px}
+  .detail dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:6px 0 0}
+  .detail dt{color:var(--ink2)} .detail dd{margin:0;font-variant-numeric:tabular-nums}
+  .mslist{list-style:none;margin:0;padding:0}
+  .mslist li{display:flex;gap:8px;align-items:baseline;padding:5px 0;border-top:1px solid var(--line);font-size:13.5px}
+  .mslist li:first-child{border-top:none}
+  .mslist .dot{flex:none;width:10px;height:10px;border-radius:50%;border:2px solid var(--ink2);align-self:center}
+  .mslist li.done .dot{background:var(--good);border-color:var(--good)}
+  .mslist li.done{font-weight:700}
+  .mslist .md{margin-left:auto;color:var(--ink2);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:12.5px}
+  .legend div{display:flex;gap:7px;align-items:center}
+  .sw{flex:none;width:16px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.18)}
+  .src{font-size:12.5px;color:var(--ink2)}
+  .src p{margin:0 0 6px}
+  .src b{color:var(--ink)}
+  .loading{padding:40px 16px;text-align:center;color:var(--ink2)}
+  .err{color:var(--warn);font-weight:700}
+  @media (prefers-reduced-motion: reduce){.ms-pop{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>工事計画タイムラプス　アイソメ図</h1>
+  <p class="lead">工事計画（サイドチャット生成・ConstructionPlan）に連動し、部材が計画タスクの開始〜終了の中で1つずつ所定位置に出現する様子を、等角投影（アイソメ図）でタイムラプス再生します。建物全体が一斉にせり上がる表現ではなく、Scene3Dの部材ごとの <i>place</i> 時刻どおりに描画します。さらに今回、部材の出現を「担い手」の動きと結びつけました：ユンボは掘る帯（掘削前線）に沿って移動し、掘削タイルはその帯を掘り終えた時点で現れます。ラフタークレーン（1基のみ）は鉄骨の実部材そのものをワイヤーで運び、本設位置の近くへ粗く下ろし、最後は建方班が横引きで最終位置へ寄せてから固定されます。作業員（誘導員・玉掛け・建方班・打設班・鉄筋/型枠/内装/設備の各班）は、進行中タスクの作業前線に沿って配置されます。タスク期間の内側での重機・人の動きは、計画データそのものではなく、期間内作業順序の想定として生成しています（詳細は下の留保欄）。さらに今回、作業員の人数を「班の人数チップ」ではなく実人数にしました：工種ごとに必要な人区を計画側テーブルから算定し（タスク人区＝1班人数×投入班数×期間）、算出した人数を個別の作業者として現場に投下します（工区分割されたタスクは工区ごとに投下）。そして全ての部材は、出現する直前に、担当作業者がその生成箇所を画面上で通過してから現れます（掘削など重機主体の部材では誘導員・合番が通過します）。現在の現場総人数は画面左上のHUDと進捗欄に常時表示します。</p>
+
+  <div class="tabs" id="tabs" role="group" aria-label="物件切替"></div>
+
+  <div class="layout">
+    <div>
+      <section class="card">
+        <div class="stage">
+          <div class="stage-head">
+            <span class="bname" id="bName">読み込み中…</span>
+            <span class="ov" id="bOv"></span>
+          </div>
+          <div class="canvasbox">
+            <canvas id="iso" aria-label="工事現場のアイソメ図（タイムラプス）"></canvas>
+            <div class="hud" aria-live="polite">
+              <div class="day"><span id="hudDay">実働 0 日目</span> <small id="hudPct"></small></div>
+              <div class="cal" id="hudCal"></div>
+              <div class="phase" id="hudPhase"></div>
+              <div class="cnt" id="hudCnt"></div>
+              <div class="cnt" id="hudCrew" style="font-weight:700;color:var(--ink)"></div>
+            </div>
+            <div class="ms-pop" id="msPop"></div>
+          </div>
+          <div class="mchips" id="machineChips" aria-label="在場中の重機"></div>
+        </div>
+        <div class="controls">
+          <div class="crow">
+            <button class="btn primary" id="playBtn" type="button">▶ 再生</button>
+            <button class="btn" id="restartBtn" type="button" title="最初に戻る">⟲ 最初へ</button>
+            <div class="speeds" id="speeds" role="group" aria-label="再生速度">
+              <button class="btn" type="button" data-speed="1">×1</button>
+              <button class="btn" type="button" data-speed="5">×5</button>
+              <button class="btn" type="button" data-speed="10" aria-pressed="true">×10</button>
+              <button class="btn" type="button" data-speed="20">×20</button>
+              <button class="btn" type="button" data-speed="40">×40</button>
+            </div>
+          </div>
+          <div class="sliderow">
+            <label for="timeSlider">実働日</label>
+            <input type="range" id="timeSlider" min="0" max="100" step="0.1" value="0" aria-label="実働日スライダー" />
+            <span class="val" id="sliderVal">0.0 / 0 日</span>
+          </div>
+          <div class="toggles">
+            <label><input type="checkbox" id="tgScaffold" checked /> 外部足場を表示</label>
+            <label><input type="checkbox" id="tgTemp" checked /> 仮設・資材（仮囲い等）を表示</label>
+            <label><input type="checkbox" id="tgDetail" checked /> 内装・設備の細部を表示</label>
+            <label><input type="checkbox" id="tgMachines" checked /> 重機を表示</label>
+            <label><input type="checkbox" id="tgPeople" checked /> 人を表示</label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card gantt" aria-label="フェーズ帯（工程バー）">
+        <h2>工程バー（フェーズ帯）— 計画そのもの</h2>
+        <div id="ganttRows"></div>
+        <div class="gticks"><div></div><div class="tk" id="gTicks"></div></div>
+        <p class="note">帯は各フェーズの計画期間（最早開始 ES 〜 最遅終了 EF、実働日）。オレンジの線が現在位置です。検査チェーンは通期で並行するため、この帯からは除いています（タスク総数には含まれます）。</p>
+      </section>
+    </div>
+
+    <aside class="side">
+      <section class="card" aria-label="進捗">
+        <h2>進捗</h2>
+        <div class="statgrid">
+          <div class="stat"><div class="k">経過（実働日）</div><div class="v" id="stDay">–</div></div>
+          <div class="stat"><div class="k">進捗率</div><div class="v" id="stPct">–</div></div>
+          <div class="stat"><div class="k">表示中の部材</div><div class="v" id="stMembers">–</div></div>
+          <div class="stat"><div class="k">完了タスク</div><div class="v" id="stTasks">–</div></div>
+          <div class="stat"><div class="k">現在の現場人数</div><div class="v" id="stCrew">–</div></div>
+          <div class="stat"><div class="k">総人区（全タスク）</div><div class="v" id="stLabor">–</div></div>
+        </div>
+        <div class="progbar"><i id="progFill"></i></div>
+        <p class="src" style="margin-top:8px" id="stPeriod"></p>
+      </section>
+
+      <section class="card" aria-label="進行中のタスク">
+        <h2>進行中のタスク <span id="taskCount" style="color:var(--ink2);font-size:13px"></span></h2>
+        <ul class="tasklist" id="taskList"></ul>
+        <div class="detail" id="taskDetail" hidden></div>
+      </section>
+
+      <section class="card" aria-label="マイルストーン">
+        <h2>マイルストーン</h2>
+        <ul class="mslist" id="msList"></ul>
+      </section>
+
+      <section class="card" aria-label="凡例とデータ出典">
+        <h2>凡例（部材の色）</h2>
+        <div class="legend" id="legend"></div>
+        <h2 style="margin-top:14px">データ出典と留保</h2>
+        <div class="src">
+          <p><b>工事計画：</b>サイドチャット「建築 工事 計画 手順 調査」で生成した ConstructionPlan（CP-1〜CP-10、計画検証 PL <b>12/12 PASS</b>、難易度 normal / seed 42 / 2027-04-01 着工）。タスク数・日付・工期は計画 JSON の値そのままです。</p>
+          <p><b>部材の出現：</b>Scene3D（scene3d/1.0）の部材ごとの place / remove イベント時刻（実働日）。足場・型枠・山留め・仮囲い等は remove 時刻で消えます。部材の位置・寸法は Scene3D の実座標そのままで、外接矩形での近似描画はしていません。</p>
+          <p><b>描画上の扱い：</b>地面は仮囲いの実配置から求めた敷地外形と、建物平面（1階床スラブ）の実フットプリントで描きます。部材はデータの画家順（奥→手前）のまま1点ずつ輪郭付きで描きます。ただし外壁・サッシ・屋根・パラペットなどの外皮部材は、薄い面が躯体・デッキに塗りつぶされないよう、躯体・デッキ・内装の後に外皮レイヤーとして描きます（外皮同士は画家順を維持）。長尺の梁・配管類はスパン単位に割って表示します。杭・埋設物などの地下部材は掘削底までの表示とし、埋戻し（1階床スラブ設置）以降は描きません。内装・設備の細部は、その階の外装が閉じた後は描きません（外から見えないため）。</p>
+          <p><b>重機の動き：</b>表示は各重機が属する計画タスクの在場区間（ES〜EF、高所作業車は搬入〜搬出の期間）の中だけです。杭打ち機・高所作業車は Scene3D の重機アクターのキーフレーム（時刻・位置）を線形補間します。ユンボ・ダンプ・ラフタークレーン・ポンプ車のキーフレームは、下記「担い手連動」の作業想定から生成したものに置き換えています。ラフタークレーンは計画どおり<b>1基のみ</b>です。<b>重機と人はアイソメで判読できるよう、実寸より大きめに描いています</b>（部材・建物は実寸のまま）。</p>
+          <p><b>担い手連動（タスク期間内の作業想定）：</b>工事計画が決めているのはタスクの期間（ES〜EF）と部材の本数・座標・出現時刻の集合までで、「期間の中で誰がどう動いて施工するか」は計画に含まれません。このビューでは、その期間内の作業順序を<b>想定として新規に組み立て</b>、部材の出現を担い手の前線と同期させています。これは計画データの改変ではなく、タスク期間の内側だけでの並べ替えと動きの付与です（タスク・ES/EF・暦日・工期・部材の本数・実座標・寸法・出現時刻の総量はすべて無変更）。分担は現場の原則どおり、<b>クレーンは粗い位置決めまで</b>（仮置き／搬入位置から本設位置の近くへ実部材をワイヤー吊りで運ぶ。固定寸法のダミー荷は廃止）、<b>人は細かい横引きと施工</b>（着地後に作業班が最終位置へ寄せ・建て込み・固定する二段構え）です。土工事では掘削タイルの帯をユンボが走行しながら掘り、タイルは掘り終えた時点で出現します（ブームは次に掘る帯を向きます）。ダンプは掘削前線とゲートを往復します。ポンプ車のブームは、その日に打つ工区の打設前線へ向けます。人力主体の部材（鉄筋・型枠・内装・設備など）は、タスク期間の中で空間的な作業前線に沿うよう出現順序を並べ替え、作業班はその前線に沿って移動します。作業員の配置は進行中タスクと前線位置から導いたもので、個人の実在の動きではありません。</p>
+          <p><b>人区の算定（計画テーブル由来）：</b>タスク人区（人日）＝ 1班人数 × 投入班数 × 期間（実働日）。1班人数は計画側テーブル model/scene_rules.json の <b>crewByTrade</b>（工種ごとのゲーム用既定値）、投入班数は計画の資源リンクが示す並行班数で、計画 JSON に指定のないタスクは1班（上限は計画 resources の <b>tradePeak</b>。1班/タスクとした場合、同工種タスクの最大同時並行数が全工種で tradePeak 以下に収まることを生成時に確認済み）。工区分割されたタスクは計画上も別タスクであり、工区ごとに班を投下します。<b>これは計画テーブル由来の算定であり、公表歩掛（国土交通省の労務費基準等）そのものではありません</b>（実務の考え方自体は「歩掛×数量÷期間」で必要人数を逆算する点で同じです）。画面の作業者はこの算定人数ぶんを1人ずつ描いたもので、班チップの人数表示ではありません。</p>
+          <p><b>この物件の算定結果：</b><span id="laborLine">–</span></p>
+          <p><b>通過ルール：</b>全ての部材は担当タスクの作業者1名に割り当てられ、その作業者の経路が部材の位置を出現の <b>0.35 実働日前</b>に通過します。クレーン揚重部材は「クレーンが粗く運ぶ→着地→作業者が横引きで通過・寄せる→出現」の順を維持し、掘削など重機主体の部材では誘導員・合番の作業者が生成直前にその箇所を通過します。データ生成時に全数検証し、<b>違反0件</b>を確認済みです（内訳は上の算定結果）。</p>
+          <p><b>留保：</b>仮置き（stock）は place の前段のため、このビューでは本設位置への出現として表現し、<b>仮置き状態そのものは未表現</b>です。<b>室外機・受水槽は工事計画側に対応タスクが無く、Scene3D の gap として未生成</b>です（画面にも現れません）。<b>生コン車・搬入トラックは Scene3D にアクターが無いため未表示です（打設はポンプ車のみ表示）</b>。</p>
+          <p><b>暦日の表示：</b>実働日→暦日は補間せず、その時点までに到達した直近のタスク境界（開始日／終了日）を表示します。</p>
+        </div>
+      </section>
+    </aside>
+  </div>
+  <div class="loading" id="loading">計画データを読み込んでいます…</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- kind 分類と色 ---------- */
+var KIND_COLOR = {
+  column:"#4a6b82", girder:"#54748c", joist:"#5d7f99", brace:"#42596b",
+  deckPanel:"#9aa5ab", groundSlab:"#a8a9a2", roofSheet:"#647687", roofProtection:"#71808e", parapet:"#b7ab90", roofDrain:"#57626d",
+  pile:"#7a6a55", footing:"#a39a86", gradeBeam:"#a89d87", blinding:"#b5ab94",
+  footingForm:"#c2a878", gradeBeamForm:"#c2a878", pitFloor:"#9d9687", pitWall:"#a39a86",
+  rebarMat:"#8a4f3a", rebarBundle:"#7c4633",
+  extWallPanel:"#d3c5a0", sash:"#7fb3c8", shopfront:"#6f9fb5", shutter:"#8b939b", doorExt:"#7d8894", canopy:"#aeb6bc",
+  scaffoldUnit:"#cc7a5c",
+  excavationTile:"#8a6d4f", retainingPanel:"#6e5b45",
+  lgsFrame:"#aebd9c", wallBoard:"#ddd6c2", ceilFrame:"#bcc7ab", ceilingBoard:"#e6dfca", floorFinish:"#c9a06b", doorLeaf:"#a97e52",
+  duct:"#9db3bd", ductRiser:"#93a9b5", hangerSet:"#b6c2c9", refrigerantPipe:"#7f9fb0", cableRack:"#a9bcc5",
+  plumbPipe:"#7fa88f", plumbFixtureSet:"#8fb89d", psRiser:"#86ad95", trunkRiser:"#8fa9b8", buriedPipe:"#6f8a7a", buriedCable:"#5f7a8a",
+  indoorUnit:"#cfd6cf", diffuser:"#d8ddd8", lightSet:"#e8d98a", outletSet:"#d9c98a", cubicle:"#b0a58e", cubiclePad:"#a89d87",
+  evCar:"#8d7fb8", evRail:"#6f6198", evMachine:"#7d6ea6",
+  stairFlight:"#a8adb2",
+  extPave:"#b3aca0", extBase:"#a39a86", lineMarking:"#e8e4da", tree:"#5d8a4e", lightPole:"#7d8894",
+  tempFence:"#9aa5ab", tempGate:"#8f979e", tempOffice:"#d8cfc0", tempPanel:"#c8c2b2", tempPole:"#a8a49a",
+  tempSmoking:"#c8bfa8", tempToilet:"#c2ccd4", batterBoard:"#d8b25e", servicePole:"#8f979e"
+};
+var FALLBACK = "#a0a0a0";
+function isTemp(k){ return k.indexOf("temp")===0 || k==="batterBoard"; }
+/* 外皮レイヤー：躯体・デッキ・内装の後に描く部材（画家順のままでは薄い面が躯体に塗りつぶされるため） */
+var SKIN_KINDS={extWallPanel:1,sash:1,shopfront:1,shutter:1,doorExt:1,canopy:1,roofSheet:1,roofProtection:1,parapet:1,roofDrain:1};
+function isSkin(k){ return !!SKIN_KINDS[k]; }
+function isDetail(k){
+  return ["lgsFrame","wallBoard","ceilFrame","ceilingBoard","floorFinish","doorLeaf",
+    "duct","ductRiser","hangerSet","refrigerantPipe","cableRack","plumbPipe","plumbFixtureSet",
+    "psRiser","trunkRiser","buriedPipe","buriedCable","indoorUnit","diffuser","lightSet","outletSet",
+    "cubicle","cubiclePad","rebarMat","rebarBundle"].indexOf(k)>=0;
+}
+function shade(hex, f){
+  var n = parseInt(hex.slice(1),16);
+  var r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+  r=Math.max(0,Math.min(255,Math.round(r*f))); g=Math.max(0,Math.min(255,Math.round(g*f))); b=Math.max(0,Math.min(255,Math.round(b*f)));
+  return "rgb("+r+","+g+","+b+")";
+}
+
+/* ---------- 状態 ---------- */
+var DATA=null, B=null, bi=0;
+var t=0, playing=false, speed=10, lastTs=0;
+var showScaffold=true, showTemp=true, showDetail=true, showMachines=true, showPeople=true;
+var view={scale:1, ox:0, oy:0};
+var shownMilestones={};
+var selectedTask=null;
+
+var $=function(id){return document.getElementById(id);};
+var canvas=$("iso"), ctx=canvas.getContext("2d");
+
+/* ---------- 投影 ---------- */
+var COS=0.8660254, SIN=0.5;
+function proj(x,y,z){ return [ (x-y)*COS, (x+y)*SIN - z ]; }
+
+function computeView(){
+  var minSx=1e9,maxSx=-1e9,minSy=1e9,maxSy=-1e9;
+  var ms=B.members;
+  for(var i=0;i<ms.length;i++){
+    var m=ms[i], x=m[3],y=m[4],z=m[5],dx=m[6],dy=m[7],dz=m[8];
+    var zb=R?Math.max(z,R.clampZ):z;
+    var cs=[[x,y,zb],[x+dx,y,zb],[x,y+dy,zb],[x+dx,y+dy,zb],[x,y,z+dz],[x+dx,y,z+dz],[x,y+dy,z+dz],[x+dx,y+dy,z+dz]];
+    for(var j=0;j<8;j++){ var p=proj(cs[j][0],cs[j][1],cs[j][2]);
+      if(p[0]<minSx)minSx=p[0]; if(p[0]>maxSx)maxSx=p[0];
+      if(p[1]<minSy)minSy=p[1]; if(p[1]>maxSy)maxSy=p[1]; }
+  }
+  var w=canvas.clientWidth, h=canvas.clientHeight;
+  var pw=maxSx-minSx||1, ph=maxSy-minSy||1;
+  var s=Math.min((w-28)/pw,(h-28)/ph);
+  view.scale=s;
+  view.ox=(w-pw*s)/2 - minSx*s;
+  view.oy=(h-ph*s)/2 - minSy*s;
+}
+function SP(x,y,z){ var p=proj(x,y,z); return [p[0]*view.scale+view.ox, p[1]*view.scale+view.oy]; }
+
+function sizeCanvas(){
+  var dpr=Math.min(2, window.devicePixelRatio||1);
+  var w=canvas.clientWidth, h=canvas.clientHeight;
+  if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){
+    canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+/* ---------- 描画まわりの事前計算 ---------- */
+var R=null;
+/* 埋戻し後に残すと宙に浮く地下部材（remove イベントを持たないもの） */
+var UNDER_HIDE={pile:1,buriedPipe:1,buriedCable:1,gradeBeam:1,gradeBeamForm:1,footing:1,footingForm:1,blinding:1,excavationTile:1,retainingPanel:1};
+function prepareRender(){
+  var ms=B.members, kinds=B.kinds;
+  var minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9, clampZ=0, hasExc=false;
+  var slabT=Infinity, paveT=Infinity, deckZ={};
+  for(var i=0;i<ms.length;i++){ var m=ms[i], k=kinds[m[2]];
+    if(m[3]<minX)minX=m[3]; if(m[4]<minY)minY=m[4];
+    if(m[3]+m[6]>maxX)maxX=m[3]+m[6]; if(m[4]+m[7]>maxY)maxY=m[4]+m[7];
+    if(k==="excavationTile"){ if(!hasExc||m[5]<clampZ)clampZ=m[5]; hasExc=true; }
+    if(k==="groundSlab"&&m[0]<slabT)slabT=m[0];
+    if((k==="extPave"||k==="extBase")&&m[0]<paveT)paveT=m[0];
+    if(k==="deckPanel")deckZ[Math.round((m[5]+0.1)*10)/10]=1;
+  }
+  if(!hasExc)clampZ=-2;
+  var sealT=slabT<Infinity?slabT:(paveT<Infinity?paveT:B.totalWorkingDays);
+  var bases=[0];
+  Object.keys(deckZ).forEach(function(z){ bases.push(parseFloat(z)); });
+  bases.sort(function(a,b){return a-b;});
+  var closure={extWallPanel:1,sash:1,shopfront:1,doorExt:1,shutter:1,canopy:1,parapet:1,roofSheet:1,roofProtection:1};
+  var bands=bases.map(function(lo,idx){
+    var hi=idx+1<bases.length?bases[idx+1]:Infinity;
+    var times=[];
+    for(var j2=0;j2<ms.length;j2++){ var mm=ms[j2];
+      if(closure[kinds[mm[2]]]&&mm[5]>=lo-0.01&&mm[5]<hi)times.push(mm[0]); }
+    times.sort(function(a,b){return a-b;});
+    return {lo:lo,hi:hi,extT:times.length?times[Math.min(times.length-1,Math.floor(times.length*0.98))]:Infinity};
+  });
+  /* 敷地外形：仮囲い・ゲートの実配置（フットプリント角）の凸包。外接矩形では描かない */
+  var fseen={}, fpts=[];
+  for(var i2=0;i2<ms.length;i2++){ var fm=ms[i2], fk=kinds[fm[2]];
+    if(fk==="tempFence"||fk==="tempGate"){
+      var fc=[[fm[3],fm[4]],[fm[3]+fm[6],fm[4]],[fm[3],fm[4]+fm[7]],[fm[3]+fm[6],fm[4]+fm[7]]];
+      for(var ci=0;ci<4;ci++){ var key=fc[ci][0]+","+fc[ci][1];
+        if(!fseen[key]){ fseen[key]=1; fpts.push(fc[ci]); } }
+    }
+  }
+  var site=convexHull(fpts);
+  if(site.length<3) site=[[minX,minY],[maxX,minY],[maxX,maxY],[minX,maxY]];
+  /* 建物平面：1階床スラブの実フットプリント（雁行形状そのまま） */
+  var footprint=[];
+  for(var i3=0;i3<ms.length;i3++){ var sm=ms[i3];
+    if(kinds[sm[2]]==="groundSlab") footprint.push([sm[3],sm[4],sm[3]+sm[6],sm[4]+sm[7]]);
+  }
+  var bcx=0, bcy=0;
+  if(footprint.length){ for(var i4=0;i4<footprint.length;i4++){ bcx+=(footprint[i4][0]+footprint[i4][2])/2; bcy+=(footprint[i4][1]+footprint[i4][3])/2; } bcx/=footprint.length; bcy/=footprint.length; }
+  else if(site.length){ for(var i5=0;i5<site.length;i5++){ bcx+=site[i5][0]; bcy+=site[i5][1]; } bcx/=site.length; bcy/=site.length; }
+  /* 掘削前線：掘削タイルの出現順（帯の掃引順）と重心。ユンボのブームはこちらを向く */
+  var excTiles=[];
+  for(var i6=0;i6<ms.length;i6++){ var em=ms[i6];
+    if(kinds[em[2]]==="excavationTile") excTiles.push([em[0], em[3]+em[6]/2, em[4]+em[7]/2, em[5]]);
+  }
+  excTiles.sort(function(a,b){return a[0]-b[0];});
+  R={sealT:sealT,clampZ:clampZ,bands:bands,site:site,footprint:footprint,cx:bcx,cy:bcy,excTiles:excTiles};
+}
+function convexHull(pts){
+  var p=pts.slice().sort(function(a,b){return a[0]-b[0]||a[1]-b[1];});
+  function cross(o,a,b){ return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]); }
+  var lo=[],hi=[],i,q;
+  for(i=0;i<p.length;i++){ q=p[i];
+    while(lo.length>=2&&cross(lo[lo.length-2],lo[lo.length-1],q)<=0)lo.pop();
+    lo.push(q); }
+  for(i=p.length-1;i>=0;i--){ q=p[i];
+    while(hi.length>=2&&cross(hi[hi.length-2],hi[hi.length-1],q)<=0)hi.pop();
+    hi.push(q); }
+  lo.pop(); hi.pop();
+  return lo.concat(hi);
+}
+function bandExtT(z){
+  if(!R)return Infinity;
+  for(var i=0;i<R.bands.length;i++){ var b=R.bands[i]; if(z>=b.lo&&z<b.hi)return b.extT; }
+  return Infinity;
+}
+
+/* ---------- 重機レイヤー ----------
+   Scene3D の重機アクター。在場区間（計画タスク ES〜EF）内だけ表示し、位置はキーフレーム間を線形補間。
+   部材の後に最前面レイヤーとして描く（接地影付き、画家順は壊さない）。
+   重機だけは機種が判読できるよう実寸より大きめ（MF 倍、平方向・高さとも）に描く。 */
+var MF=1.7;
+var MACHINE_COLOR={excavator:"#d98e2b",dumpTruck:"#8b939c",pileDriver:"#5b7a99",pumpTruck:"#c0452f",
+  roughCrane:"#dfa41e",awp:"#d96c2c",finisher:"#6b7f5e",roller:"#c9a227"};
+function mActiveAt(m, tt){
+  for(var i=0;i<m.active.length;i++) if(tt>=m.active[i][0] && tt<m.active[i][1]) return true;
+  return false;
+}
+function mPosAt(m, tt){
+  var ks=m.keys, n=ks.length, i;
+  if(n===1 || tt<=ks[0][0])
+    return {x:ks[0][1], y:ks[0][2], z:ks[0][3], hx:(n>1?ks[1][1]-ks[0][1]:1), hy:(n>1?ks[1][2]-ks[0][2]:0)};
+  for(i=1;i<n;i++){
+    if(tt<=ks[i][0]){
+      var a=ks[i-1], b=ks[i], f=(tt-a[0])/((b[0]-a[0])||1);
+      return {x:a[1]+(b[1]-a[1])*f, y:a[2]+(b[2]-a[2])*f, z:a[3]+(b[3]-a[3])*f, hx:b[1]-a[1], hy:b[2]-a[2]};
+    }
+  }
+  var l=ks[n-1], p=ks[n-2];
+  return {x:l[1], y:l[2], z:l[3], hx:l[1]-p[1], hy:l[2]-p[2]};
+}
+function activeMachines(tt){
+  var out=[];
+  if(!B || !B.machines) return out;
+  for(var i=0;i<B.machines.length;i++){ var m=B.machines[i];
+    if(mActiveAt(m,tt)) out.push({m:m, p:mPosAt(m,tt)});
+  }
+  out.sort(function(a,b){ return (a.p.x+a.p.y)-(b.p.x+b.p.y); });
+  return out;
+}
+
+/* ---------- 担い手連動ヘルパー ----------
+   lifts は [揚重時刻, 部材index]。揚重時刻〜place 時刻の間、その部材は「運ばれている／横引き中」。
+   最も新しい1件をクレーンの吊り荷（CARRY）とし、それ以前の同時進行分は着地後の横引き途中（SETTLE）
+   として、本設位置の手前（クレーン側）にずらして描く。 */
+/* キーフレーム列 [t,x,y,z] の線形補間（重機・班・照準で共用） */
+function keysPosAt(keys, tt){
+  var n=keys.length, i;
+  if(n===1 || tt<=keys[0][0]) return keys[0];
+  for(i=1;i<n;i++){
+    if(tt<=keys[i][0]){
+      var a=keys[i-1], b=keys[i], f=(tt-a[0])/((b[0]-a[0])||1);
+      return [tt, a[1]+(b[1]-a[1])*f, a[2]+(b[2]-a[2])*f, a[3]+(b[3]-a[3])*f];
+    }
+  }
+  return keys[n-1];
+}
+var CARRY=null, SETTLE={};
+function computeCarry(){
+  CARRY=null; SETTLE={};
+  if(!B || !B.lifts || !showMachines) return;
+  var L=B.lifts, ms=B.members;
+  var lo=0, hi=L.length-1, idx=-1;
+  while(lo<=hi){ var mid=(lo+hi)>>1; if(L[mid][0]<=t){ idx=mid; lo=mid+1; } else hi=mid-1; }
+  var found=0;
+  for(var i=idx;i>=0 && found<8;i--){
+    var lt=L[i][0]; if(lt<t-2.5) break;
+    var mi=L[i][1], pt=ms[mi][0];
+    if(pt<=lt || t>=pt) continue;
+    if(found===0) CARRY={mi:mi, u:(t-lt)/(pt-lt)};
+    else SETTLE[mi]=(pt-t)/(pt-lt);
+    found++;
+  }
+}
+function nextLift(){
+  if(!B || !B.lifts) return null;
+  var L=B.lifts, lo=0, hi=L.length-1, idx=-1;
+  while(lo<=hi){ var mid=(lo+hi)>>1; if(L[mid][0]>t){ idx=mid; hi=mid-1; } else lo=mid+1; }
+  if(idx<0) return null;
+  return (L[idx][0]-t<=2.0)? L[idx] : null;
+}
+/* 次に掘る掘削タイル（無ければ最後のタイル）。ユンボのブームの向き */
+function nextExcTarget(){
+  var a=R? R.excTiles : null;
+  if(!a || !a.length) return null;
+  for(var i=0;i<a.length;i++) if(a[i][0]>t) return a[i];
+  return a[a.length-1];
+}
+/* ワールド座標のまま3面で描く箱（吊り荷・バケット用） */
+function drawBoxWorld(x,y,z,dx,dy,dz,base){
+  var A=SP(x,y+dy,z), Bp=SP(x+dx,y+dy,z), C=SP(x+dx,y,z), D=SP(x,y,z);
+  var A2=SP(x,y+dy,z+dz), B2=SP(x+dx,y+dy,z+dz), C2=SP(x+dx,y,z+dz), D2=SP(x,y,z+dz);
+  mFace([A,Bp,B2,A2], shade(base,0.82));
+  mFace([Bp,C,C2,B2], shade(base,0.64));
+  mFace([A2,B2,C2,D2], shade(base,1.12));
+}
+
+/* 機体ローカル座標 (u:進行方向, v:直交, w:高さ) の枠組みと変換 */
+function mFrame(p){
+  var alongX = Math.abs(p.hx)>=Math.abs(p.hy);
+  var s = alongX ? (p.hx<0?-1:1) : (p.hy<0?-1:1);
+  if(!p.hx && !p.hy){ alongX=true; s=1; }
+  return {alongX:alongX, s:s, x:p.x, y:p.y, z:p.z};
+}
+function mPt(fr, u, v, w){
+  u*=MF; v*=MF; w*=MF;
+  if(fr.alongX) return [fr.x + u*fr.s, fr.y + v, fr.z + w];
+  return [fr.x + v, fr.y + u*fr.s, fr.z + w];
+}
+function mFace(pts, fill){
+  ctx.beginPath();
+  var p0=SP(pts[0][0],pts[0][1],pts[0][2]); ctx.moveTo(p0[0],p0[1]);
+  for(var i=1;i<pts.length;i++){ var p=SP(pts[i][0],pts[i][1],pts[i][2]); ctx.lineTo(p[0],p[1]); }
+  ctx.closePath(); ctx.fillStyle=fill; ctx.fill();
+  ctx.strokeStyle="rgba(28,32,38,0.45)"; ctx.lineWidth=0.7; ctx.stroke();
+}
+/* 中心(u0,v0)・底面 w0 の箱。寸法は実寸(m)で渡し、内部で MF 倍する */
+function mBox(fr, u0, v0, w0, du, dv, dw, base){
+  var hu=du/2, hv=dv/2;
+  function C(u,v,w){ return mPt(fr, u0+u, v0+v, w0+w); }
+  var c000=C(-hu,-hv,0), c100=C(hu,-hv,0), c010=C(-hu,hv,0), c110=C(hu,hv,0);
+  var c001=C(-hu,-hv,dw), c101=C(hu,-hv,dw), c011=C(-hu,hv,dw), c111=C(hu,hv,dw);
+  void c000;
+  mFace([c010,c110,c111,c011], shade(base,0.82));
+  mFace([c110,c100,c101,c111], shade(base,0.64));
+  mFace([c011,c111,c101,c001], shade(base,1.12));
+}
+function mLine(a, b, width, color){
+  var pa=SP(a[0],a[1],a[2]), pb=SP(b[0],b[1],b[2]);
+  ctx.strokeStyle=color; ctx.lineWidth=width; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(pa[0],pa[1]); ctx.lineTo(pb[0],pb[1]); ctx.stroke();
+}
+function mWheel(fr, u, v){
+  var p=mPt(fr, u, v, 0.55); var s=SP(p[0],p[1],p[2]);
+  ctx.beginPath();
+  ctx.ellipse(s[0], s[1], Math.max(2.2, 0.62*MF*view.scale), Math.max(1.8, 0.55*MF*view.scale), 0, 0, Math.PI*2);
+  ctx.fillStyle="#33383e"; ctx.fill();
+  ctx.strokeStyle="rgba(28,32,38,0.5)"; ctx.lineWidth=0.6; ctx.stroke();
+}
+function mShadow(fr, ru, rv){
+  var c=SP(fr.x, fr.y, fr.z);
+  ctx.beginPath();
+  ctx.ellipse(c[0], c[1]+1.5, Math.max(4, ru*MF*view.scale), Math.max(2, rv*MF*view.scale*0.5), 0, 0, Math.PI*2);
+  ctx.fillStyle="rgba(20,24,28,0.20)"; ctx.fill();
+}
+var GLASS="#7fb3c8", TIRE="#33383e";
+function drawExcavator(fr, tt){
+  var base=MACHINE_COLOR.excavator;
+  mShadow(fr, 3.2, 2.4);
+  mBox(fr, 0, 1.05, 0, 4.6, 0.85, 1.05, TIRE);
+  mBox(fr, 0, -1.05, 0, 4.6, 0.85, 1.05, TIRE);
+  mBox(fr, 0, 0, 1.05, 4.3, 1.5, 0.35, shade(base,0.7));
+  mBox(fr, -0.2, 0, 1.4, 3.7, 2.9, 1.55, base);
+  mBox(fr, 0.75, -0.85, 2.95, 1.25, 1.15, 1.45, GLASS);
+  mBox(fr, -2.15, 0, 1.55, 0.9, 2.5, 1.5, shade(base,0.8));
+  /* ブームは数式アニメーションではなく「次に掘るタイル」の方を向く（上部旋回）。
+     機体は帯に沿って走行し、ブームだけが掘削点へ旋回する */
+  var bc=shade(base,0.72);
+  var tgt=nextExcTarget();
+  var dx, dy;
+  if(tgt){ dx=tgt[1]-fr.x; dy=tgt[2]-fr.y; }
+  else { dx=fr.alongX? fr.s : 0; dy=fr.alongX? 0 : fr.s; }
+  var len=Math.sqrt(dx*dx+dy*dy)||1; dx/=len; dy/=len;
+  var reach=Math.min(len, 7.2*MF);
+  var B0=[fr.x, fr.y, fr.z+2.55*MF];
+  var J=[fr.x+dx*3.4*MF, fr.y+dy*3.4*MF, fr.z+4.6*MF];
+  var K=[fr.x+dx*reach, fr.y+dy*reach, tgt? tgt[3]+0.4 : fr.z+0.4];
+  if(K[2]>J[2]-0.4) K[2]=J[2]-0.4;
+  mLine(B0, J, 5, bc);
+  mLine(J, K, 4, bc);
+  drawBoxWorld(K[0]-0.55, K[1]-0.45, K[2]-0.8, 1.1, 0.9, 0.8, TIRE);
+}
+function drawDump(fr){
+  var bed=MACHINE_COLOR.dumpTruck;
+  mShadow(fr, 3.9, 2.0);
+  mBox(fr, 0, 0, 0.5, 7.6, 2.4, 0.45, "#4a5058");
+  mBox(fr, -0.7, 0, 0.95, 5.2, 2.35, 1.6, bed);
+  mBox(fr, -0.7, 0, 2.55, 5.2, 2.35, 0.18, shade(bed,0.78));
+  mBox(fr, 2.9, 0, 0.95, 1.9, 2.25, 0.9, "#e8e6df");
+  mBox(fr, 2.9, 0, 1.85, 1.9, 2.25, 1.15, GLASS);
+  mWheel(fr, 2.6, 1.3); mWheel(fr, 2.6, -1.3); mWheel(fr, -2.4, 1.3); mWheel(fr, -2.4, -1.3);
+}
+function drawPileDriver(fr){
+  var base=MACHINE_COLOR.pileDriver, mast=shade(base,0.6);
+  mShadow(fr, 3.4, 2.6);
+  mBox(fr, 0, 1.25, 0, 5.0, 0.9, 1.05, TIRE);
+  mBox(fr, 0, -1.25, 0, 5.0, 0.9, 1.05, TIRE);
+  mBox(fr, -0.3, 0, 1.05, 4.4, 3.1, 1.9, base);
+  mBox(fr, -1.6, -0.7, 2.95, 1.3, 1.2, 1.4, GLASS);
+  mLine(mPt(fr,2.5,0.42,0), mPt(fr,2.5,0.42,9.8), 3.4, mast);
+  mLine(mPt(fr,2.5,-0.42,0), mPt(fr,2.5,-0.42,9.8), 3.4, mast);
+  for(var i=1;i<=4;i++) mLine(mPt(fr,2.5,0.42,i*1.95), mPt(fr,2.5,-0.42,i*1.95), 1.4, mast);
+  mLine(mPt(fr,-1.8,0,2.9), mPt(fr,2.5,0,9.8), 2, mast);
+  mBox(fr, 2.5, 0, 5.4, 0.85, 1.0, 1.7, TIRE);
+  mBox(fr, 3.3, 0, 0, 0.5, 0.5, 6.4, "#a39a86");
+}
+function drawPump(fr, mach){
+  var base=MACHINE_COLOR.pumpTruck;
+  mShadow(fr, 4.6, 2.0);
+  mBox(fr, 0, 0, 0.5, 8.6, 2.5, 0.5, "#4a5058");
+  mBox(fr, -0.9, 0, 1.0, 5.6, 2.4, 1.5, "#e8e6df");
+  mBox(fr, -3.4, 0, 2.5, 1.4, 2.2, 0.7, shade(base,0.8));
+  mBox(fr, 3.35, 0, 1.0, 1.9, 2.3, 0.85, "#e8e6df");
+  mBox(fr, 3.35, 0, 1.85, 1.9, 2.3, 1.15, GLASS);
+  mWheel(fr, 3.0, 1.32); mWheel(fr, 3.0, -1.32); mWheel(fr, -2.9, 1.32); mWheel(fr, -2.9, -1.32);
+  /* ブーム：敷地中心固定ではなく、その日に打つ工区の打設前線（aim）へ向ける */
+  var aim=null;
+  if(mach && mach.aim && mach.aim.length){ var ap=keysPosAt(mach.aim, t); aim=[ap[1], ap[2], ap[3]]; }
+  if(!aim) aim=[R.cx, R.cy, 0];
+  var p0=[fr.x, fr.y, fr.z+2.9*MF];
+  var p1=[fr.x+(aim[0]-fr.x)*0.35, fr.y+(aim[1]-fr.y)*0.35, Math.max(fr.z+11.5, aim[2]+9)];
+  var p2=[fr.x+(aim[0]-fr.x)*0.8, fr.y+(aim[1]-fr.y)*0.8, aim[2]+8.0];
+  var p3=[aim[0], aim[1], aim[2]+2.4];
+  mLine(p0, p1, 5, shade(base,0.75)); mLine(p0, p1, 2.4, shade(base,1.2));
+  mLine(p1, p2, 4, shade(base,0.75)); mLine(p1, p2, 2, shade(base,1.2));
+  mLine(p2, p3, 3.4, shade(base,0.75));
+  mLine(p3, [aim[0], aim[1], aim[2]+0.15], 2, "#4a5058");
+}
+function drawCrane(fr){
+  var base=MACHINE_COLOR.roughCrane, dark=shade(base,0.62);
+  mShadow(fr, 5.4, 2.2);
+  mBox(fr, 2.6, 0, 0.12, 0.5, 5.6, 0.3, dark);
+  mBox(fr, -2.6, 0, 0.12, 0.5, 5.6, 0.3, dark);
+  mBox(fr, 0, 0, 0.55, 9.6, 2.6, 1.1, base);
+  mWheel(fr, 3.1, 1.45); mWheel(fr, 3.1, -1.45); mWheel(fr, -3.1, 1.45); mWheel(fr, -3.1, -1.45);
+  mBox(fr, 4.1, -0.45, 1.65, 1.7, 1.7, 1.5, shade(base,1.05));
+  mBox(fr, -1.2, 0, 1.65, 4.4, 2.5, 1.5, base);
+  mBox(fr, -3.6, 0, 1.8, 1.2, 2.3, 1.6, dark);
+  mBox(fr, 0.6, 1.35, 2.9, 1.3, 0.9, 1.3, GLASS);
+  var turret=mPt(fr, -0.6, 0, 3.6);
+  var cm = CARRY? B.members[CARRY.mi] : null;
+  if(cm){
+    /* 二段構え：クレーンは実部材そのものを仮置き側から本設位置の「近く」へ粗く運び（u<0.65、
+       ワイヤー吊り・実寸法・実種別の色）、着地後は建方班が横引きで最終位置へ寄せる（u>=0.65、
+       ワイヤーを外し、クレーン側のずれが解消していく）。place 時刻で本設表示に引き継ぐ */
+    var ckind=B.kinds[cm[2]];
+    var ccol=KIND_COLOR[ckind]||FALLBACK;
+    var fx=cm[3], fy=cm[4], fz=cm[5], dx=cm[6], dy=cm[7], dz=cm[8];
+    var craneSide=(fr.y<=R.cy)? -1 : 1;
+    var coarseY=fy+craneSide*2.4;
+    var pickX=fr.x+(fx-fr.x)*0.15, pickY=fr.y+craneSide*6.5;
+    var u=CARRY.u, px, py, pz;
+    if(u<0.65){
+      var e=u/0.65; e=e*e*(3-2*e);
+      px=pickX+(fx-pickX)*e;
+      py=pickY+(coarseY-pickY)*e;
+      pz=0.6+(fz-0.6)*e+Math.sin(e*Math.PI)*2.6;
+    } else {
+      var s=(u-0.65)/0.35;
+      px=fx; py=coarseY+(fy-coarseY)*s; pz=fz;
+    }
+    var tip=[px+dx/2, py+dy/2, pz+dz+6.5];
+    mLine(turret, tip, 5.5, dark);
+    mLine(turret, tip, 2.6, shade(base,1.15));
+    if(u<0.65){
+      mLine(tip, [px+dx*0.15, py+dy*0.15, pz+dz], 1.2, "rgba(30,34,40,0.85)");
+      mLine(tip, [px+dx*0.85, py+dy*0.85, pz+dz], 1.2, "rgba(30,34,40,0.85)");
+    }
+    drawBoxWorld(px, py, pz, dx, dy, dz, ccol);
+  } else {
+    var nl=nextLift();
+    if(nl){
+      var nm=B.members[nl[1]];
+      var tip2=[nm[3]+nm[6]/2, nm[4]+nm[7]/2, nm[5]+nm[8]+11.5];
+      mLine(turret, tip2, 5.5, dark);
+      mLine(turret, tip2, 2.6, shade(base,1.15));
+    } else {
+      mLine(turret, mPt(fr, 7.5, 0, 9.5), 5, dark);
+    }
+  }
+}
+function drawAWP(fr){
+  var base=MACHINE_COLOR.awp, rail="#4a5058", top=3.4;
+  mShadow(fr, 1.9, 1.2);
+  mBox(fr, 0, 0, 0.25, 2.6, 1.35, 0.5, shade(base,0.75));
+  mWheel(fr, 0.95, 0.72); mWheel(fr, 0.95, -0.72); mWheel(fr, -0.95, 0.72); mWheel(fr, -0.95, -0.72);
+  for(var sgn=-1; sgn<=1; sgn+=2){
+    var v=sgn*0.58;
+    mLine(mPt(fr,-1.05,v,0.75), mPt(fr,1.05,v,top), 2, rail);
+    mLine(mPt(fr,1.05,v,0.75), mPt(fr,-1.05,v,top), 2, rail);
+    mLine(mPt(fr,-1.05,v,top*0.52), mPt(fr,1.05,v,top*0.52), 1.2, rail);
+  }
+  mBox(fr, 0, 0, top, 2.5, 1.25, 0.22, base);
+  mLine(mPt(fr,-1.25,0.62,top+0.25), mPt(fr,-1.25,0.62,top+1.35), 1.4, rail);
+  mLine(mPt(fr,1.25,0.62,top+0.25), mPt(fr,1.25,0.62,top+1.35), 1.4, rail);
+  mLine(mPt(fr,-1.25,-0.62,top+0.25), mPt(fr,-1.25,-0.62,top+1.35), 1.4, rail);
+  mLine(mPt(fr,1.25,-0.62,top+0.25), mPt(fr,1.25,-0.62,top+1.35), 1.4, rail);
+  mLine(mPt(fr,-1.25,0.62,top+1.35), mPt(fr,1.25,0.62,top+1.35), 1.4, rail);
+  mLine(mPt(fr,-1.25,-0.62,top+1.35), mPt(fr,1.25,-0.62,top+1.35), 1.4, rail);
+  mLine(mPt(fr,-1.25,0.62,top+1.35), mPt(fr,-1.25,-0.62,top+1.35), 1.4, rail);
+  mLine(mPt(fr,1.25,0.62,top+1.35), mPt(fr,1.25,-0.62,top+1.35), 1.4, rail);
+}
+function drawFinisher(fr){
+  var base=MACHINE_COLOR.finisher, c="#4a5058";
+  mShadow(fr, 3.4, 2.2);
+  mBox(fr, 0.3, 0, 0.35, 5.6, 2.5, 1.35, base);
+  mBox(fr, 2.2, 0, 1.7, 1.6, 2.3, 0.5, shade(base,0.85));
+  mBox(fr, -3.1, 0, 0.15, 0.5, 3.4, 0.55, c);
+  mLine(mPt(fr,-0.9,1.0,1.7), mPt(fr,-0.9,1.0,3.1), 1.6, c);
+  mLine(mPt(fr,-0.9,-1.0,1.7), mPt(fr,-0.9,-1.0,3.1), 1.6, c);
+  mBox(fr, -0.9, 0, 3.1, 2.4, 2.3, 0.16, shade(base,1.1));
+  mWheel(fr, 1.9, 1.3); mWheel(fr, 1.9, -1.3); mWheel(fr, -1.9, 1.3); mWheel(fr, -1.9, -1.3);
+}
+function drawRoller(fr){
+  var base=MACHINE_COLOR.roller;
+  mShadow(fr, 3.0, 2.0);
+  mBox(fr, 2.0, 0, 0, 1.3, 2.3, 1.5, "#6d7278");
+  mBox(fr, -0.6, 0, 0.55, 3.4, 1.9, 1.35, base);
+  mBox(fr, -1.1, 0, 1.9, 1.5, 1.6, 1.15, GLASS);
+  mWheel(fr, -2.2, 1.05); mWheel(fr, -2.2, -1.05);
+}
+/* ---------- 作業員レイヤー ----------
+   作業者は「班」ではなく実人数：データ側で算定した投下人数ぶん、1人ずつ個別の経路
+   （keys）を持つ。各作業者は担当タスクの部材を順に受け持ち、経路は各部材の位置を
+   その出現 0.35 実働日前に通過する（通過ルール）。部材の無いタスク（監督・検査等）
+   の作業者は建物周りの巡回経路を持つ。人物は重機と同様、判読できるよう実寸より
+   大きめに描く（高さ約3.6単位）。 */
+var CREW_COLORS={"誘導員":"#d43d2a","建方班":"#e8710a","玉掛け":"#e8710a","打設班":"#c0452f","コンクリート班":"#c0452f",
+  "鉄筋班":"#8a4f3a","型枠班":"#b07d3a","土工班":"#a67c2e","設備班":"#3f7fbf","EV班":"#7d6ea6",
+  "外装班":"#2e7d46","内装班":"#5d8a4e","ボード班":"#5d8a4e","軽鉄班":"#5d8a4e","防水班":"#2e7d46",
+  "基礎班":"#9c7b4f","仮設班":"#7d8894","外構班":"#6f9450","美装班":"#c98a3d","墨出し班":"#b39b2e",
+  "鳶班":"#cc7a5c","杭班":"#5b7a99","揚重班":"#dfa41e","監督班":"#33566e","検査班":"#2f6f6a"};
+function crewColor(role){ return CREW_COLORS[role]||"#54606d"; }
+function activeWorkers(tt){
+  var out=[];
+  if(!B || !B.workers) return out;
+  for(var i=0;i<B.workers.length;i++){ var w=B.workers[i], ks=w.keys;
+    if(tt>=ks[0][0] && tt<=ks[ks.length-1][0]) out.push({w:w, p:keysPosAt(ks,tt), i:i});
+  }
+  out.sort(function(a,b){ return (a.p[1]+a.p[2])-(b.p[1]+b.p[2]); });
+  return out;
+}
+function drawWorker(x,y,z,col,seed){
+  var s=SP(x,y,z), px=view.scale, H=3.6*px;
+  ctx.beginPath();
+  ctx.ellipse(s[0], s[1]+1, Math.max(2,H*0.30), Math.max(1.2,H*0.16), 0, 0, Math.PI*2);
+  ctx.fillStyle="rgba(20,24,28,0.25)"; ctx.fill();
+  var bob=Math.sin(t*9+seed*2.1)*H*0.02;
+  ctx.lineCap="round";
+  /* 脚 */
+  ctx.strokeStyle="#3a3f45"; ctx.lineWidth=Math.max(1.2,H*0.09);
+  ctx.beginPath();
+  ctx.moveTo(s[0], s[1]-H*0.42+bob); ctx.lineTo(s[0]-H*0.13, s[1]);
+  ctx.moveTo(s[0], s[1]-H*0.42+bob); ctx.lineTo(s[0]+H*0.13, s[1]);
+  ctx.stroke();
+  /* 胴（班色のベスト） */
+  ctx.strokeStyle=col; ctx.lineWidth=Math.max(2.2,H*0.20);
+  ctx.beginPath(); ctx.moveTo(s[0], s[1]-H*0.40+bob); ctx.lineTo(s[0], s[1]-H*0.76+bob); ctx.stroke();
+  /* 頭＋白ヘルメット */
+  var hy=s[1]-H*0.87+bob, hr=Math.max(1.6,H*0.085);
+  ctx.beginPath(); ctx.arc(s[0], hy, hr, 0, Math.PI*2); ctx.fillStyle="#e8c39a"; ctx.fill();
+  ctx.beginPath(); ctx.arc(s[0], hy-hr*0.25, hr*1.12, Math.PI, Math.PI*2); ctx.fillStyle="#f5f2ea"; ctx.fill();
+  ctx.strokeStyle="rgba(28,32,38,0.5)"; ctx.lineWidth=0.7;
+  ctx.beginPath(); ctx.moveTo(s[0]-hr*1.25, hy-hr*0.25); ctx.lineTo(s[0]+hr*1.25, hy-hr*0.25); ctx.stroke();
+}
+function drawWorkers(){
+  var list=activeWorkers(t);
+  for(var li=0; li<list.length; li++){
+    var w=list[li].w, p=list[li].p, col=crewColor(w.role);
+    /* 内装・EVの作業者は、その階の外装が閉じた後は描かない（細部カリングと同じ扱い） */
+    if(w.task){
+      var tk=taskById(w.task);
+      if(tk && (tk.phase==="mepInterior"||tk.phase==="elevator") && p[3]>=0 && t>=bandExtT(p[3])) continue;
+    }
+    /* 実人数を1人ずつ描く。位置は本人の経路そのもの（通過ルールの担保）で、
+       ばらつきは重なり判読用の小さな固定オフセットのみ */
+    var seed=list[li].i*31+7;
+    var ox=(((seed*37)%40)/10-2.0)*0.18;
+    var oy=(((seed*53)%40)/10-2.0)*0.18;
+    drawWorker(p[1]+ox, p[2]+oy, p[3], col, seed);
+  }
+}
+
+function drawMachines(){
+  var list=activeMachines(t);
+  for(var i=0;i<list.length;i++){
+    var m=list[i].m, fr=mFrame(list[i].p);
+    ctx.globalAlpha=1;
+    switch(m.kind){
+      case "excavator": drawExcavator(fr, t); break;
+      case "dumpTruck": drawDump(fr); break;
+      case "pileDriver": drawPileDriver(fr); break;
+      case "pumpTruck": drawPump(fr, m); break;
+      case "roughCrane": drawCrane(fr); break;
+      case "awp": drawAWP(fr); break;
+      case "finisher": drawFinisher(fr); break;
+      case "roller": drawRoller(fr); break;
+      default: mShadow(fr, 2.6, 1.6); mBox(fr, 0, 0, 0, 4, 2.4, 1.6, MACHINE_COLOR[m.kind]||"#999999");
+    }
+  }
+  ctx.globalAlpha=1;
+}
+
+/* ---------- 描画 ----------
+   データの画家順（x+y 昇順）のまま、部材→面の順に即時描画する。
+   色バケット一括塗りも Path2D への面の蓄積もしない（蓄積方式は描画が崩れることを実機で確認済み）。
+   例外は外皮レイヤー（外壁・屋根・パラペット等）だけ：本体の後に回して描く（drawMember のパス2）。 */
+function draw(){
+  if(!B||!R) return;
+  sizeCanvas();
+  var w=canvas.clientWidth, h=canvas.clientHeight;
+  ctx.clearRect(0,0,w,h);
+  /* 敷地の地面：仮囲いラインの実外形ポリゴン＋建物平面の実フットプリントを最初に敷く */
+  var panel2=getComputedStyle(document.documentElement).getPropertyValue("--panel2").trim()||"#e6e0cf";
+  ctx.globalAlpha=1;
+  ctx.beginPath();
+  for(var gi=0;gi<R.site.length;gi++){ var gs=SP(R.site[gi][0],R.site[gi][1],0);
+    if(gi)ctx.lineTo(gs[0],gs[1]); else ctx.moveTo(gs[0],gs[1]); }
+  ctx.closePath();
+  ctx.fillStyle=shade(panel2,0.93);
+  ctx.fill();
+  ctx.strokeStyle="rgba(28,32,38,0.28)"; ctx.lineWidth=0.8; ctx.stroke();
+  ctx.fillStyle=shade(panel2,0.84);
+  for(var fi=0;fi<R.footprint.length;fi++){ var rc=R.footprint[fi];
+    var fa=SP(rc[0],rc[3],0), fb=SP(rc[2],rc[3],0), fc2=SP(rc[2],rc[1],0), fd=SP(rc[0],rc[1],0);
+    ctx.beginPath();
+    ctx.moveTo(fa[0],fa[1]); ctx.lineTo(fb[0],fb[1]); ctx.lineTo(fc2[0],fc2[1]); ctx.lineTo(fd[0],fd[1]);
+    ctx.closePath(); ctx.fill();
+  }
+
+  var kinds=B.kinds, visible=0, SEG=9;
+  function face(pts,fill){
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0],pts[0][1]);
+    for(var q=1;q<pts.length;q++)ctx.lineTo(pts[q][0],pts[q][1]);
+    ctx.closePath();
+    ctx.fillStyle=fill; ctx.fill();
+    ctx.strokeStyle="rgba(28,32,38,0.38)"; ctx.lineWidth=0.6; ctx.stroke();
+  }
+  function addBox(x,y,z,dx,dy,dz,kind,cL,cR,cT){
+    var A=SP(x,y+dy,z), Bp=SP(x+dx,y+dy,z), C=SP(x+dx,y,z), D=SP(x,y,z);
+    var A2=SP(x,y+dy,z+dz), B2=SP(x+dx,y+dy,z+dz), C2=SP(x+dx,y,z+dz), D2=SP(x,y,z+dz);
+    face([A,Bp,B2,A2],cL); face([Bp,C,C2,B2],cR); face([A2,B2,C2,D2],cT);
+    if(kind==="brace"){
+      ctx.strokeStyle="rgba(28,32,38,0.6)"; ctx.lineWidth=1.7;
+      ctx.beginPath();
+      if(dx<=dy){ ctx.moveTo(Bp[0],Bp[1]); ctx.lineTo(C2[0],C2[1]); ctx.moveTo(C[0],C[1]); ctx.lineTo(B2[0],B2[1]); }
+      else { ctx.moveTo(A[0],A[1]); ctx.lineTo(B2[0],B2[1]); ctx.moveTo(Bp[0],Bp[1]); ctx.lineTo(A2[0],A2[1]); }
+      ctx.stroke();
+    }
+  }
+  function drawMember(m, idx){
+    if(m[0]>t) return 0;
+    if(m[1]>=0 && t>=m[1]) return 0;
+    /* クレーンが吊っている最中の部材は、クレーン側で実部材として描くためここでは描かない */
+    if(CARRY && idx===CARRY.mi) return 0;
+    var kind=kinds[m[2]];
+    if(kind==="scaffoldUnit" && !showScaffold) return 0;
+    if(isTemp(kind) && !showTemp) return 0;
+    var detail=isDetail(kind);
+    if(detail && !showDetail) return 0;
+    var x=m[3],y=m[4],z=m[5],dx=m[6],dy=m[7],dz=m[8];
+    if(z+dz<=0.001){
+      /* 地下部材：埋戻し（1階床スラブ設置）以降は描かない。深さは掘削底で切り、宙に残さない */
+      if(m[1]<0 && UNDER_HIDE[kind] && t>=R.sealT) return 0;
+      if(z<R.clampZ){ dz=(z+dz)-R.clampZ; z=R.clampZ; if(dz<=0.001) return 0; }
+    } else if(detail && z>=0){
+      /* 内部細部：その階の外装が閉じた後は描かない（全階X線表示にしない） */
+      if(t>=bandExtT(z)) return 0;
+    }
+    /* 横引き途中：着地したが最終位置へ寄せ切っていない部材は、クレーン側にずらして描く */
+    var stf=SETTLE[idx];
+    if(stf){ var diry=(y+dy/2<=R.cy)? -1 : 1; y+=diry*1.8*stf; }
+    var base=KIND_COLOR[kind]||FALLBACK;
+    var alpha=kind==="scaffoldUnit"?0.5:(kind==="tempFence"?0.4:1);
+    ctx.globalAlpha=alpha;
+    var cL=shade(base,0.82), cR=shade(base,0.64), cT=shade(base,1.12);
+    /* 長尺ランはスパン単位（最大9m）に割って描く：建物幅1本の線に見せない */
+    var nx=Math.max(1,Math.ceil(dx/SEG)), ny=Math.max(1,Math.ceil(dy/SEG));
+    for(var ix=0;ix<nx;ix++)for(var iy=0;iy<ny;iy++){
+      addBox(x+dx*ix/nx, y+dy*iy/ny, z, dx/nx, dy/ny, dz, kind, cL, cR, cT);
+    }
+    return 1;
+  }
+  computeCarry();
+  /* パス1：躯体・デッキ・内装・仮設などを画家順のまま描く */
+  for(var i=0;i<B.members.length;i++){
+    if(isSkin(kinds[B.members[i][2]])) continue;
+    visible+=drawMember(B.members[i], i);
+  }
+  /* パス2：外皮レイヤー（外壁・サッシ・屋根・パラペット）。厚さ0.2mの壁や0.03mの屋根シートは
+     画家順の途中で描くと後続の躯体・デッキに塗りつぶされるため、外皮だけを最後に回す。
+     外皮同士はデータの画家順（奥→手前）を保つ */
+  for(var i2=0;i2<B.members.length;i2++){
+    if(!isSkin(kinds[B.members[i2][2]])) continue;
+    visible+=drawMember(B.members[i2], i2);
+  }
+  ctx.globalAlpha=1;
+  if(showMachines) drawMachines();
+  if(showPeople) drawWorkers();
+  draw.visibleCount=visible;
+}
+
+/* ---------- 計画連動の表示 ---------- */
+function fmtDate(ds){ if(!ds) return "–"; var p=ds.split("-"); return p[0]+"年"+(+p[1])+"月"+(+p[2])+"日"; }
+function taskById(id){ for(var i=0;i<B.tasks.length;i++) if(B.tasks[i].id===id) return B.tasks[i]; return null; }
+
+/* 実働日→暦：直近タスク境界（補間しない） */
+var boundaries=[];
+function buildBoundaries(){
+  boundaries=[];
+  for(var i=0;i<B.tasks.length;i++){ var tk=B.tasks[i];
+    boundaries.push({d:tk.es, date:tk.start});
+    boundaries.push({d:tk.ef, date:tk.end});
+  }
+  boundaries.sort(function(a,b){return a.d-b.d;});
+}
+function calDateAt(tt){
+  var best=null;
+  for(var i=0;i<boundaries.length;i++){ if(boundaries[i].d<=tt+1e-9) best=boundaries[i]; else break; }
+  if(!best) return B.startDate;
+  return best.date;
+}
+function currentPhases(tt){
+  var out=[];
+  for(var i=0;i<B.phases.length;i++){ var p=B.phases[i];
+    if(p.phase==="inspection") continue;
+    if(p.es<=tt && tt<p.ef) out.push(p);
+  }
+  return out;
+}
+function activeTasks(tt){
+  var main=[], insp=0;
+  for(var i=0;i<B.tasks.length;i++){ var tk=B.tasks[i];
+    if(tk.es<=tt && tt<tk.ef){ if(tk.phase==="inspection") insp++; else main.push(tk); } }
+  main.sort(function(a,b){return a.es-b.es;});
+  return {main:main, insp:insp};
+}
+function updateUI(){
+  if(!B) return;
+  var total=B.totalWorkingDays;
+  var pct=Math.min(100, t/total*100);
+  $("hudDay").textContent="実働 "+Math.floor(t)+" 日目";
+  $("hudPct").textContent="進捗 "+pct.toFixed(1)+"%";
+  $("hudCal").textContent="暦日（直近タスク境界）: "+fmtDate(calDateAt(t))+"　期間: "+fmtDate(B.startDate)+" 〜 "+fmtDate(B.endDate);
+  var ph=currentPhases(t);
+  $("hudPhase").textContent = t>=total ? "竣工・引渡し完了" : (ph.length? "現在: "+ph.map(function(p){return p.ja;}).join(" ／ ") : "着工前");
+  $("hudCnt").textContent="表示部材 "+(draw.visibleCount||0).toLocaleString()+" 点 ／ 全 "+B.members.length.toLocaleString()+" 点";
+  /* 現場人数＝その時刻に投下されている作業者の実人数（データ側のピーク算出と
+     同じ「経路の有効期間内」定義で数えるため、算出値と表示が一致する）。
+     なお外装が閉じた階の内装・EV作業者は、外から見えないため姿だけ描かない
+     （細部カリングと同じ扱い）——人数には数える */
+  var awList = activeWorkers(t);
+  var headN = awList.length;
+  var culledN = 0;
+  for(var ci=0;ci<awList.length;ci++){
+    var ctk = awList[ci].w.task? taskById(awList[ci].w.task) : null;
+    if(ctk && (ctk.phase==="mepInterior"||ctk.phase==="elevator") && awList[ci].p[3]>=0 && t>=bandExtT(awList[ci].p[3])) culledN++;
+  }
+  $("hudCrew").textContent = showPeople
+    ? "現場人数 "+headN+" 人（ピーク "+(B.labor? B.labor.peakWorkers:0)+" 人）"+(culledN? "・うち "+culledN+" 人は外装の内側で姿は見えません" : "")
+    : "現場人数 "+headN+" 人（人は非表示中）";
+  $("stCrew").textContent = headN+" 人";
+  $("stLabor").textContent = B.labor? B.labor.totalPersonDays.toLocaleString()+" 人日" : "–";
+  $("stDay").textContent=t.toFixed(1)+" / "+total.toFixed(1)+" 日";
+  $("stPct").textContent=pct.toFixed(1)+"%";
+  $("stMembers").textContent=(draw.visibleCount||0).toLocaleString()+" 点";
+  var done=0; for(var i=0;i<B.tasks.length;i++) if(B.tasks[i].ef<=t) done++;
+  $("stTasks").textContent=done+" / "+B.tasks.length+" 件";
+  $("progFill").style.width=pct+"%";
+  $("stPeriod").textContent="着工 "+fmtDate(B.startDate)+" ／ 引渡し "+fmtDate(B.endDate)+"（実働 "+total.toFixed(1)+" 日・全タスク "+B.tasks.length+" 件・検査チェーン "+B.stats.inspectionChains+" 本）";
+  var sl=$("timeSlider"); sl.max=total; if(document.activeElement!==sl) sl.value=t;
+  $("sliderVal").textContent=t.toFixed(1)+" / "+total.toFixed(1)+" 日";
+  /* 工程バー現在位置 */
+  var rows=document.querySelectorAll("#ganttRows .grow");
+  var phSet={}; ph.forEach(function(p){phSet[p.phase]=1;});
+  rows.forEach(function(row){
+    var key=row.getAttribute("data-phase");
+    row.classList.toggle("cur", !!phSet[key]);
+    var line=row.querySelector(".nowline"); if(line) line.style.left=(t/total*100)+"%";
+  });
+  /* 進行中タスク */
+  var act=activeTasks(t);
+  $("taskCount").textContent="主タスク "+act.main.length+" 件（＋検査チェーン "+act.insp+" 件並行）";
+  var ul=$("taskList"); ul.innerHTML="";
+  if(t>=total){ ul.innerHTML='<li class="empty">全タスク完了（引渡し済み）</li>'; }
+  else if(!act.main.length){ ul.innerHTML='<li class="empty">この時点で進行中の主タスクはありません。</li>'; }
+  act.main.slice(0,14).forEach(function(tk){
+    var li=document.createElement("li");
+    var btn=document.createElement("button"); btn.type="button";
+    btn.innerHTML='<span class="tn"></span>'+(tk.gate?'<span class="gate">検査ゲート</span>':'')+'<br><span class="tm"></span>';
+    btn.querySelector(".tn").textContent=tk.name;
+    btn.querySelector(".tm").textContent=(tk.trade||"")+(tk.zone? " ／ "+tk.zone : "")+" ／ "+tk.start+" 〜 "+tk.end;
+    btn.addEventListener("click", function(){ showTaskDetail(tk); });
+    li.appendChild(btn); ul.appendChild(li);
+  });
+  if(act.main.length>14){
+    var more=document.createElement("li");
+    more.innerHTML='<div class="empty">ほか '+(act.main.length-14)+' 件が進行中です。</div>';
+    ul.appendChild(more);
+  }
+  /* 在場中の重機チップ（並びが変わったときだけ再構築） */
+  updateMachineChips();
+  /* マイルストーン */
+  var ml=$("msList"); ml.innerHTML="";
+  B.milestones.forEach(function(ms){
+    var tk=taskById(ms.task);
+    var reached = tk ? (t>=tk.ef-1e-9) : false;
+    var li=document.createElement("li");
+    if(reached) li.className="done";
+    li.innerHTML='<span class="dot"></span><span class="mn"></span><span class="md"></span>';
+    li.querySelector(".mn").textContent=tk? tk.name : ms.task;
+    li.querySelector(".md").textContent=fmtDate(ms.date)+(reached?" 到達":"");
+    ml.appendChild(li);
+    var key=B.label+":"+ms.task;
+    if(reached && !shownMilestones[key]){
+      shownMilestones[key]=true;
+      if(playing || t>0){ showMsPop("🏁 マイルストーン到達： "+(tk?tk.name:ms.task)); }
+    }
+    if(!reached) shownMilestones[key]=false;
+  });
+}
+var chipKey=null;
+function updateMachineChips(){
+  var mc=$("machineChips"); if(!mc) return;
+  var act=showMachines? activeMachines(t) : [];
+  var crews=showPeople? activeWorkers(t) : [];
+  var people=crews.length;
+  var taskSet={}; crews.forEach(function(a){ taskSet[a.w.task]=1; });
+  var key=(showMachines? act.map(function(a){ return a.m.id; }).join(",") : "off")
+    +"|"+(showPeople? Object.keys(taskSet).sort().join(",")+":"+people : "off");
+  if(key===chipKey) return;
+  chipKey=key;
+  mc.innerHTML="";
+  if(showMachines){
+    var lab=document.createElement("span"); lab.className="mlab"; lab.textContent="在場中の重機"; mc.appendChild(lab);
+    if(!act.length){
+      var none=document.createElement("span"); none.className="none";
+      none.textContent="この時点では重機は入場していません"; mc.appendChild(none);
+    }
+    act.forEach(function(a){
+      var chip=document.createElement("span"); chip.className="mchip";
+      var dot=document.createElement("span"); dot.className="mdot";
+      dot.style.background=MACHINE_COLOR[a.m.kind]||"#999999";
+      var nm=document.createElement("span"); nm.textContent=a.m.label;
+      chip.appendChild(dot); chip.appendChild(nm); mc.appendChild(chip);
+    });
+  }
+  if(showPeople){
+    var pchip=document.createElement("span"); pchip.className="mchip";
+    var pdot=document.createElement("span"); pdot.className="mdot";
+    pdot.style.background="#e8710a";
+    var pnm=document.createElement("span");
+    pnm.textContent = crews.length? ("作業員 "+people+"人（実人数・"+Object.keys(taskSet).length+"タスクに投下中）") : "作業員なし";
+    pchip.appendChild(pdot); pchip.appendChild(pnm); mc.appendChild(pchip);
+  }
+}
+var msTimer=null;
+function showMsPop(msg){
+  var el=$("msPop"); el.textContent=msg; el.classList.add("show");
+  if(msTimer) clearTimeout(msTimer);
+  msTimer=setTimeout(function(){ el.classList.remove("show"); }, 3400);
+}
+function showTaskDetail(tk){
+  selectedTask=tk;
+  var d=$("taskDetail"); d.hidden=false;
+  d.innerHTML="<b></b><dl>"+
+    "<dt>フェーズ</dt><dd></dd><dt>工種</dt><dd></dd><dt>工区</dt><dd></dd>"+
+    "<dt>期間（暦）</dt><dd></dd><dt>期間（実働）</dt><dd></dd>"+
+    "<dt>投入</dt><dd></dd><dt>人区</dt><dd></dd></dl>";
+  d.querySelector("b").textContent=tk.name+(tk.gate?"（検査ゲート）":"");
+  var dd=d.querySelectorAll("dd");
+  dd[0].textContent=tk.phaseJa; dd[1].textContent=tk.trade||"–"; dd[2].textContent=tk.zone||"全体";
+  dd[3].textContent=fmtDate(tk.start)+" 〜 "+fmtDate(tk.end);
+  dd[4].textContent="ES "+tk.es.toFixed(1)+" 日 〜 EF "+tk.ef.toFixed(1)+" 日";
+  dd[5].textContent=(tk.bands||1)+" 班 × 1班 "+(tk.crew||0)+" 人 ＝ "+(tk.nWorkers||0)+" 人を投下";
+  dd[6].textContent=((tk.personDays||0)).toLocaleString()+" 人日（1班人数×班数×期間）";
+}
+
+/* ---------- 工程バー構築 ---------- */
+function buildGantt(){
+  var total=B.totalWorkingDays;
+  var wrap=$("ganttRows"); wrap.innerHTML="";
+  B.phases.forEach(function(p){
+    if(p.phase==="inspection") return;
+    var row=document.createElement("div"); row.className="grow"; row.setAttribute("data-phase", p.phase);
+    var left=Math.max(0,p.es/total*100), width=Math.max(0.6,(p.ef-p.es)/total*100);
+    row.innerHTML='<div class="gl"></div><div class="gt"><div class="gb"></div><div class="nowline"></div></div>';
+    row.querySelector(".gl").textContent=p.ja+"（"+p.count+"）";
+    var bar=row.querySelector(".gb"); bar.style.left=left+"%"; bar.style.width=width+"%";
+    bar.title=p.ja+"：実働 "+p.es.toFixed(1)+" 〜 "+p.ef.toFixed(1)+" 日";
+    row.querySelector(".nowline").style.left=(t/total*100)+"%";
+    wrap.appendChild(row);
+  });
+  var tk=$("gTicks"); tk.innerHTML="";
+  [0,0.25,0.5,0.75,1].forEach(function(f){
+    var s=document.createElement("span"); s.style.left=(f*100)+"%";
+    s.textContent=Math.round(total*f)+"日"; tk.appendChild(s);
+  });
+}
+
+/* ---------- 凡例 ---------- */
+function buildLegend(){
+  var items=[
+    ["鉄骨（柱・梁）","#4a6b82"],["スラブ・デッキ","#9aa5ab"],["基礎・杭","#a39a86"],
+    ["型枠（撤去あり）","#c2a878"],["鉄筋","#8a4f3a"],["外壁パネル","#d3c5a0"],
+    ["屋根","#647687"],["パラペット","#b7ab90"],
+    ["サッシ・ガラス","#7fb3c8"],["外部足場（半透明）","#cc7a5c"],["掘削・山留め","#8a6d4f"],
+    ["内装（LGS・ボード・床）","#aebd9c"],["設備（ダクト・配管）","#9db3bd"],["EV","#8d7fb8"],
+    ["外構・舗装・植栽","#b3aca0"],["仮設（仮囲い等）","#9aa5ab"],
+    ["重機：ユンボ","#d98e2b"],["重機：ラフタークレーン","#dfa41e"],["重機：ポンプ車","#c0452f"],
+    ["重機：杭打ち機","#5b7a99"],["重機：高所作業車","#d96c2c"],["重機：ダンプ","#8b939c"],
+    ["重機：フィニッシャー","#6b7f5e"],["重機：ローラー","#c9a227"],
+    ["作業員：建方班","#e8710a"],["作業員：打設班","#c0452f"],["作業員：設備班","#3f7fbf"],
+    ["作業員：誘導員","#d43d2a"],["作業員：その他作業班","#54606d"]
+  ];
+  var el=$("legend"); el.innerHTML="";
+  items.forEach(function(it){
+    var d=document.createElement("div");
+    d.innerHTML='<span class="sw"></span><span></span>';
+    d.querySelector(".sw").style.background=it[1];
+    d.querySelectorAll("span")[1].textContent=it[0];
+    el.appendChild(d);
+  });
+}
+
+/* ---------- 物件切替 ---------- */
+function buildTabs(){
+  var el=$("tabs"); el.innerHTML="";
+  DATA.buildings.forEach(function(b, idx){
+    var btn=document.createElement("button"); btn.type="button"; btn.className="tab";
+    btn.setAttribute("aria-pressed", idx===bi? "true":"false");
+    btn.innerHTML="<b></b><span></span>";
+    btn.querySelector("b").textContent=b.label;
+    btn.querySelector("span").textContent=b.overview.floors+"階・延床 "+Math.round(b.overview.grossAreaM2).toLocaleString()+"㎡・実働 "+b.totalWorkingDays.toFixed(0)+"日";
+    btn.addEventListener("click", function(){ selectBuilding(idx); });
+    el.appendChild(btn);
+  });
+}
+function selectBuilding(idx){
+  bi=idx; B=DATA.buildings[idx];
+  t=0; playing=false; setPlayUI();
+  shownMilestones={}; chipKey=null;
+  $("bName").textContent=B.label;
+  $("bOv").textContent=B.overview.use+"施設・"+B.overview.structure+"造 "+B.overview.floors+"階・工区 "+B.overview.zones+"・延床 "+Math.round(B.overview.grossAreaM2).toLocaleString()+"㎡";
+  $("taskDetail").hidden=true;
+  if(B.labor) $("laborLine").textContent="総人区 "+B.labor.totalPersonDays.toLocaleString()+" 人日 ／ ピーク時現場人数 "+B.labor.peakWorkers+" 人（実働 "+B.labor.peakDay+" 日目）／ 通過チェック：全 "+B.labor.passMembers.toLocaleString()+" 部材に担当作業者の通過イベントあり・違反 "+B.labor.passViolations+" 件";
+  buildTabs(); buildBoundaries(); buildGantt();
+  prepareRender(); computeView(); draw(); updateUI();
+}
+function setPlayUI(){ $("playBtn").textContent = playing? "⏸ 一時停止" : "▶ 再生"; }
+
+/* ---------- 再生 ---------- */
+function loop(ts){
+  if(!playing) return;
+  if(!lastTs) lastTs=ts;
+  var dt=(ts-lastTs)/1000; lastTs=ts;
+  var daysPerSec = 3 * speed; /* ×1 = 3実働日/秒 */
+  t += dt*daysPerSec;
+  if(t>=B.totalWorkingDays){ t=B.totalWorkingDays; playing=false; setPlayUI(); }
+  if(ts-(draw.lastDraw||0)>=50 || !playing){ draw(); draw.lastDraw=ts; }
+  updateUI();
+  if(playing) requestAnimationFrame(loop);
+}
+$("playBtn").addEventListener("click", function(){
+  if(!B) return;
+  if(!playing && t>=B.totalWorkingDays) t=0;
+  playing=!playing; lastTs=0; setPlayUI();
+  if(playing) requestAnimationFrame(loop);
+});
+$("restartBtn").addEventListener("click", function(){
+  t=0; shownMilestones={}; draw(); updateUI();
+});
+$("speeds").addEventListener("click", function(e){
+  var b=e.target.closest("button[data-speed]"); if(!b) return;
+  speed=parseFloat(b.getAttribute("data-speed"));
+  document.querySelectorAll("#speeds .btn").forEach(function(x){ x.setAttribute("aria-pressed", x===b? "true":"false"); });
+});
+$("timeSlider").addEventListener("input", function(e){
+  t=parseFloat(e.target.value); shownMilestones={};
+  B.milestones.forEach(function(ms){ var tk=taskById(ms.task); if(tk && t>=tk.ef) shownMilestones[B.label+":"+ms.task]=true; });
+  draw(); updateUI();
+});
+$("tgScaffold").addEventListener("change", function(e){ showScaffold=e.target.checked; draw(); updateUI(); });
+$("tgTemp").addEventListener("change", function(e){ showTemp=e.target.checked; draw(); updateUI(); });
+$("tgDetail").addEventListener("change", function(e){ showDetail=e.target.checked; draw(); updateUI(); });
+$("tgMachines").addEventListener("change", function(e){ showMachines=e.target.checked; chipKey=null; draw(); updateUI(); });
+$("tgPeople").addEventListener("change", function(e){ showPeople=e.target.checked; chipKey=null; draw(); updateUI(); });
+
+var resizeTimer=null;
+window.addEventListener("resize", function(){
+  if(resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(function(){ if(B){ computeView(); draw(); } }, 120);
+});
+if(window.matchMedia){
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){ draw(); });
+}
+
+/* ---------- 読み込み ---------- */
+buildLegend();
+fetch("assets/iso_timelapse_data.json").then(function(r){
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  return r.json();
+}).then(function(json){
+  DATA=json;
+  $("loading").hidden=true;
+  selectBuilding(0);
+}).catch(function(err){
+  $("loading").innerHTML='<span class="err">計画データの読み込みに失敗しました（'+err.message+'）。ページを再読み込みしてください。</span>';
+  $("bName").textContent="読み込みエラー";
+});
+})();
+</script>
+</body>
+</html>

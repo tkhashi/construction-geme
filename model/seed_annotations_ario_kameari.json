@@ -1,0 +1,242 @@
+{
+  "anchorName": "イトーヨーカドー",
+  "anchorSide": "E",
+  "anchorSize": 0.34,
+  "buildingName": "アリオ亀有（シード再構成・再現性検証）",
+  "coreFracs": [
+    0.05,
+    0.18,
+    0.48,
+    0.72
+  ],
+  "courtFracRange": [
+    0.42,
+    0.55
+  ],
+  "floorHeight": 5400,
+  "floors": 3,
+  "foodCourt": {
+    "fracRange": [
+      0.52,
+      0.65
+    ],
+    "levels": [
+      1
+    ],
+    "seatRows": [
+      15
+    ],
+    "shopRows": [
+      14
+    ]
+  },
+  "for": "conversion_osm_ario_kameari.json",
+  "gates": [
+    {
+      "edge": "south",
+      "frac": 0.3,
+      "name": "南入口（推定）"
+    },
+    {
+      "edge": "south",
+      "frac": 0.55,
+      "name": "南入口（推定）"
+    },
+    {
+      "edge": "south",
+      "frac": 0.8,
+      "name": "南入口（推定）"
+    },
+    {
+      "edge": "north",
+      "frac": 0.25,
+      "name": "北入口（推定）"
+    },
+    {
+      "edge": "north",
+      "frac": 0.6,
+      "name": "北入口（推定）"
+    },
+    {
+      "edge": "east",
+      "frac": 0.5,
+      "name": "ヨーカドー側入口（推定）"
+    }
+  ],
+  "groundPrior": "riverine-lowland",
+  "levelAnchors": [
+    {
+      "columnFree": true,
+      "excludeMallRows": true,
+      "fracRange": [
+        0.0,
+        0.2
+      ],
+      "levels": [
+        3
+      ],
+      "name": "MOVIX亀有",
+      "rows": "north",
+      "use": "大型店"
+    }
+  ],
+  "mallRows": [
+    16,
+    17
+  ],
+  "notes": "再現性検証用。モデル座標は変換プレート基準（実方位とは回転の関係）。アンカー端はガイド図形との形状照合でモデル東端と判定。既知の限界：3FのみのMOVIX（西端）は階別アンカー未対応のため未注釈、南の曲面ファサードは階段状近似、アネックス棟は同一ポリゴン内の南西部として扱う。ゲート位置は推定。",
+  "quasiAnchors": [],
+  "serviceFace": "E",
+  "source": "公式フロアガイド1F/3F・施設概要（地上3F・売場面積約42,120㎡・専門店123店）",
+  "spec": {
+    "structureSystem": {
+      "value": null,
+      "basis": "公開Web情報で確認できず（全体像調査）。値が無い場合は生成器のL4推論が補う"
+    },
+    "frameMethod": {
+      "value": null,
+      "basis": "不明。値が無い場合は在来工法を前提に推論する"
+    },
+    "foundationType": {
+      "value": null,
+      "basis": "不明。groundPrior（地域prior）から生成器が仮定する"
+    },
+    "exteriorWall": {
+      "value": null,
+      "basis": "不明（外壁種別：ALC／カーテンウォール等）"
+    },
+    "roofSpec": {
+      "value": null,
+      "basis": "不明（防水・仕上げ種別）"
+    },
+    "ceilingHeightMm": {
+      "value": null,
+      "basis": "不明。生成器既定（一般室3600／モール・物販4800）を使う"
+    },
+    "sprinkler": {
+      "value": true,
+      "basis": "個別確認なし。大規模物販の標準前提として生成器が採用【実務】"
+    },
+    "roofUse": {
+      "value": null,
+      "basis": "不明"
+    },
+    "parking": {
+      "value": "2,000台（形態は未確認）",
+      "basis": "施設概要（事実）"
+    }
+  },
+  "floorHeightBasis": "階数3は施設概要（事実）。階高5400mmは推定",
+  "site": {
+    "neighbors": {
+      "value": null,
+      "basis": "未調査。生成器の仮置き（蘇我の値）は使わず空にする"
+    },
+    "roads": {
+      "value": null,
+      "basis": "未調査"
+    },
+    "siteAreaM2": {
+      "value": 44300,
+      "basis": "施設概要（事実）"
+    },
+    "polygon": {
+      "value": null,
+      "basis": "敷地形状は未取得。生成器の仮置き矩形を使う"
+    }
+  },
+  "outline": {
+    "address": {
+      "value": "東京都葛飾区亀有3丁目",
+      "basis": "所在地（番地は未確認）"
+    },
+    "use": {
+      "value": "商業施設（ショッピングセンター）",
+      "basis": "施設概要"
+    },
+    "buildingAreaM2": {
+      "value": null,
+      "basis": "未確認"
+    },
+    "totalFloorAreaM2": {
+      "value": null,
+      "basis": "延床は未確認（売場面積 約42,120㎡のみ公表）"
+    },
+    "heightMm": {
+      "value": null,
+      "basis": "未確認"
+    },
+    "openedYear": {
+      "value": 2006,
+      "basis": "施設概要（2006年3月開業）"
+    },
+    "operator": {
+      "value": "イトーヨーカ堂（アリオ）",
+      "basis": "アリオはイトーヨーカ堂のショッピングセンター"
+    },
+    "architect": {
+      "value": null,
+      "basis": "未確認"
+    },
+    "builder": {
+      "value": null,
+      "basis": "未確認"
+    }
+  },
+  "zoning": {
+    "useDistrict": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "fireZone": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "buildingCoverageLimit": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "floorAreaRatioLimit": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "heightDistrict": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "shadowRegulation": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    }
+  },
+  "systems": {
+    "powerReceiving": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "waterSupply": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "drainage": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "airConditioning": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "heatSource": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "elevators": {
+      "value": null,
+      "basis": "台数・配置はモデル内のEVシャフトで表現。仕様は未収集"
+    },
+    "fireAlarm": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    }
+  }
+}

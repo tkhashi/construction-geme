@@ -1,0 +1,379 @@
+{
+ "difficulty": {
+  "fields": {
+   "budgetAssessmentRate": "実行予算の査定率：積み上げ原価から本社査定で削る割合（実行予算 = 原価 × (1 - 査定率)）。粗利率の標準値ではなくゲームの難易度パラメータ",
+   "bufferRate": "計画バッファ率：CP長に対する予備期間の割合（risks の期間バッファ）",
+   "methodConservatism": "工法選定の初期値の保守性（CP-4 のスコア重みに効く）",
+   "productivitySwing": "歩掛の揺れ幅：シード抽選で各フェーズの日数に掛かる ± 揺れの上限"
+  },
+  "levels": {
+   "easy": {
+    "budgetAssessmentRateRange": [
+     0.0,
+     0.02
+    ],
+    "bufferRateRange": [
+     0.1,
+     0.14
+    ],
+    "label": "簡単",
+    "methodConservatism": "標準〜保守的",
+    "productivitySwingRange": [
+     0.0,
+     0.05
+    ]
+   },
+   "hard": {
+    "budgetAssessmentRateRange": [
+     0.05,
+     0.09
+    ],
+    "bufferRateRange": [
+     0.02,
+     0.06
+    ],
+    "label": "難しい",
+    "methodConservatism": "標準〜攻め",
+    "productivitySwingRange": [
+     0.1,
+     0.16
+    ]
+   },
+   "normal": {
+    "budgetAssessmentRateRange": [
+     0.02,
+     0.05
+    ],
+    "bufferRateRange": [
+     0.06,
+     0.1
+    ],
+    "label": "普通",
+    "methodConservatism": "標準",
+    "productivitySwingRange": [
+     0.05,
+     0.1
+    ]
+   }
+  },
+  "note": "DP-3（ユーザー訂正）：ユーザーは 簡単／普通／難しい を選ぶだけ。実値はレンジからシード抽選し decisions に記録する"
+ },
+ "meta": {
+  "calibrationTarget": "大規模商業施設（テナント内装B/C工事を除く躯体・共用部・設備）の㎡単価が、建築着工統計2024・店舗250.9千円/㎡を下限参考としつつ、設備・外装グレード補正を入れて 260〜340千円/㎡ の帯に入ること",
+  "created": "2026-11-10",
+  "currency": "JPY",
+  "honesty": "全値はゲーム用既定（default）。公表歩掛・公表単価そのものではない。相対関係の維持と総額の統計レンジ照合（PL-09）を目的に調整した。アンカー（rule）は養生下限・申請期限等の規則値で、テーブル値とは別扱い",
+  "name": "工事計画用テーブル（DP-2）S造・商業 v0.1",
+  "scope": "S造・商業施設テンプレート専用。他構造・他用途は未対応（gapを返す）",
+  "calibrationLog": [
+   {
+    "date": "2026-11-10",
+    "run": "CP-0初回（パークサイドモール）",
+    "result": "222,950円/㎡で目標帯（260〜340千円/㎡）の下限未満",
+    "changes": "内装仕上げ 58,000→72,000円/㎡（建具・サイン・左官等の取りこぼし吸収）、設備 68,000→82,000円/㎡（受変電・熱源を含む大型商業水準）、鉄骨 395,000→425,000円/t、外壁 34,000→37,000円/㎡、耐火被覆 60,000円/t を追加（S造商業では必須の取りこぼし）",
+    "note": "較正はゲーム内バランス調整であり、実勢単価の主張ではない。相対関係は維持した"
+   }
+  ]
+ },
+ "productivity": {
+  "calendar": {
+   "basis": "決定：ゲーム開始時の閉所パラメータ（ユーザー確定）",
+   "pattern": "4週8閉所",
+   "workingDaysPer28CalendarDays": 20
+  },
+  "note": "日数 = 数量 ÷ (日当たり出来高 × 投入セット数)。固定型は根拠付き固定日数。暦変換は calendarProfile（4週8閉所＝28暦日あたり20実働日）で行う",
+  "phases": [
+   {
+    "basis": "固定：仮設事務所・仮囲い・引込（WORK_STRUCTURE_V2 着工時の順序）",
+    "id": "prep",
+    "name": "着工準備・仮設",
+    "type": "fixed",
+    "workingDays": 20
+   },
+   {
+    "basis": "掘削セット（ユンボ+ダンプ隊）800㎥/日×2セット＋山留め・床付けの固定分",
+    "dailyOutput": 800,
+    "id": "earthwork",
+    "name": "土工事（根切り・残土搬出）",
+    "plusDays": 8,
+    "quantity": "excavationM3",
+    "sets": 2,
+    "type": "rate"
+   },
+   {
+    "basis": "場所打ち杭 2本/日・台×2台",
+    "dailyOutput": 2,
+    "id": "piling",
+    "name": "杭工事",
+    "quantity": "pileCount",
+    "sets": 2,
+    "type": "rate"
+   },
+   {
+    "basis": "打設・配筋・型枠の律速をコンクリート量で代表（130㎥/日相当）＋養生・型枠転用待ち",
+    "dailyOutput": 130,
+    "id": "foundation",
+    "name": "基礎・地中梁（配筋・型枠・打設）",
+    "plusDays": 7,
+    "quantity": "foundationConcreteM3",
+    "sets": 1,
+    "type": "rate"
+   },
+   {
+    "basis": "建方 22t/日・クレーンセット×2セット＋節ごとの本締め・建入れ直し・床打設の固定分。節は2節（structure.constructionDerived）",
+    "dailyOutput": 22,
+    "id": "frame",
+    "name": "鉄骨建方〜デッキ・床打設（躯体）",
+    "plusDays": 12,
+    "quantity": "steelTonnes",
+    "sets": 2,
+    "type": "rate"
+   },
+   {
+    "basis": "パネル建込み 260㎡/日（面別ラップ込み）＋雨仕舞い・試験の固定分。躯体完了後に開始（確定ルール）",
+    "dailyOutput": 260,
+    "id": "roofExterior",
+    "name": "屋根防水・外装（ALC・サッシ・シーリング）",
+    "plusDays": 10,
+    "quantity": "exteriorWallM2",
+    "sets": 1,
+    "type": "rate"
+   },
+   {
+    "basis": "9工区ラップの実効出来高 620㎡/日（延床換算）＋受電待ち・試運転調整の固定分。躯体完了後に開始（確定ルール）",
+    "dailyOutput": 620,
+    "id": "mepInterior",
+    "name": "設備・内装（隠蔽→仕上げ→器具付け）",
+    "plusDays": 15,
+    "quantity": "grossAreaM2",
+    "sets": 1,
+    "type": "rate"
+   },
+   {
+    "basis": "固定：単独レーン。mepInterior と並行しクリティカルパスには原則ならない",
+    "id": "elevator",
+    "name": "EV（レール→かご→試運転→落成検査）",
+    "parallelWith": "mepInterior",
+    "type": "fixed",
+    "workingDays": 55
+   },
+   {
+    "basis": "舗装・埋設の実効 420㎡/日。外部足場全面解体が起点、内装と並行可（後半にラップ）",
+    "dailyOutput": 420,
+    "id": "exteriorWorks",
+    "name": "外構（埋設→舗装→植栽）",
+    "parallelRatio": 0.7,
+    "parallelWith": "mepInterior",
+    "quantity": "exteriorWorksM2",
+    "sets": 1,
+    "type": "rate"
+   },
+   {
+    "basis": "固定：総合試運転調整＋社内→監理者→施主→完了検査と是正期間",
+    "id": "closing",
+    "name": "試運転・検査群（自→監→施→法）・引渡し",
+    "type": "fixed",
+    "workingDays": 25
+   }
+  ],
+  "threePoint": {
+   "basis": "ゲーム既定：低＝歩掛・天候が favorable、高＝歩掛悪化・作業不能日増・検査是正1回分を含む。暦日への変換後に適用しない（実働日数側で振る）",
+   "highFactor": 1.18,
+   "lowFactor": 0.88
+  }
+ },
+ "quantityCoefficients": {
+  "columnSteelKgPerM": {
+   "basis": "推定：□-400×400（columnSizeMm=400）、板厚16〜19mm相当の単位重量",
+   "range": [
+    170,
+    230
+   ],
+   "tag": "inferred",
+   "value": 200
+  },
+  "earthworkWorkingSpaceRatio": {
+   "basis": "ゲーム既定：根切りはプレート面積×深さに作業スペース分を割増",
+   "tag": "default",
+   "value": 1.15
+  },
+  "formworkFoundationM2PerM3": {
+   "basis": "ゲーム既定：基礎・地中梁の型枠量（コンクリート量連動の近似）",
+   "tag": "default",
+   "value": 3.5
+  },
+  "foundationRebarKgPerM3": {
+   "basis": "ゲーム既定：基礎・地中梁のコンクリート㎥当たり鉄筋量",
+   "range": [
+    70,
+    110
+   ],
+   "tag": "default",
+   "value": 90
+  },
+  "girderSteelKgPerM": {
+   "basis": "推定：H-550×200（girderDepthMm=550）相当の単位重量",
+   "range": [
+    75,
+    110
+   ],
+   "tag": "inferred",
+   "value": 90
+  },
+  "gradeBeamSectionM2": {
+   "basis": "推定：地中梁 600×1200mm（モデルに断面なし）",
+   "tag": "inferred",
+   "value": 0.72
+  },
+  "pileDiameterMm": {
+   "basis": "ゲーム既定：場所打ち杭と仮定",
+   "tag": "default",
+   "value": 800
+  },
+  "pileLengthM": {
+   "basis": "ゲーム既定：モデルは杭種別・長さ未特定（gap）のため仮置き。要地盤調査の対象",
+   "range": [
+    10,
+    25
+   ],
+   "tag": "default",
+   "value": 15
+  },
+  "slabRebarKgPerM2": {
+   "basis": "算定値：D13@200ダブル（Reinforcement.spec）→ D13単位重量0.995kg/m × (1000/200)×2方向×2層 = 19.9kg/㎡",
+   "tag": "rule",
+   "value": 19.9
+  },
+  "steelBraceEtcRatio": {
+   "basis": "ゲーム既定：ブレース・小梁・接合部の割増率（柱梁主材に対して）",
+   "tag": "default",
+   "value": 0.1
+  },
+  "secondaryBeamSteelKgPerM": {
+   "value": 45,
+   "range": [
+    35,
+    60
+   ],
+   "tag": "inferred",
+   "basis": "推定：補助軸上の小梁（大梁より軽い断面）の単位重量"
+  }
+ },
+ "unitPrices": {
+  "commonRates": {
+   "commonTemporaryRateOnDirect": {
+    "basis": "ゲーム既定：共通仮設費（直接工事費に対する率）。公表率の固定値ではない",
+    "value": 0.045
+   },
+   "generalManagementRateOnCost": {
+    "basis": "ゲーム既定：一般管理費等（工事原価に対する率）",
+    "value": 0.07
+   },
+   "siteManagementRateOnNet": {
+    "basis": "ゲーム既定：現場管理費（純工事費に対する率）",
+    "value": 0.1
+   }
+  },
+  "items": [
+   {
+    "id": "excavation",
+    "name": "根切り・残土処分",
+    "price": 2400,
+    "quantity": "excavationM3",
+    "unit": "m3"
+   },
+   {
+    "id": "piling",
+    "name": "場所打ち杭",
+    "price": 52000,
+    "quantity": "pileLengthTotalM",
+    "unit": "m"
+   },
+   {
+    "id": "concrete",
+    "name": "コンクリート（材工）",
+    "price": 26000,
+    "quantity": "concreteTotalM3",
+    "unit": "m3"
+   },
+   {
+    "id": "formwork",
+    "name": "型枠",
+    "price": 7200,
+    "quantity": "formworkM2",
+    "unit": "m2"
+   },
+   {
+    "id": "rebar",
+    "name": "鉄筋（加工組立共）",
+    "price": 195000,
+    "quantity": "rebarTonnes",
+    "unit": "t"
+   },
+   {
+    "id": "steel",
+    "name": "鉄骨（製作・建方共）",
+    "price": 425000,
+    "quantity": "steelTonnes",
+    "unit": "t"
+   },
+   {
+    "id": "deck",
+    "name": "デッキプレート",
+    "price": 9800,
+    "quantity": "deckSlabM2",
+    "unit": "m2"
+   },
+   {
+    "id": "exteriorWall",
+    "name": "外壁ALC・サッシ・シーリング",
+    "price": 37000,
+    "quantity": "exteriorWallM2",
+    "unit": "m2"
+   },
+   {
+    "id": "roofing",
+    "name": "屋根防水（保護共）",
+    "price": 13500,
+    "quantity": "roofM2",
+    "unit": "m2"
+   },
+   {
+    "id": "interiorFinish",
+    "name": "内装仕上げ（共用・バック・テナント基本）",
+    "price": 72000,
+    "quantity": "grossAreaM2",
+    "unit": "m2"
+   },
+   {
+    "id": "mep",
+    "name": "設備（電気・衛生・空調の合計）",
+    "price": 82000,
+    "quantity": "grossAreaM2",
+    "unit": "m2"
+   },
+   {
+    "id": "elevator",
+    "name": "エレベーター",
+    "price": 26000000,
+    "quantity": "elevatorCount",
+    "unit": "基"
+   },
+   {
+    "id": "exteriorWorks",
+    "name": "外構（舗装・排水・植栽）",
+    "price": 9500,
+    "quantity": "exteriorWorksM2",
+    "unit": "m2"
+   },
+   {
+    "id": "fireproofing",
+    "name": "耐火被覆（鉄骨）",
+    "quantity": "steelTonnes",
+    "unit": "t",
+    "price": 60000
+   }
+  ],
+  "note": "数量×単価（材工共のゲーム用複合単価）。総額は calibrationTarget の帯で照合する"
+ }
+}

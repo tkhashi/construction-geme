@@ -2,7 +2,7 @@
 
 日本の建設現場の現場監督（施工管理）の仕事を体験するゲーム。健全な工程計画が外乱で崩れ、立て直していく過程が中核の、工程ネットワーク・シミュレーション。
 
-**プレイ（GitHub Pages）**: このリポジトリの `game/` が GitHub Actions で自動デプロイされる。
+**プレイ（GitHub Pages）**: https://tkhashi.github.io/construction-geme/ — `docs/` を GitHub Pages（ブランチ方式）で公開。本編を更新したら `game/index.html` と `docs/index.html` の両方へ反映する。
 
 ![本編スクリーンショット](research/images/game-screenshot.png)
 
@@ -10,7 +10,7 @@
 
 | パス | 内容 |
 |---|---|
-| `game/` | 本編ゲーム（単一HTML）。`main` への push で GitHub Pages へ自動デプロイ |
+| `game/` | 本編ゲーム（単一HTML）の正。`docs/index.html` がその公開用コピー（GitHub Pages） |
 | `*.md`（ルート） | 設計文書群（QCDSEモデル、作業構造、登場人物、イベントプール等）。索引は `DOCUMENTS.md` |
 | `model/` | 建物モデル／工事計画／3Dシーンの生成ロジックと仕様書。生成物JSON（`generated_*.json`）は再生成可能なため管理対象外 |
 | `characters/` | 登場人物のプロファイルとドット絵素材（画像はローカル管理） |

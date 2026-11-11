@@ -1,0 +1,8 @@
+{
+  "runtime": "static",
+  "platformVersion": 15,
+  "entry": "index.html",
+  "name": "現場監督 — 立て直しの14日間",
+  "slug": "xian-chang-jian-du-li-tezhi-sino14ri-jian",
+  "managedCronJobs": []
+}

@@ -1,0 +1,199 @@
+{
+  "for": "conversion_plateau_mallage_kashiwa.json",
+  "buildingName": "モラージュ柏",
+  "source": "PLATEAU（柏市、Flateau V2 GeoParquet）building_id=12217-bldg-72906 ＋ 公式サイト／運営者発表／Wikipedia（施設概要）",
+  "notes": "PLATEAU経由の新規生成の検証用に作った軽量注釈。外形・面積・高さはPLATEAU実データ、施設概要は公開情報、内部の配置（アンカー位置・モール行・コア位置・フードコート）はフロアガイド図面を精査していない推定。本格利用の前にフロアガイドでの裏付けが必要。",
+  "floors": 2,
+  "floorHeight": 5400,
+  "floorHeightBasis": "階数は公式フロアガイド（売場1F/2F＋RF屋上駐車場）による。PLATEAU属性 storeys_above_ground=4 は駐車場階等を含むとみて不採用（要確認）。階高5400mmは推定（階段の蹴上×段数の整合が取れる値に丸めた）",
+  "anchorName": "ヤオコー",
+  "anchorSide": "E",
+  "anchorSize": 0.22,
+  "quasiAnchors": [],
+  "levelAnchors": [],
+  "mallRows": [
+    11,
+    12
+  ],
+  "coreFracs": [
+    0.06,
+    0.18,
+    0.32,
+    0.46,
+    0.6,
+    0.74,
+    0.88
+  ],
+  "foodCourt": {
+    "fracRange": [
+      0.4,
+      0.6
+    ],
+    "levels": [
+      2
+    ],
+    "seatRows": [
+      15
+    ],
+    "shopRows": [
+      16
+    ]
+  },
+  "courtFracRange": [
+    0.44,
+    0.58
+  ],
+  "gates": [],
+  "serviceFace": "N",
+  "groundPrior": "upland",
+  "spec": {
+    "structureSystem": {
+      "value": null,
+      "basis": "公開情報で不明"
+    },
+    "frameMethod": {
+      "value": null,
+      "basis": "公開情報で不明"
+    },
+    "foundationType": {
+      "value": null,
+      "basis": "公開情報で不明（地盤は下総台地の想定）"
+    },
+    "exteriorWall": {
+      "value": null,
+      "basis": "公開情報で不明"
+    },
+    "roofUse": {
+      "value": "駐車場",
+      "basis": "公式フロアガイド（RF＝屋上駐車場）"
+    },
+    "roofSpec": {
+      "value": null,
+      "basis": "公開情報で不明"
+    },
+    "ceilingHeightMm": {
+      "value": null,
+      "basis": "公開情報で不明"
+    },
+    "sprinkler": {
+      "value": true,
+      "basis": "個別確認なし・大規模物販の標準前提"
+    },
+    "parking": {
+      "value": "約967台（平面＋屋上）",
+      "basis": "店舗情報サイトの掲載値。運営者の公表値ではない"
+    }
+  },
+  "site": {
+    "neighbors": {
+      "value": null,
+      "basis": "未調査"
+    },
+    "roads": {
+      "value": null,
+      "basis": "未調査"
+    },
+    "siteAreaM2": {
+      "value": 54000,
+      "basis": "運営者（双日商業開発）の施設概要（約54,000㎡）"
+    },
+    "polygon": {
+      "value": null,
+      "basis": "敷地形状は未取得。生成器の仮置き矩形を使う"
+    }
+  },
+  "outline": {
+    "address": {
+      "value": "千葉県柏市大山台2丁目3番地",
+      "basis": "公式サイト・運営者発表"
+    },
+    "use": {
+      "value": "商業施設（ショッピングセンター）",
+      "basis": "施設概要"
+    },
+    "buildingAreaM2": {
+      "value": null,
+      "basis": "未確認（PLATEAUの footprint 実測は約23,500㎡）"
+    },
+    "totalFloorAreaM2": {
+      "value": 56660,
+      "basis": "Wikipedia の延床面積。運営者の商業施設面積は約39,964㎡（売場ベース）"
+    },
+    "heightMm": {
+      "value": 17800,
+      "basis": "PLATEAU計測高さ（Flateau属性 measured_height=17.8m）"
+    },
+    "openedYear": {
+      "value": 2004,
+      "basis": "施設概要（2004-07-03開業）"
+    },
+    "operator": {
+      "value": "双日商業開発",
+      "basis": "運営者公式サイトの運営実績ページ"
+    },
+    "architect": {
+      "value": null,
+      "basis": "未確認"
+    },
+    "builder": {
+      "value": null,
+      "basis": "未確認"
+    }
+  },
+  "zoning": {
+    "useDistrict": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "fireZone": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "buildingCoverageLimit": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "floorAreaRatioLimit": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "heightDistrict": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "shadowRegulation": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    }
+  },
+  "systems": {
+    "powerReceiving": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "waterSupply": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "drainage": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "airConditioning": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "heatSource": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "elevators": {
+      "value": null,
+      "basis": "台数・配置はモデル内のEVシャフトで表現。仕様は未収集"
+    },
+    "fireAlarm": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    }
+  }
+}

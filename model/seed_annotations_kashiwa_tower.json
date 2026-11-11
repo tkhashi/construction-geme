@@ -1,0 +1,6 @@
+{
+  "buildingName": "柏市の高層マンション（PLATEAUシード 12217-bldg-170397）",
+  "floors": 15,
+  "floorHeight": 2800,
+  "notes": "階数15はPLATEAU属性（storeys_above_ground）。階高2800は計測高さ42.7mからの逆算を、階段の蹴上×段数の整合が取れる値に丸めたもの。建物名は未同定（所在地は柏市柏436-2）。"
+}

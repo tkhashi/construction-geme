@@ -1,0 +1,5207 @@
+{
+ "meta": {
+  "converter": "plan_to_game.py v0.1",
+  "sourcePlan": "generated_construction_plan_commercial_seeded2.json",
+  "building": "アリオ蘇我（シード再構成）",
+  "durationScale": 7.0,
+  "difficulty": "normal",
+  "seed": 42,
+  "note": "計画は実日数で保持し、換算はこの層でのみ行う（DP-1）"
+ },
+ "premises": {
+  "quantities": {
+   "grossAreaM2": 59059.0,
+   "grossAreaTargetM2": 75712,
+   "plateAreaByLevel": {
+    "L1": 29529.5,
+    "L2": 29529.5
+   },
+   "columnCount1F": 422,
+   "pileCount": 422,
+   "pileLengthTotalM": 6330,
+   "excavationM3": 50938.4,
+   "foundationConcreteM3": 7048.3,
+   "concreteTotalM3": 15907.1,
+   "slabConcreteM3": 8858.9,
+   "formworkM2": 24669.0,
+   "rebarTonnes": 1809.6,
+   "steelTonnes": 2620.1,
+   "columnSteelTonnes": 911.5,
+   "girderSteelTonnes": 1470.4,
+   "deckSlabM2": 29529.5,
+   "exteriorWallM2": 10530.0,
+   "roofM2": 29529.5,
+   "exteriorWorksM2": 30510.5,
+   "siteAreaM2": 60040.0,
+   "elevatorCount": 9
+  },
+  "cp0Duration": {
+   "workingDaysBase": 483.8,
+   "workingDaysLow": 431.1,
+   "workingDaysHigh": 562.8,
+   "calendarDaysBase": 698,
+   "calendarDaysLow": 622,
+   "calendarDaysHigh": 812,
+   "bufferWorkingDays": 34.3,
+   "note": "暦変換は4週8閉所（28暦日=20実働日）＋長期休暇近似。3点推定は実働日数側の係数（cost_tables.threePoint）"
+  },
+  "cost": {
+   "directCost": 13362817160,
+   "totalPrice": 16435797408,
+   "unitPricePerM2": 278295,
+   "executionBudget": 15041058712
+  },
+  "draws": {
+   "difficulty": "normal",
+   "seed": 42,
+   "budgetAssessmentRate": 0.0208,
+   "bufferRate": 0.071,
+   "productivitySwing": 0.082
+  }
+ },
+ "tasks": [
+  {
+   "id": "prep-1",
+   "name": "着工届出・施工計画確定",
+   "phase": "prep",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 1,
+   "gameEnd": 1,
+   "realWorkingDays": 4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": []
+  },
+  {
+   "id": "prep-2",
+   "name": "仮設工事（仮囲い・事務所・ゲート）",
+   "phase": "prep",
+   "zone": null,
+   "trade": "仮設",
+   "gameStart": 1,
+   "gameEnd": 3,
+   "realWorkingDays": 12,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "prep-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "prep-3",
+   "name": "遣り方・基準墨",
+   "phase": "prep",
+   "zone": null,
+   "trade": "墨出し",
+   "gameStart": 3,
+   "gameEnd": 3,
+   "realWorkingDays": 4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "prep-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "prep-4",
+   "name": "仮設電気・水道引込",
+   "phase": "prep",
+   "zone": null,
+   "trade": "設備",
+   "gameStart": 3,
+   "gameEnd": 4,
+   "realWorkingDays": 8,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "prep-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "earth-1",
+   "name": "山留め",
+   "phase": "earthwork",
+   "zone": null,
+   "trade": "土工",
+   "gameStart": 3,
+   "gameEnd": 4,
+   "realWorkingDays": 5,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "prep-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "earth-2",
+   "name": "根切り・残土搬出",
+   "phase": "earthwork",
+   "zone": null,
+   "trade": "土工",
+   "gameStart": 4,
+   "gameEnd": 9,
+   "realWorkingDays": 32.2,
+   "cost": 122252160,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "earth-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "earth-3",
+   "name": "床付け・地業・捨てコン",
+   "phase": "earthwork",
+   "zone": null,
+   "trade": "土工",
+   "gameStart": 9,
+   "gameEnd": 9,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "earth-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "pile-1",
+   "name": "試験杭・支持層確認",
+   "phase": "piling",
+   "zone": null,
+   "trade": "杭",
+   "gameStart": 9,
+   "gameEnd": 10,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "earth-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "pile-2",
+   "name": "本杭（場所打ち）",
+   "phase": "piling",
+   "zone": null,
+   "trade": "杭",
+   "gameStart": 10,
+   "gameEnd": 23,
+   "realWorkingDays": 94.2,
+   "cost": 329160000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "pile-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "pile-3",
+   "name": "杭頭処理",
+   "phase": "piling",
+   "zone": null,
+   "trade": "杭",
+   "gameStart": 23,
+   "gameEnd": 23,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "pile-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "fnd-1F-C-1",
+   "name": "1F-C 基礎配筋・型枠",
+   "phase": "foundation",
+   "zone": "1F-C",
+   "trade": "基礎",
+   "gameStart": 23,
+   "gameEnd": 25,
+   "realWorkingDays": 13.9,
+   "cost": 107136623,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "pile-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "fnd-1F-E-1",
+   "name": "1F-E 基礎配筋・型枠",
+   "phase": "foundation",
+   "zone": "1F-E",
+   "trade": "基礎",
+   "gameStart": 25,
+   "gameEnd": 27,
+   "realWorkingDays": 11.3,
+   "cost": 89954334,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "pile-3",
+     "type": "finish-start"
+    },
+    {
+     "to": "fnd-1F-C-1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "fnd-1F-W-1",
+   "name": "1F-W 基礎配筋・型枠",
+   "phase": "foundation",
+   "zone": "1F-W",
+   "trade": "基礎",
+   "gameStart": 27,
+   "gameEnd": 29,
+   "realWorkingDays": 16.4,
+   "cost": 130888610,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "pile-3",
+     "type": "finish-start"
+    },
+    {
+     "to": "fnd-1F-E-1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "insp-fnd-1F-C-doc",
+   "name": "1F-C 基礎配筋検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 25,
+   "gameEnd": 26,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-fnd-1F-C",
+   "deps": [
+    {
+     "to": "fnd-1F-C-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-fnd-1F-C-app",
+   "name": "1F-C 基礎配筋検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 26,
+   "gameEnd": 26,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-fnd-1F-C",
+   "deps": [
+    {
+     "to": "insp-fnd-1F-C-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-fnd-1F-C-act",
+   "name": "1F-C 基礎配筋検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 26,
+   "gameEnd": 26,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-fnd-1F-C",
+   "deps": [
+    {
+     "to": "insp-fnd-1F-C-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "fnd-1F-C-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-fnd-1F-E-doc",
+   "name": "1F-E 基礎配筋検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 27,
+   "gameEnd": 27,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-fnd-1F-E",
+   "deps": [
+    {
+     "to": "fnd-1F-E-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-fnd-1F-E-app",
+   "name": "1F-E 基礎配筋検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 27,
+   "gameEnd": 27,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-fnd-1F-E",
+   "deps": [
+    {
+     "to": "insp-fnd-1F-E-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-fnd-1F-E-act",
+   "name": "1F-E 基礎配筋検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 27,
+   "gameEnd": 28,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-fnd-1F-E",
+   "deps": [
+    {
+     "to": "insp-fnd-1F-E-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "fnd-1F-E-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-fnd-1F-W-doc",
+   "name": "1F-W 基礎配筋検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 29,
+   "gameEnd": 30,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-fnd-1F-W",
+   "deps": [
+    {
+     "to": "fnd-1F-W-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-fnd-1F-W-app",
+   "name": "1F-W 基礎配筋検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 30,
+   "gameEnd": 30,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-fnd-1F-W",
+   "deps": [
+    {
+     "to": "insp-fnd-1F-W-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-fnd-1F-W-act",
+   "name": "1F-W 基礎配筋検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 30,
+   "gameEnd": 30,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-fnd-1F-W",
+   "deps": [
+    {
+     "to": "insp-fnd-1F-W-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "fnd-1F-W-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-steel-prod-doc",
+   "name": "鉄骨製品検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 1,
+   "gameEnd": 1,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-steel-prod",
+   "deps": [
+    {
+     "to": "prep-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-steel-prod-app",
+   "name": "鉄骨製品検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 2,
+   "gameEnd": 2,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-steel-prod",
+   "deps": [
+    {
+     "to": "insp-steel-prod-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-steel-prod-act",
+   "name": "鉄骨製品検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 2,
+   "gameEnd": 2,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-steel-prod",
+   "deps": [
+    {
+     "to": "insp-steel-prod-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "prep-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "fnd-1F-C-2",
+   "name": "1F-C 基礎打設・養生",
+   "phase": "foundation",
+   "zone": "1F-C",
+   "trade": "基礎",
+   "gameStart": 26,
+   "gameEnd": 27,
+   "realWorkingDays": 9.8,
+   "cost": 22516676,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "insp-fnd-1F-C-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "fnd-1F-C-3",
+   "name": "1F-C 型枠解体・埋戻し",
+   "phase": "foundation",
+   "zone": "1F-C",
+   "trade": "基礎",
+   "gameStart": 27,
+   "gameEnd": 28,
+   "realWorkingDays": 4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "fnd-1F-C-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "fnd-1F-E-2",
+   "name": "1F-E 基礎打設・養生",
+   "phase": "foundation",
+   "zone": "1F-E",
+   "trade": "基礎",
+   "gameStart": 28,
+   "gameEnd": 29,
+   "realWorkingDays": 9.3,
+   "cost": 18905511,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "insp-fnd-1F-E-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "fnd-1F-E-3",
+   "name": "1F-E 型枠解体・埋戻し",
+   "phase": "foundation",
+   "zone": "1F-E",
+   "trade": "基礎",
+   "gameStart": 29,
+   "gameEnd": 29,
+   "realWorkingDays": 4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "fnd-1F-E-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "fnd-1F-W-2",
+   "name": "1F-W 基礎打設・養生",
+   "phase": "foundation",
+   "zone": "1F-W",
+   "trade": "基礎",
+   "gameStart": 30,
+   "gameEnd": 32,
+   "realWorkingDays": 12.4,
+   "cost": 27508580,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "insp-fnd-1F-W-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "fnd-1F-W-3",
+   "name": "1F-W 型枠解体・埋戻し",
+   "phase": "foundation",
+   "zone": "1F-W",
+   "trade": "基礎",
+   "gameStart": 32,
+   "gameEnd": 32,
+   "realWorkingDays": 4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "fnd-1F-W-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "frm-s1-1",
+   "name": "第1節 鉄骨建方",
+   "phase": "frame",
+   "zone": null,
+   "trade": "鉄骨",
+   "gameStart": 32,
+   "gameEnd": 41,
+   "realWorkingDays": 60.1,
+   "cost": 1270748500,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "fnd-1F-C-3",
+     "type": "finish-start"
+    },
+    {
+     "to": "fnd-1F-E-3",
+     "type": "finish-start"
+    },
+    {
+     "to": "fnd-1F-W-3",
+     "type": "finish-start"
+    },
+    {
+     "to": "insp-steel-prod-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "frm-s1-2",
+   "name": "第1節 本締め・建入れ直し",
+   "phase": "frame",
+   "zone": null,
+   "trade": "鉄骨",
+   "gameStart": 41,
+   "gameEnd": 41,
+   "realWorkingDays": 4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "frm-s1-L1-d",
+   "name": "L1 デッキ敷き・先行仕込み（スリーブ／インサート）",
+   "phase": "frame",
+   "zone": null,
+   "trade": "鉄骨",
+   "gameStart": 41,
+   "gameEnd": 43,
+   "realWorkingDays": 7.9,
+   "cost": 144694550,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "frm-s1-L1-c",
+   "name": "L1 床配筋・打設・養生",
+   "phase": "frame",
+   "zone": null,
+   "trade": "コンクリート",
+   "gameStart": 43,
+   "gameEnd": 44,
+   "realWorkingDays": 12.5,
+   "cost": 273581533,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-d",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "frm-s1-L2-d",
+   "name": "L2 デッキ敷き・先行仕込み（スリーブ／インサート）",
+   "phase": "frame",
+   "zone": null,
+   "trade": "鉄骨",
+   "gameStart": 41,
+   "gameEnd": 43,
+   "realWorkingDays": 7.7,
+   "cost": 144694550,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "frm-s1-L2-c",
+   "name": "L2 床配筋・打設・養生",
+   "phase": "frame",
+   "zone": null,
+   "trade": "コンクリート",
+   "gameStart": 43,
+   "gameEnd": 44,
+   "realWorkingDays": 11.9,
+   "cost": 273581533,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L2-d",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "roof-1",
+   "name": "屋根下地・防水",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "防水",
+   "gameStart": 44,
+   "gameEnd": 46,
+   "realWorkingDays": 12.7,
+   "cost": 398648250,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "roof-2",
+   "name": "屋根立上り・保護・ドレン通水確認",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "防水",
+   "gameStart": 46,
+   "gameEnd": 47,
+   "realWorkingDays": 5,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "roof-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-南面-1",
+   "name": "南面 足場組立",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "鳶",
+   "gameStart": 44,
+   "gameEnd": 45,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-東面-1",
+   "name": "東面 足場組立",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "鳶",
+   "gameStart": 44,
+   "gameEnd": 45,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-東面-2",
+   "name": "東面 外壁パネル建込み",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 45,
+   "gameEnd": 45,
+   "realWorkingDays": 3.2,
+   "cost": 31168800,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-東面-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-東面-3",
+   "name": "東面 サッシ・ガラス",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 45,
+   "gameEnd": 45,
+   "realWorkingDays": 1.5,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-東面-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-東面-4",
+   "name": "東面 シーリング・雨仕舞い確認",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 45,
+   "gameEnd": 46,
+   "realWorkingDays": 2.0,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-東面-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-東面-5",
+   "name": "東面 足場解体",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "鳶",
+   "gameStart": 46,
+   "gameEnd": 46,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-東面-4",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-西面-1",
+   "name": "西面 足場組立",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "鳶",
+   "gameStart": 46,
+   "gameEnd": 46,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "face-東面-5",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "face-西面-2",
+   "name": "西面 外壁パネル建込み",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 46,
+   "gameEnd": 48,
+   "realWorkingDays": 7.6,
+   "cost": 67532400,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-西面-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-西面-3",
+   "name": "西面 サッシ・ガラス",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 48,
+   "gameEnd": 48,
+   "realWorkingDays": 3.3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-西面-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-西面-4",
+   "name": "西面 シーリング・雨仕舞い確認",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 48,
+   "gameEnd": 48,
+   "realWorkingDays": 2.3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-西面-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-西面-5",
+   "name": "西面 足場解体",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "鳶",
+   "gameStart": 48,
+   "gameEnd": 49,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-西面-4",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "elec-0a",
+   "name": "屋外引込・受変電基礎",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "電気",
+   "gameStart": 44,
+   "gameEnd": 45,
+   "realWorkingDays": 6,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "elec-0b",
+   "name": "キュービクル据付・幹線立上げ",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "電気",
+   "gameStart": 45,
+   "gameEnd": 46,
+   "realWorkingDays": 7.5,
+   "cost": 8200,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "elec-0a",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "lift-in-L1",
+   "name": "L1 高所作業車 搬入（クレーン揚重・開口部から）",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "揚重",
+   "gameStart": 44,
+   "gameEnd": 44,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "lift-in-L2",
+   "name": "L2 高所作業車 搬入（クレーン揚重・開口部から）",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "揚重",
+   "gameStart": 44,
+   "gameEnd": 44,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-sumi",
+   "name": "1F-C 内装墨出し",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "墨出し",
+   "gameStart": 47,
+   "gameEnd": 47,
+   "realWorkingDays": 3.1,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "roof-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-lgs",
+   "name": "1F-C LGS下地",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "軽鉄",
+   "gameStart": 47,
+   "gameEnd": 49,
+   "realWorkingDays": 8.7,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-sumi",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-ps",
+   "name": "1F-C PS縦管立上げ",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "衛生",
+   "gameStart": 49,
+   "gameEnd": 49,
+   "realWorkingDays": 4.3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-lgs",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-hanger",
+   "name": "1F-C 吊りボルト・支持材",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "設備支持",
+   "gameStart": 49,
+   "gameEnd": 50,
+   "realWorkingDays": 2.9,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-ps",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-hvac1",
+   "name": "1F-C 空調ダクト・冷媒配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "空調",
+   "gameStart": 50,
+   "gameEnd": 51,
+   "realWorkingDays": 7.9,
+   "cost": 158194132,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-hanger",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-plmb1",
+   "name": "1F-C 衛生配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "衛生",
+   "gameStart": 51,
+   "gameEnd": 52,
+   "realWorkingDays": 6.3,
+   "cost": 158194132,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-hvac1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-elec1",
+   "name": "1F-C 電気配管・配線（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "電気",
+   "gameStart": 52,
+   "gameEnd": 52,
+   "realWorkingDays": 6.2,
+   "cost": 158194132,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-sumi",
+   "name": "1F-E 内装墨出し",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "墨出し",
+   "gameStart": 47,
+   "gameEnd": 47,
+   "realWorkingDays": 2.5,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "roof-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-lgs",
+   "name": "1F-E LGS下地",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "軽鉄",
+   "gameStart": 47,
+   "gameEnd": 48,
+   "realWorkingDays": 7.3,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-sumi",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-ps",
+   "name": "1F-E PS縦管立上げ",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "衛生",
+   "gameStart": 49,
+   "gameEnd": 50,
+   "realWorkingDays": 3.6,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-lgs",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-ps",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-hanger",
+   "name": "1F-E 吊りボルト・支持材",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "設備支持",
+   "gameStart": 50,
+   "gameEnd": 50,
+   "realWorkingDays": 2.4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-ps",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-hvac1",
+   "name": "1F-E 空調ダクト・冷媒配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "空調",
+   "gameStart": 50,
+   "gameEnd": 51,
+   "realWorkingDays": 6.2,
+   "cost": 132823375,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-hanger",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-plmb1",
+   "name": "1F-E 衛生配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "衛生",
+   "gameStart": 52,
+   "gameEnd": 52,
+   "realWorkingDays": 5.1,
+   "cost": 132823375,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-plmb1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-elec1",
+   "name": "1F-E 電気配管・配線（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "電気",
+   "gameStart": 52,
+   "gameEnd": 53,
+   "realWorkingDays": 5.1,
+   "cost": 132823375,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-sumi",
+   "name": "1F-W 内装墨出し",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "墨出し",
+   "gameStart": 47,
+   "gameEnd": 48,
+   "realWorkingDays": 3.8,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "roof-2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-sumi",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-lgs",
+   "name": "1F-W LGS下地",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "軽鉄",
+   "gameStart": 49,
+   "gameEnd": 50,
+   "realWorkingDays": 11.4,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-sumi",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-lgs",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-ps",
+   "name": "1F-W PS縦管立上げ",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "衛生",
+   "gameStart": 50,
+   "gameEnd": 51,
+   "realWorkingDays": 5.4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-lgs",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-ps",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-hanger",
+   "name": "1F-W 吊りボルト・支持材",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "設備支持",
+   "gameStart": 51,
+   "gameEnd": 51,
+   "realWorkingDays": 3.7,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-ps",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-hanger",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-hvac1",
+   "name": "1F-W 空調ダクト・冷媒配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "空調",
+   "gameStart": 51,
+   "gameEnd": 53,
+   "realWorkingDays": 9.8,
+   "cost": 193265473,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-hanger",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-hvac1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-plmb1",
+   "name": "1F-W 衛生配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "衛生",
+   "gameStart": 53,
+   "gameEnd": 54,
+   "realWorkingDays": 7.2,
+   "cost": 193265473,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-plmb1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-elec1",
+   "name": "1F-W 電気配管・配線（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "電気",
+   "gameStart": 54,
+   "gameEnd": 55,
+   "realWorkingDays": 7.5,
+   "cost": 193265473,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-elec1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-sumi",
+   "name": "2F-C 内装墨出し",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "墨出し",
+   "gameStart": 47,
+   "gameEnd": 48,
+   "realWorkingDays": 3.0,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "roof-2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-sumi",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-lgs",
+   "name": "2F-C LGS下地",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "軽鉄",
+   "gameStart": 48,
+   "gameEnd": 50,
+   "realWorkingDays": 9.0,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-sumi",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-lgs",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-ps",
+   "name": "2F-C PS縦管立上げ",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "衛生",
+   "gameStart": 51,
+   "gameEnd": 52,
+   "realWorkingDays": 4.3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-lgs",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-ps",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-hanger",
+   "name": "2F-C 吊りボルト・支持材",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "設備支持",
+   "gameStart": 52,
+   "gameEnd": 52,
+   "realWorkingDays": 3.2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-ps",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-hanger",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-hvac1",
+   "name": "2F-C 空調ダクト・冷媒配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "空調",
+   "gameStart": 52,
+   "gameEnd": 53,
+   "realWorkingDays": 7.9,
+   "cost": 158194132,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-hanger",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-hvac1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-plmb1",
+   "name": "2F-C 衛生配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "衛生",
+   "gameStart": 54,
+   "gameEnd": 55,
+   "realWorkingDays": 5.8,
+   "cost": 158194132,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-plmb1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-elec1",
+   "name": "2F-C 電気配管・配線（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "電気",
+   "gameStart": 55,
+   "gameEnd": 56,
+   "realWorkingDays": 5.6,
+   "cost": 158194132,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-elec1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-sumi",
+   "name": "2F-E 内装墨出し",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "墨出し",
+   "gameStart": 48,
+   "gameEnd": 48,
+   "realWorkingDays": 2.4,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "roof-2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-sumi",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-lgs",
+   "name": "2F-E LGS下地",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "軽鉄",
+   "gameStart": 50,
+   "gameEnd": 51,
+   "realWorkingDays": 7.5,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-sumi",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-lgs",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-ps",
+   "name": "2F-E PS縦管立上げ",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "衛生",
+   "gameStart": 52,
+   "gameEnd": 52,
+   "realWorkingDays": 3.6,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-lgs",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-ps",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-hanger",
+   "name": "2F-E 吊りボルト・支持材",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "設備支持",
+   "gameStart": 52,
+   "gameEnd": 52,
+   "realWorkingDays": 2.6,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-ps",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-hanger",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-hvac1",
+   "name": "2F-E 空調ダクト・冷媒配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "空調",
+   "gameStart": 53,
+   "gameEnd": 54,
+   "realWorkingDays": 5.9,
+   "cost": 132823375,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-hanger",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-hvac1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-plmb1",
+   "name": "2F-E 衛生配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "衛生",
+   "gameStart": 55,
+   "gameEnd": 55,
+   "realWorkingDays": 5.2,
+   "cost": 132823375,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-plmb1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-elec1",
+   "name": "2F-E 電気配管・配線（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "電気",
+   "gameStart": 55,
+   "gameEnd": 56,
+   "realWorkingDays": 5.1,
+   "cost": 132823375,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-elec1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-sumi",
+   "name": "2F-W 内装墨出し",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "墨出し",
+   "gameStart": 48,
+   "gameEnd": 48,
+   "realWorkingDays": 3.4,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "roof-2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-sumi",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-lgs",
+   "name": "2F-W LGS下地",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "軽鉄",
+   "gameStart": 50,
+   "gameEnd": 51,
+   "realWorkingDays": 11.5,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-sumi",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-lgs",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-ps",
+   "name": "2F-W PS縦管立上げ",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "衛生",
+   "gameStart": 52,
+   "gameEnd": 53,
+   "realWorkingDays": 5.6,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-lgs",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-ps",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-hanger",
+   "name": "2F-W 吊りボルト・支持材",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "設備支持",
+   "gameStart": 53,
+   "gameEnd": 53,
+   "realWorkingDays": 3.4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-ps",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-hanger",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-hvac1",
+   "name": "2F-W 空調ダクト・冷媒配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "空調",
+   "gameStart": 53,
+   "gameEnd": 55,
+   "realWorkingDays": 9.4,
+   "cost": 193265473,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-hanger",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-hvac1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-plmb1",
+   "name": "2F-W 衛生配管（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "衛生",
+   "gameStart": 55,
+   "gameEnd": 56,
+   "realWorkingDays": 6.8,
+   "cost": 193265473,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-plmb1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-elec1",
+   "name": "2F-W 電気配管・配線（隠蔽）",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "電気",
+   "gameStart": 56,
+   "gameEnd": 57,
+   "realWorkingDays": 6.9,
+   "cost": 193265473,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-elec1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "ev-1",
+   "name": "昇降路引渡し・レール据付",
+   "phase": "elevator",
+   "zone": null,
+   "trade": "EV",
+   "gameStart": 44,
+   "gameEnd": 47,
+   "realWorkingDays": 17.6,
+   "cost": 93600000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "ev-2",
+   "name": "かご・巻上機組立",
+   "phase": "elevator",
+   "zone": null,
+   "trade": "EV",
+   "gameStart": 47,
+   "gameEnd": 49,
+   "realWorkingDays": 14.1,
+   "cost": 81900000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "ev-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "ev-3",
+   "name": "配線・試運転調整",
+   "phase": "elevator",
+   "zone": null,
+   "trade": "EV",
+   "gameStart": 49,
+   "gameEnd": 51,
+   "realWorkingDays": 11.9,
+   "cost": 58500000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "ev-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-steel-s1-doc",
+   "name": "第1節 建方検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 41,
+   "gameEnd": 42,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-steel-s1",
+   "deps": [
+    {
+     "to": "frm-s1-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-steel-s1-app",
+   "name": "第1節 建方検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 42,
+   "gameEnd": 42,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-steel-s1",
+   "deps": [
+    {
+     "to": "insp-steel-s1-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-steel-s1-act",
+   "name": "第1節 建方検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 42,
+   "gameEnd": 42,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-steel-s1",
+   "deps": [
+    {
+     "to": "insp-steel-s1-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-mid-doc",
+   "name": "中間検査（特定工程・鉄骨工事） 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 41,
+   "gameEnd": 42,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-mid",
+   "deps": [
+    {
+     "to": "frm-s1-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-mid-app",
+   "name": "中間検査（特定工程・鉄骨工事） 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 42,
+   "gameEnd": 42,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-mid",
+   "deps": [
+    {
+     "to": "insp-mid-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-mid-act",
+   "name": "中間検査（特定工程・鉄骨工事） 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 42,
+   "gameEnd": 42,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-mid",
+   "deps": [
+    {
+     "to": "insp-mid-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-1F-C-doc",
+   "name": "1F-C 水圧・満水試験 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 52,
+   "gameEnd": 52,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-1F-C",
+   "deps": [
+    {
+     "to": "z-1F-C-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-1F-C-app",
+   "name": "1F-C 水圧・満水試験 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 52,
+   "gameEnd": 52,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-1F-C",
+   "deps": [
+    {
+     "to": "insp-wp-1F-C-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-1F-C-act",
+   "name": "1F-C 水圧・満水試験 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 52,
+   "gameEnd": 52,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-wp-1F-C",
+   "deps": [
+    {
+     "to": "insp-wp-1F-C-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-1F-C-doc",
+   "name": "1F-C 隠蔽前検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 53,
+   "gameEnd": 53,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-1F-C",
+   "deps": [
+    {
+     "to": "z-1F-C-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-1F-C-app",
+   "name": "1F-C 隠蔽前検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 53,
+   "gameEnd": 53,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-1F-C",
+   "deps": [
+    {
+     "to": "insp-conc-1F-C-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-1F-C-act",
+   "name": "1F-C 隠蔽前検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 53,
+   "gameEnd": 53,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-conc-1F-C",
+   "deps": [
+    {
+     "to": "insp-conc-1F-C-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-1F-E-doc",
+   "name": "1F-E 水圧・満水試験 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 52,
+   "gameEnd": 52,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-1F-E",
+   "deps": [
+    {
+     "to": "z-1F-E-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-1F-E-app",
+   "name": "1F-E 水圧・満水試験 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 52,
+   "gameEnd": 53,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-1F-E",
+   "deps": [
+    {
+     "to": "insp-wp-1F-E-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-1F-E-act",
+   "name": "1F-E 水圧・満水試験 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 53,
+   "gameEnd": 53,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-wp-1F-E",
+   "deps": [
+    {
+     "to": "insp-wp-1F-E-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-1F-E-doc",
+   "name": "1F-E 隠蔽前検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 53,
+   "gameEnd": 53,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-1F-E",
+   "deps": [
+    {
+     "to": "z-1F-E-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-1F-E-app",
+   "name": "1F-E 隠蔽前検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 53,
+   "gameEnd": 53,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-1F-E",
+   "deps": [
+    {
+     "to": "insp-conc-1F-E-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-1F-E-act",
+   "name": "1F-E 隠蔽前検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 54,
+   "gameEnd": 54,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-conc-1F-E",
+   "deps": [
+    {
+     "to": "insp-conc-1F-E-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-1F-W-doc",
+   "name": "1F-W 水圧・満水試験 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 54,
+   "gameEnd": 54,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-1F-W",
+   "deps": [
+    {
+     "to": "z-1F-W-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-1F-W-app",
+   "name": "1F-W 水圧・満水試験 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 54,
+   "gameEnd": 54,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-1F-W",
+   "deps": [
+    {
+     "to": "insp-wp-1F-W-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-1F-W-act",
+   "name": "1F-W 水圧・満水試験 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 54,
+   "gameEnd": 54,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-wp-1F-W",
+   "deps": [
+    {
+     "to": "insp-wp-1F-W-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-1F-W-doc",
+   "name": "1F-W 隠蔽前検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 55,
+   "gameEnd": 55,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-1F-W",
+   "deps": [
+    {
+     "to": "z-1F-W-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-1F-W-app",
+   "name": "1F-W 隠蔽前検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 55,
+   "gameEnd": 55,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-1F-W",
+   "deps": [
+    {
+     "to": "insp-conc-1F-W-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-1F-W-act",
+   "name": "1F-W 隠蔽前検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 55,
+   "gameEnd": 56,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-conc-1F-W",
+   "deps": [
+    {
+     "to": "insp-conc-1F-W-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-2F-C-doc",
+   "name": "2F-C 水圧・満水試験 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 55,
+   "gameEnd": 55,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-2F-C",
+   "deps": [
+    {
+     "to": "z-2F-C-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-2F-C-app",
+   "name": "2F-C 水圧・満水試験 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 55,
+   "gameEnd": 55,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-2F-C",
+   "deps": [
+    {
+     "to": "insp-wp-2F-C-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-2F-C-act",
+   "name": "2F-C 水圧・満水試験 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 55,
+   "gameEnd": 55,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-wp-2F-C",
+   "deps": [
+    {
+     "to": "insp-wp-2F-C-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-2F-C-doc",
+   "name": "2F-C 隠蔽前検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 56,
+   "gameEnd": 56,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-2F-C",
+   "deps": [
+    {
+     "to": "z-2F-C-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-2F-C-app",
+   "name": "2F-C 隠蔽前検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 56,
+   "gameEnd": 56,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-2F-C",
+   "deps": [
+    {
+     "to": "insp-conc-2F-C-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-2F-C-act",
+   "name": "2F-C 隠蔽前検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 56,
+   "gameEnd": 56,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-conc-2F-C",
+   "deps": [
+    {
+     "to": "insp-conc-2F-C-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-2F-E-doc",
+   "name": "2F-E 水圧・満水試験 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 55,
+   "gameEnd": 56,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-2F-E",
+   "deps": [
+    {
+     "to": "z-2F-E-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-2F-E-app",
+   "name": "2F-E 水圧・満水試験 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 56,
+   "gameEnd": 56,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-2F-E",
+   "deps": [
+    {
+     "to": "insp-wp-2F-E-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-2F-E-act",
+   "name": "2F-E 水圧・満水試験 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 56,
+   "gameEnd": 56,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-wp-2F-E",
+   "deps": [
+    {
+     "to": "insp-wp-2F-E-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-2F-E-doc",
+   "name": "2F-E 隠蔽前検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 56,
+   "gameEnd": 56,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-2F-E",
+   "deps": [
+    {
+     "to": "z-2F-E-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-2F-E-app",
+   "name": "2F-E 隠蔽前検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 57,
+   "gameEnd": 57,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-2F-E",
+   "deps": [
+    {
+     "to": "insp-conc-2F-E-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-2F-E-act",
+   "name": "2F-E 隠蔽前検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 57,
+   "gameEnd": 57,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-conc-2F-E",
+   "deps": [
+    {
+     "to": "insp-conc-2F-E-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-2F-W-doc",
+   "name": "2F-W 水圧・満水試験 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 56,
+   "gameEnd": 57,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-2F-W",
+   "deps": [
+    {
+     "to": "z-2F-W-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-2F-W-app",
+   "name": "2F-W 水圧・満水試験 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 57,
+   "gameEnd": 57,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-wp-2F-W",
+   "deps": [
+    {
+     "to": "insp-wp-2F-W-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-wp-2F-W-act",
+   "name": "2F-W 水圧・満水試験 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 57,
+   "gameEnd": 57,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-wp-2F-W",
+   "deps": [
+    {
+     "to": "insp-wp-2F-W-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-W-plmb1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-2F-W-doc",
+   "name": "2F-W 隠蔽前検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 57,
+   "gameEnd": 58,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-2F-W",
+   "deps": [
+    {
+     "to": "z-2F-W-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-W-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-W-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-2F-W-app",
+   "name": "2F-W 隠蔽前検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 58,
+   "gameEnd": 58,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-conc-2F-W",
+   "deps": [
+    {
+     "to": "insp-conc-2F-W-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-conc-2F-W-act",
+   "name": "2F-W 隠蔽前検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 58,
+   "gameEnd": 58,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-conc-2F-W",
+   "deps": [
+    {
+     "to": "insp-conc-2F-W-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-W-hvac1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-W-plmb1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-W-elec1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-power-doc",
+   "name": "受電立会い（電力会社・電気主任技術者） 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 46,
+   "gameEnd": 47,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-power",
+   "deps": [
+    {
+     "to": "elec-0b",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-power-app",
+   "name": "受電立会い（電力会社・電気主任技術者） 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 47,
+   "gameEnd": 47,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-power",
+   "deps": [
+    {
+     "to": "insp-power-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-power-act",
+   "name": "受電立会い（電力会社・電気主任技術者） 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 47,
+   "gameEnd": 47,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-power",
+   "deps": [
+    {
+     "to": "insp-power-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "elec-0b",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-ev-doc",
+   "name": "EV落成検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 51,
+   "gameEnd": 51,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-ev",
+   "deps": [
+    {
+     "to": "ev-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-ev-app",
+   "name": "EV落成検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 51,
+   "gameEnd": 51,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-ev",
+   "deps": [
+    {
+     "to": "insp-ev-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-ev-act",
+   "name": "EV落成検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 51,
+   "gameEnd": 51,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-ev",
+   "deps": [
+    {
+     "to": "insp-ev-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "ev-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-南面-2",
+   "name": "南面 外壁パネル建込み",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 45,
+   "gameEnd": 47,
+   "realWorkingDays": 15.4,
+   "cost": 151048800,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-南面-1",
+     "type": "finish-start"
+    },
+    {
+     "to": "insp-mid-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "face-南面-3",
+   "name": "南面 サッシ・ガラス",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 47,
+   "gameEnd": 48,
+   "realWorkingDays": 8.1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-南面-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-南面-4",
+   "name": "南面 シーリング・雨仕舞い確認",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 48,
+   "gameEnd": 49,
+   "realWorkingDays": 5.0,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-南面-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-南面-5",
+   "name": "南面 足場解体",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "鳶",
+   "gameStart": 49,
+   "gameEnd": 49,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-南面-4",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-北面-1",
+   "name": "北面 足場組立",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "鳶",
+   "gameStart": 49,
+   "gameEnd": 50,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "face-南面-5",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "face-北面-2",
+   "name": "北面 外壁パネル建込み",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 50,
+   "gameEnd": 52,
+   "realWorkingDays": 14.5,
+   "cost": 139860000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-北面-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-北面-3",
+   "name": "北面 サッシ・ガラス",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 52,
+   "gameEnd": 53,
+   "realWorkingDays": 7.9,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-北面-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-北面-4",
+   "name": "北面 シーリング・雨仕舞い確認",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "外装",
+   "gameStart": 53,
+   "gameEnd": 53,
+   "realWorkingDays": 4.7,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-北面-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "face-北面-5",
+   "name": "北面 足場解体",
+   "phase": "roofExterior",
+   "zone": null,
+   "trade": "鳶",
+   "gameStart": 53,
+   "gameEnd": 54,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-北面-4",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-board",
+   "name": "1F-C 天井下地・ボード",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "ボード",
+   "gameStart": 53,
+   "gameEnd": 54,
+   "realWorkingDays": 9.5,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-elec1",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L1",
+     "type": "finish-start"
+    },
+    {
+     "to": "insp-wp-1F-C-act",
+     "type": "gate"
+    },
+    {
+     "to": "insp-conc-1F-C-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-mep2",
+   "name": "1F-C 設備2次（器具前配管・配線）",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "設備2次",
+   "gameStart": 54,
+   "gameEnd": 55,
+   "realWorkingDays": 4.7,
+   "cost": 158194132,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-board",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-finish",
+   "name": "1F-C パテ・仕上げ（塗装・クロス）",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "仕上げ",
+   "gameStart": 55,
+   "gameEnd": 57,
+   "realWorkingDays": 10.8,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-mep2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-floor",
+   "name": "1F-C 床仕上げ",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "床",
+   "gameStart": 57,
+   "gameEnd": 57,
+   "realWorkingDays": 5.8,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-finish",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-door",
+   "name": "1F-C 建具・金物",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "建具",
+   "gameStart": 57,
+   "gameEnd": 58,
+   "realWorkingDays": 4.8,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-floor",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-mep3",
+   "name": "1F-C 器具付け（照明・水栓・吹出口）",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "器具付け",
+   "gameStart": 58,
+   "gameEnd": 59,
+   "realWorkingDays": 4.8,
+   "cost": 158194132,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-door",
+     "type": "finish-start"
+    },
+    {
+     "to": "elec-0b",
+     "type": "finish-start"
+    },
+    {
+     "to": "insp-power-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-clean",
+   "name": "1F-C 美装・引渡し確認",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "美装",
+   "gameStart": 59,
+   "gameEnd": 59,
+   "realWorkingDays": 3.0,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-mep3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-board",
+   "name": "1F-E 天井下地・ボード",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "ボード",
+   "gameStart": 54,
+   "gameEnd": 55,
+   "realWorkingDays": 7.1,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-elec1",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L1",
+     "type": "finish-start"
+    },
+    {
+     "to": "insp-wp-1F-E-act",
+     "type": "gate"
+    },
+    {
+     "to": "insp-conc-1F-E-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-mep2",
+   "name": "1F-E 設備2次（器具前配管・配線）",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "設備2次",
+   "gameStart": 55,
+   "gameEnd": 55,
+   "realWorkingDays": 3.8,
+   "cost": 132823375,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-board",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-finish",
+   "name": "1F-E パテ・仕上げ（塗装・クロス）",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "仕上げ",
+   "gameStart": 55,
+   "gameEnd": 56,
+   "realWorkingDays": 8.2,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-mep2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-floor",
+   "name": "1F-E 床仕上げ",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "床",
+   "gameStart": 56,
+   "gameEnd": 57,
+   "realWorkingDays": 5.3,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-finish",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-door",
+   "name": "1F-E 建具・金物",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "建具",
+   "gameStart": 57,
+   "gameEnd": 58,
+   "realWorkingDays": 3.6,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-floor",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-mep3",
+   "name": "1F-E 器具付け（照明・水栓・吹出口）",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "器具付け",
+   "gameStart": 58,
+   "gameEnd": 58,
+   "realWorkingDays": 3.8,
+   "cost": 132823375,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-door",
+     "type": "finish-start"
+    },
+    {
+     "to": "elec-0b",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-clean",
+   "name": "1F-E 美装・引渡し確認",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "美装",
+   "gameStart": 58,
+   "gameEnd": 59,
+   "realWorkingDays": 2.4,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-mep3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-board",
+   "name": "1F-W 天井下地・ボード",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "ボード",
+   "gameStart": 56,
+   "gameEnd": 57,
+   "realWorkingDays": 10.0,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-elec1",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L1",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-board",
+     "type": "resource"
+    },
+    {
+     "to": "insp-wp-1F-W-act",
+     "type": "gate"
+    },
+    {
+     "to": "insp-conc-1F-W-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-mep2",
+   "name": "1F-W 設備2次（器具前配管・配線）",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "設備2次",
+   "gameStart": 57,
+   "gameEnd": 58,
+   "realWorkingDays": 5.1,
+   "cost": 193265473,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-mep2",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-finish",
+   "name": "1F-W パテ・仕上げ（塗装・クロス）",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "仕上げ",
+   "gameStart": 58,
+   "gameEnd": 60,
+   "realWorkingDays": 13.5,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-mep2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-finish",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-floor",
+   "name": "1F-W 床仕上げ",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "床",
+   "gameStart": 60,
+   "gameEnd": 61,
+   "realWorkingDays": 7.2,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-finish",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-floor",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-door",
+   "name": "1F-W 建具・金物",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "建具",
+   "gameStart": 61,
+   "gameEnd": 61,
+   "realWorkingDays": 5.7,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-floor",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-door",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-mep3",
+   "name": "1F-W 器具付け（照明・水栓・吹出口）",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "器具付け",
+   "gameStart": 61,
+   "gameEnd": 62,
+   "realWorkingDays": 5.2,
+   "cost": 193265473,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-door",
+     "type": "finish-start"
+    },
+    {
+     "to": "elec-0b",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-mep3",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-clean",
+   "name": "1F-W 美装・引渡し確認",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "美装",
+   "gameStart": 62,
+   "gameEnd": 63,
+   "realWorkingDays": 3.7,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-mep3",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-clean",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-board",
+   "name": "2F-C 天井下地・ボード",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "ボード",
+   "gameStart": 56,
+   "gameEnd": 57,
+   "realWorkingDays": 8.2,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-elec1",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-board",
+     "type": "resource"
+    },
+    {
+     "to": "insp-wp-2F-C-act",
+     "type": "gate"
+    },
+    {
+     "to": "insp-conc-2F-C-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-mep2",
+   "name": "2F-C 設備2次（器具前配管・配線）",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "設備2次",
+   "gameStart": 57,
+   "gameEnd": 58,
+   "realWorkingDays": 4.4,
+   "cost": 158194132,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-mep2",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-finish",
+   "name": "2F-C パテ・仕上げ（塗装・クロス）",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "仕上げ",
+   "gameStart": 58,
+   "gameEnd": 59,
+   "realWorkingDays": 10.2,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-mep2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-finish",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-floor",
+   "name": "2F-C 床仕上げ",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "床",
+   "gameStart": 59,
+   "gameEnd": 60,
+   "realWorkingDays": 6.3,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-finish",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-floor",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-door",
+   "name": "2F-C 建具・金物",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "建具",
+   "gameStart": 60,
+   "gameEnd": 61,
+   "realWorkingDays": 4.8,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-floor",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-door",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-mep3",
+   "name": "2F-C 器具付け（照明・水栓・吹出口）",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "器具付け",
+   "gameStart": 61,
+   "gameEnd": 62,
+   "realWorkingDays": 4.7,
+   "cost": 158194132,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-door",
+     "type": "finish-start"
+    },
+    {
+     "to": "elec-0b",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-mep3",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-clean",
+   "name": "2F-C 美装・引渡し確認",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "美装",
+   "gameStart": 62,
+   "gameEnd": 62,
+   "realWorkingDays": 2.8,
+   "cost": 99216000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-mep3",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-clean",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-board",
+   "name": "2F-E 天井下地・ボード",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "ボード",
+   "gameStart": 57,
+   "gameEnd": 58,
+   "realWorkingDays": 7.7,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-elec1",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-board",
+     "type": "resource"
+    },
+    {
+     "to": "insp-wp-2F-E-act",
+     "type": "gate"
+    },
+    {
+     "to": "insp-conc-2F-E-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-mep2",
+   "name": "2F-E 設備2次（器具前配管・配線）",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "設備2次",
+   "gameStart": 58,
+   "gameEnd": 59,
+   "realWorkingDays": 3.6,
+   "cost": 132823375,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-mep2",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-finish",
+   "name": "2F-E パテ・仕上げ（塗装・クロス）",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "仕上げ",
+   "gameStart": 60,
+   "gameEnd": 61,
+   "realWorkingDays": 8.9,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-mep2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-finish",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-floor",
+   "name": "2F-E 床仕上げ",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "床",
+   "gameStart": 61,
+   "gameEnd": 62,
+   "realWorkingDays": 4.8,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-finish",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-floor",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-door",
+   "name": "2F-E 建具・金物",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "建具",
+   "gameStart": 62,
+   "gameEnd": 62,
+   "realWorkingDays": 3.4,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-floor",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-door",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-mep3",
+   "name": "2F-E 器具付け（照明・水栓・吹出口）",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "器具付け",
+   "gameStart": 62,
+   "gameEnd": 63,
+   "realWorkingDays": 3.8,
+   "cost": 132823375,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-door",
+     "type": "finish-start"
+    },
+    {
+     "to": "elec-0b",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-mep3",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-clean",
+   "name": "2F-E 美装・引渡し確認",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "美装",
+   "gameStart": 63,
+   "gameEnd": 63,
+   "realWorkingDays": 2.6,
+   "cost": 83304000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-mep3",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-clean",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-board",
+   "name": "2F-W 天井下地・ボード",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "ボード",
+   "gameStart": 58,
+   "gameEnd": 60,
+   "realWorkingDays": 11.8,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-elec1",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-in-L2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-board",
+     "type": "resource"
+    },
+    {
+     "to": "insp-wp-2F-W-act",
+     "type": "gate"
+    },
+    {
+     "to": "insp-conc-2F-W-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-mep2",
+   "name": "2F-W 設備2次（器具前配管・配線）",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "設備2次",
+   "gameStart": 60,
+   "gameEnd": 60,
+   "realWorkingDays": 5.6,
+   "cost": 193265473,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-mep2",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-finish",
+   "name": "2F-W パテ・仕上げ（塗装・クロス）",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "仕上げ",
+   "gameStart": 61,
+   "gameEnd": 62,
+   "realWorkingDays": 12.7,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-mep2",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-finish",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-floor",
+   "name": "2F-W 床仕上げ",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "床",
+   "gameStart": 62,
+   "gameEnd": 63,
+   "realWorkingDays": 6.7,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-finish",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-floor",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-door",
+   "name": "2F-W 建具・金物",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "建具",
+   "gameStart": 63,
+   "gameEnd": 64,
+   "realWorkingDays": 5.1,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-floor",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-door",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-mep3",
+   "name": "2F-W 器具付け（照明・水栓・吹出口）",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "器具付け",
+   "gameStart": 64,
+   "gameEnd": 65,
+   "realWorkingDays": 5.8,
+   "cost": 193265473,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-door",
+     "type": "finish-start"
+    },
+    {
+     "to": "elec-0b",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-mep3",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-clean",
+   "name": "2F-W 美装・引渡し確認",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "美装",
+   "gameStart": 65,
+   "gameEnd": 65,
+   "realWorkingDays": 3.7,
+   "cost": 121212000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-mep3",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-clean",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "ev-4",
+   "name": "養生・工事用解放",
+   "phase": "elevator",
+   "zone": null,
+   "trade": "EV",
+   "gameStart": 51,
+   "gameEnd": 51,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "ev-3",
+     "type": "finish-start"
+    },
+    {
+     "to": "insp-ev-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "ext-1",
+   "name": "外構 埋設配管・排水",
+   "phase": "exteriorWorks",
+   "zone": null,
+   "trade": "外構",
+   "gameStart": 54,
+   "gameEnd": 55,
+   "realWorkingDays": 7.4,
+   "cost": 101447413,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "face-南面-5",
+     "type": "finish-start"
+    },
+    {
+     "to": "face-東面-5",
+     "type": "finish-start"
+    },
+    {
+     "to": "face-北面-5",
+     "type": "finish-start"
+    },
+    {
+     "to": "face-西面-5",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "ext-2",
+   "name": "外構 路盤・縁石",
+   "phase": "exteriorWorks",
+   "zone": null,
+   "trade": "外構",
+   "gameStart": 55,
+   "gameEnd": 56,
+   "realWorkingDays": 7.3,
+   "cost": 86954925,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "ext-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "ext-3",
+   "name": "外構 舗装",
+   "phase": "exteriorWorks",
+   "zone": null,
+   "trade": "外構",
+   "gameStart": 56,
+   "gameEnd": 57,
+   "realWorkingDays": 7.5,
+   "cost": 72462438,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "ext-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "ext-4",
+   "name": "外構 植栽・ライン・美装",
+   "phase": "exteriorWorks",
+   "zone": null,
+   "trade": "外構",
+   "gameStart": 57,
+   "gameEnd": 57,
+   "realWorkingDays": 3,
+   "cost": 28984975,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "ext-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "lift-out-L1",
+   "name": "L1 高所作業車 搬出",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "揚重",
+   "gameStart": 57,
+   "gameEnd": 57,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-board",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "lift-out-L2",
+   "name": "L2 高所作業車 搬出",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "揚重",
+   "gameStart": 60,
+   "gameEnd": 60,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-W-board",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "close-1",
+   "name": "総合試運転調整",
+   "phase": "closing",
+   "zone": null,
+   "trade": "設備",
+   "gameStart": 65,
+   "gameEnd": 66,
+   "realWorkingDays": 8,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-clean",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-clean",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-clean",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-clean",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-clean",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-W-clean",
+     "type": "finish-start"
+    },
+    {
+     "to": "ev-4",
+     "type": "finish-start"
+    },
+    {
+     "to": "ext-4",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-out-L1",
+     "type": "finish-start"
+    },
+    {
+     "to": "lift-out-L2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "close-2",
+   "name": "社内自主検査・是正",
+   "phase": "closing",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 67,
+   "gameEnd": 67,
+   "realWorkingDays": 4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "close-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "close-3",
+   "name": "監理者検査・是正",
+   "phase": "closing",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 67,
+   "gameEnd": 68,
+   "realWorkingDays": 4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "close-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "close-4",
+   "name": "施主検査・是正",
+   "phase": "closing",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 68,
+   "gameEnd": 68,
+   "realWorkingDays": 4,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "close-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-fire-doc",
+   "name": "消防検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 67,
+   "gameEnd": 67,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-fire",
+   "deps": [
+    {
+     "to": "close-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-fire-app",
+   "name": "消防検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 67,
+   "gameEnd": 67,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-fire",
+   "deps": [
+    {
+     "to": "insp-fire-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-fire-act",
+   "name": "消防検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 67,
+   "gameEnd": 67,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-fire",
+   "deps": [
+    {
+     "to": "insp-fire-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "close-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-final-doc",
+   "name": "完了検査 書類作成",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 68,
+   "gameEnd": 69,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-final",
+   "deps": [
+    {
+     "to": "close-4",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-final-app",
+   "name": "完了検査 申請・依頼",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 69,
+   "gameEnd": 69,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": "insp-final",
+   "deps": [
+    {
+     "to": "insp-final-doc",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "insp-final-act",
+   "name": "完了検査 実施",
+   "phase": "inspection",
+   "zone": null,
+   "trade": "検査",
+   "gameStart": 69,
+   "gameEnd": 69,
+   "realWorkingDays": 1,
+   "cost": 0,
+   "gate": true,
+   "inspectionId": "insp-final",
+   "deps": [
+    {
+     "to": "insp-final-app",
+     "type": "finish-start"
+    },
+    {
+     "to": "close-4",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "close-5",
+   "name": "完了検査（法定）・是正",
+   "phase": "closing",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 68,
+   "gameEnd": 69,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "close-4",
+     "type": "finish-start"
+    },
+    {
+     "to": "insp-fire-act",
+     "type": "gate"
+    }
+   ]
+  },
+  {
+   "id": "close-6",
+   "name": "引渡し",
+   "phase": "closing",
+   "zone": null,
+   "trade": "監督",
+   "gameStart": 69,
+   "gameEnd": 69,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "close-5",
+     "type": "finish-start"
+    },
+    {
+     "to": "insp-final-act",
+     "type": "gate"
+    }
+   ]
+  }
+ ],
+ "inspections": [
+  {
+   "id": "insp-fnd-1F-C",
+   "name": "1F-C 基礎配筋検査",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-fnd-1F-C-doc",
+    "insp-fnd-1F-C-app",
+    "insp-fnd-1F-C-act"
+   ],
+   "gateFor": "fnd-1F-C-2",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-fnd-1F-E",
+   "name": "1F-E 基礎配筋検査",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-fnd-1F-E-doc",
+    "insp-fnd-1F-E-app",
+    "insp-fnd-1F-E-act"
+   ],
+   "gateFor": "fnd-1F-E-2",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-fnd-1F-W",
+   "name": "1F-W 基礎配筋検査",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-fnd-1F-W-doc",
+    "insp-fnd-1F-W-app",
+    "insp-fnd-1F-W-act"
+   ],
+   "gateFor": "fnd-1F-W-2",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-steel-prod",
+   "name": "鉄骨製品検査",
+   "kind": "工場検査",
+   "chain": [
+    "insp-steel-prod-doc",
+    "insp-steel-prod-app",
+    "insp-steel-prod-act"
+   ],
+   "gateFor": "frm-s1-1",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-steel-s1",
+   "name": "第1節 建方検査",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-steel-s1-doc",
+    "insp-steel-s1-app",
+    "insp-steel-s1-act"
+   ],
+   "gateFor": null,
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-mid",
+   "name": "中間検査（特定工程・鉄骨工事）",
+   "kind": "法定",
+   "chain": [
+    "insp-mid-doc",
+    "insp-mid-app",
+    "insp-mid-act"
+   ],
+   "gateFor": "face-南面-2",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-wp-1F-C",
+   "name": "1F-C 水圧・満水試験",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-wp-1F-C-doc",
+    "insp-wp-1F-C-app",
+    "insp-wp-1F-C-act"
+   ],
+   "gateFor": "z-1F-C-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-conc-1F-C",
+   "name": "1F-C 隠蔽前検査",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-conc-1F-C-doc",
+    "insp-conc-1F-C-app",
+    "insp-conc-1F-C-act"
+   ],
+   "gateFor": "z-1F-C-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-wp-1F-E",
+   "name": "1F-E 水圧・満水試験",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-wp-1F-E-doc",
+    "insp-wp-1F-E-app",
+    "insp-wp-1F-E-act"
+   ],
+   "gateFor": "z-1F-E-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-conc-1F-E",
+   "name": "1F-E 隠蔽前検査",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-conc-1F-E-doc",
+    "insp-conc-1F-E-app",
+    "insp-conc-1F-E-act"
+   ],
+   "gateFor": "z-1F-E-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-wp-1F-W",
+   "name": "1F-W 水圧・満水試験",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-wp-1F-W-doc",
+    "insp-wp-1F-W-app",
+    "insp-wp-1F-W-act"
+   ],
+   "gateFor": "z-1F-W-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-conc-1F-W",
+   "name": "1F-W 隠蔽前検査",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-conc-1F-W-doc",
+    "insp-conc-1F-W-app",
+    "insp-conc-1F-W-act"
+   ],
+   "gateFor": "z-1F-W-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-wp-2F-C",
+   "name": "2F-C 水圧・満水試験",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-wp-2F-C-doc",
+    "insp-wp-2F-C-app",
+    "insp-wp-2F-C-act"
+   ],
+   "gateFor": "z-2F-C-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-conc-2F-C",
+   "name": "2F-C 隠蔽前検査",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-conc-2F-C-doc",
+    "insp-conc-2F-C-app",
+    "insp-conc-2F-C-act"
+   ],
+   "gateFor": "z-2F-C-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-wp-2F-E",
+   "name": "2F-E 水圧・満水試験",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-wp-2F-E-doc",
+    "insp-wp-2F-E-app",
+    "insp-wp-2F-E-act"
+   ],
+   "gateFor": "z-2F-E-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-conc-2F-E",
+   "name": "2F-E 隠蔽前検査",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-conc-2F-E-doc",
+    "insp-conc-2F-E-app",
+    "insp-conc-2F-E-act"
+   ],
+   "gateFor": "z-2F-E-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-wp-2F-W",
+   "name": "2F-W 水圧・満水試験",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-wp-2F-W-doc",
+    "insp-wp-2F-W-app",
+    "insp-wp-2F-W-act"
+   ],
+   "gateFor": "z-2F-W-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-conc-2F-W",
+   "name": "2F-W 隠蔽前検査",
+   "kind": "監理者立会い",
+   "chain": [
+    "insp-conc-2F-W-doc",
+    "insp-conc-2F-W-app",
+    "insp-conc-2F-W-act"
+   ],
+   "gateFor": "z-2F-W-board",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-power",
+   "name": "受電立会い（電力会社・電気主任技術者）",
+   "kind": "立会い",
+   "chain": [
+    "insp-power-doc",
+    "insp-power-app",
+    "insp-power-act"
+   ],
+   "gateFor": "z-1F-C-mep3",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-ev",
+   "name": "EV落成検査",
+   "kind": "法定",
+   "chain": [
+    "insp-ev-doc",
+    "insp-ev-app",
+    "insp-ev-act"
+   ],
+   "gateFor": "ev-4",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-fire",
+   "name": "消防検査",
+   "kind": "法定",
+   "chain": [
+    "insp-fire-doc",
+    "insp-fire-app",
+    "insp-fire-act"
+   ],
+   "gateFor": "close-5",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  },
+  {
+   "id": "insp-final",
+   "name": "完了検査",
+   "kind": "法定",
+   "chain": [
+    "insp-final-doc",
+    "insp-final-app",
+    "insp-final-act"
+   ],
+   "gateFor": "close-6",
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+  }
+ ],
+ "milestones": [
+  {
+   "task": "pile-2",
+   "gameDay": 23
+  },
+  {
+   "task": "frm-s1-1",
+   "gameDay": 41
+  },
+  {
+   "task": "elec-0b",
+   "gameDay": 46
+  },
+  {
+   "task": "ev-4",
+   "gameDay": 51
+  },
+  {
+   "task": "close-6",
+   "gameDay": 69
+  }
+ ],
+ "totalGameDays": 69,
+ "validation": {
+  "ok": true,
+  "errors": []
+ }
+}

@@ -1,0 +1,1555 @@
+{
+ "source": "user-provided drawio (1.drawio), copied as stakeholder_map.drawio",
+ "note": "元drawioのmxCell構造から機械抽出。ラベルはHTMLタグを除去して平文化。座標も保持。",
+ "nodes": [
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-14",
+   "label": "施主",
+   "parent": "1",
+   "geometry": {
+    "x": "30",
+    "y": "150",
+    "width": "420",
+    "height": "200"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-26",
+   "label": "担当者",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-14",
+   "geometry": {
+    "x": "150",
+    "y": "130",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-27",
+   "label": "責任者",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-14",
+   "geometry": {
+    "x": "20",
+    "y": "40",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-29",
+   "label": "各部署の担当者",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-14",
+   "geometry": {
+    "x": "180",
+    "y": "40",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-15",
+   "label": "設計者",
+   "parent": "1",
+   "geometry": {
+    "x": "1050",
+    "y": "120",
+    "width": "200",
+    "height": "330"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-43",
+   "label": "意匠",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-15",
+   "geometry": {
+    "x": "30",
+    "y": "50",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-44",
+   "label": "構造",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-15",
+   "geometry": {
+    "x": "30",
+    "y": "135",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-45",
+   "label": "設備",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-15",
+   "geometry": {
+    "x": "30",
+    "y": "220",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-16",
+   "label": "監理者",
+   "parent": "1",
+   "geometry": {
+    "x": "1320",
+    "y": "120",
+    "width": "200",
+    "height": "200"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-51",
+   "label": "担当者",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-16",
+   "geometry": {
+    "x": "40",
+    "y": "70",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-17",
+   "label": "協力業者",
+   "parent": "1",
+   "geometry": {
+    "x": "290",
+    "y": "850",
+    "width": "570",
+    "height": "290"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-18",
+   "label": "業者A",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-17",
+   "geometry": {
+    "x": "10",
+    "y": "40",
+    "width": "410",
+    "height": "240"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-19",
+   "label": "職長",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-18",
+   "geometry": {
+    "x": "30",
+    "y": "60",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-20",
+   "label": "職人A",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-18",
+   "geometry": {
+    "x": "30",
+    "y": "150",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-21",
+   "label": "職人B",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-18",
+   "geometry": {
+    "x": "170",
+    "y": "150",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-40",
+   "label": "責任者",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-18",
+   "geometry": {
+    "x": "260",
+    "y": "40",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-49",
+   "label": "官公庁",
+   "parent": "1",
+   "geometry": {
+    "x": "-650",
+    "y": "660",
+    "width": "540",
+    "height": "240"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-64",
+   "label": "土木課 （敷地外道路の掘削）",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "geometry": {
+    "x": "10",
+    "y": "40",
+    "width": "130",
+    "height": "70"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-65",
+   "label": "下水道課 （上下水配管への接続）",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "geometry": {
+    "x": "150",
+    "y": "40",
+    "width": "130",
+    "height": "70"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-66",
+   "label": "警察 （道路許可証発行）",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "geometry": {
+    "x": "10",
+    "y": "130",
+    "width": "130",
+    "height": "70"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-67",
+   "label": "経済産業省（電柱・電線への接続・引き込み）",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "geometry": {
+    "x": "150",
+    "y": "130",
+    "width": "130",
+    "height": "70"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-76",
+   "label": "消防署 （消防検査）",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "geometry": {
+    "x": "290",
+    "y": "40",
+    "width": "130",
+    "height": "70"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-77",
+   "label": "労基署",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "geometry": {
+    "x": "290",
+    "y": "130",
+    "width": "130",
+    "height": "70"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-54",
+   "label": "リース業者",
+   "parent": "1",
+   "geometry": {
+    "x": "-80",
+    "y": "900",
+    "width": "200",
+    "height": "200"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-56",
+   "label": "担当者",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-54",
+   "geometry": {
+    "x": "40",
+    "y": "70",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-60",
+   "label": "工場・資機材商社・メーカー",
+   "parent": "1",
+   "geometry": {
+    "x": "270",
+    "y": "1190",
+    "width": "200",
+    "height": "200"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-61",
+   "label": "担当者",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-60",
+   "geometry": {
+    "x": "40",
+    "y": "51",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-68",
+   "label": "凡例",
+   "parent": "1",
+   "geometry": {
+    "x": "-590",
+    "y": "-30",
+    "width": "450",
+    "height": "590"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": true
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-12",
+   "label": "上位",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "geometry": {
+    "x": "265",
+    "y": "65",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": true
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-11",
+   "label": "下位",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "geometry": {
+    "x": "65",
+    "y": "65",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": true
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-31",
+   "label": "担当者A",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "geometry": {
+    "x": "65",
+    "y": "175",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-33",
+   "label": "担当者B",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "geometry": {
+    "x": "265",
+    "y": "175",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-69",
+   "label": "本社・支店",
+   "parent": "1",
+   "geometry": {
+    "x": "-200",
+    "y": "1150",
+    "width": "270",
+    "height": "350"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-72",
+   "label": "安全・環境担当",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-69",
+   "geometry": {
+    "x": "75",
+    "y": "61",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-73",
+   "label": "建築本部",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-69",
+   "geometry": {
+    "x": "80",
+    "y": "145",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-74",
+   "label": "設備本部",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-69",
+   "geometry": {
+    "x": "90",
+    "y": "220",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-78",
+   "label": "現場",
+   "parent": "1",
+   "geometry": {
+    "x": "250",
+    "y": "380",
+    "width": "800",
+    "height": "410"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-2",
+   "label": "現場監督",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-78",
+   "geometry": {
+    "x": "40",
+    "y": "34",
+    "width": "360",
+    "height": "360"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-3",
+   "label": "所長",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-2",
+   "geometry": {
+    "x": "90",
+    "y": "50",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-4",
+   "label": "課長",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-2",
+   "geometry": {
+    "x": "90",
+    "y": "150",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-5",
+   "label": "担当者A",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-2",
+   "geometry": {
+    "x": "20",
+    "y": "270",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-6",
+   "label": "担当者B",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-2",
+   "geometry": {
+    "x": "180",
+    "y": "270",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-80",
+   "label": "図面屋（施工図作図者）",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-78",
+   "geometry": {
+    "x": "430",
+    "y": "244",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-82",
+   "label": "確認検査機関",
+   "parent": "1",
+   "geometry": {
+    "x": "-650",
+    "y": "930",
+    "width": "200",
+    "height": "200"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-83",
+   "label": "担当者",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-82",
+   "geometry": {
+    "x": "50",
+    "y": "70",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-L1a",
+   "label": "当事者A",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "geometry": {
+    "x": "45",
+    "y": "285",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": true
+  },
+  {
+   "id": "new-L1b",
+   "label": "当事者B",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "geometry": {
+    "x": "285",
+    "y": "285",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": true
+  },
+  {
+   "id": "new-L2a",
+   "label": "申請・提出する側",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "geometry": {
+    "x": "45",
+    "y": "395",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": true
+  },
+  {
+   "id": "new-L2b",
+   "label": "承認・検査する側",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "geometry": {
+    "x": "285",
+    "y": "395",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": true
+  },
+  {
+   "id": "new-N",
+   "label": "近隣住民・近隣事業者",
+   "parent": "1",
+   "geometry": {
+    "x": "1200",
+    "y": "600",
+    "width": "220",
+    "height": "200"
+   },
+   "style": "swimlane;whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-N1",
+   "label": "近隣住民",
+   "parent": "new-N",
+   "geometry": {
+    "x": "50",
+    "y": "40",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-N2",
+   "label": "自治会・近隣事業者",
+   "parent": "new-N",
+   "geometry": {
+    "x": "50",
+    "y": "115",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-L3a",
+   "label": "影響を受ける側",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "geometry": {
+    "x": "45",
+    "y": "505",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": true
+  },
+  {
+   "id": "new-L3b",
+   "label": "影響を与える側",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "geometry": {
+    "x": "285",
+    "y": "505",
+    "width": "120",
+    "height": "60"
+   },
+   "style": "whiteSpace=wrap;html=1;",
+   "is_legend_example": true
+  }
+ ],
+ "edges": [
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-23",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-2",
+   "target": "wsTuqjMtPUAFl9iQP1-P-14",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "現場監督",
+   "target_label": "施主",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-28",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-26",
+   "target": "wsTuqjMtPUAFl9iQP1-P-27",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-14",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;",
+   "source_label": "担当者",
+   "target_label": "責任者",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-30",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-26",
+   "target": "wsTuqjMtPUAFl9iQP1-P-29",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-14",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;",
+   "source_label": "担当者",
+   "target_label": "各部署の担当者",
+   "relation_type": "対等な関係でやり取り",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-24",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-15",
+   "target": "wsTuqjMtPUAFl9iQP1-P-14",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.75;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "設計者",
+   "target_label": "施主",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-25",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-16",
+   "target": "wsTuqjMtPUAFl9iQP1-P-14",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "監理者",
+   "target_label": "施主",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-22",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-17",
+   "target": "wsTuqjMtPUAFl9iQP1-P-2",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.4167;entryY=1;entryDx=0;entryDy=0;",
+   "source_label": "協力業者",
+   "target_label": "現場監督",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-35",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-20",
+   "target": "wsTuqjMtPUAFl9iQP1-P-19",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-18",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "職人A",
+   "target_label": "職長",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-41",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-19",
+   "target": "wsTuqjMtPUAFl9iQP1-P-40",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-18",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "職長",
+   "target_label": "責任者",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-36",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-21",
+   "target": "wsTuqjMtPUAFl9iQP1-P-19",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-18",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "職人B",
+   "target_label": "職長",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-37",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-19",
+   "target": "wsTuqjMtPUAFl9iQP1-P-5",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "職長",
+   "target_label": "担当者A",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-39",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-19",
+   "target": "wsTuqjMtPUAFl9iQP1-P-4",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "職長",
+   "target_label": "課長",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-38",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-19",
+   "target": "wsTuqjMtPUAFl9iQP1-P-6",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "職長",
+   "target_label": "担当者B",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-42",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-40",
+   "target": "wsTuqjMtPUAFl9iQP1-P-3",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "責任者",
+   "target_label": "所長",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-46",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-4",
+   "target": "wsTuqjMtPUAFl9iQP1-P-43",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;",
+   "source_label": "課長",
+   "target_label": "意匠",
+   "relation_type": "対等な関係でやり取り",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-47",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-44",
+   "target": "wsTuqjMtPUAFl9iQP1-P-4",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;",
+   "source_label": "構造",
+   "target_label": "課長",
+   "relation_type": "対等な関係でやり取り",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-48",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-45",
+   "target": "wsTuqjMtPUAFl9iQP1-P-4",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;",
+   "source_label": "設備",
+   "target_label": "課長",
+   "relation_type": "対等な関係でやり取り",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-50",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-49",
+   "target": "wsTuqjMtPUAFl9iQP1-P-2",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;startArrow=classic;startFill=1;endArrow=none;endFill=0;strokeColor=#D79B00;strokeWidth=2;dashed=1;",
+   "source_label": "官公庁",
+   "target_label": "現場監督",
+   "relation_type": "承認・検査・許認可",
+   "is_legend_example": false,
+   "note": "色は承認・検査系だが矢印なし。分類は色を優先した（要・原図確認）"
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-53",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-4",
+   "target": "wsTuqjMtPUAFl9iQP1-P-26",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "課長",
+   "target_label": "担当者",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-55",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-54",
+   "target": "wsTuqjMtPUAFl9iQP1-P-2",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "リース業者",
+   "target_label": "現場監督",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-57",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-56",
+   "target": "wsTuqjMtPUAFl9iQP1-P-5",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;",
+   "source_label": "担当者",
+   "target_label": "担当者A",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-58",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-56",
+   "target": "wsTuqjMtPUAFl9iQP1-P-6",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "担当者",
+   "target_label": "担当者B",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-59",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-56",
+   "target": "wsTuqjMtPUAFl9iQP1-P-4",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "担当者",
+   "target_label": "課長",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-62",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-61",
+   "target": "wsTuqjMtPUAFl9iQP1-P-19",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "担当者",
+   "target_label": "職長",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-13",
+   "label": "指揮命令系統上の上下関係",
+   "source": "wsTuqjMtPUAFl9iQP1-P-11",
+   "target": "wsTuqjMtPUAFl9iQP1-P-12",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;",
+   "source_label": "下位",
+   "target_label": "上位",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": true
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-34",
+   "label": "対等な関係でやり取り",
+   "source": "wsTuqjMtPUAFl9iQP1-P-31",
+   "target": "wsTuqjMtPUAFl9iQP1-P-33",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;",
+   "source_label": "担当者A",
+   "target_label": "担当者B",
+   "relation_type": "対等な関係でやり取り",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-75",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-3",
+   "target": "wsTuqjMtPUAFl9iQP1-P-69",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "所長",
+   "target_label": "本社・支店",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-79",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-51",
+   "target": "wsTuqjMtPUAFl9iQP1-P-78",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;",
+   "source_label": "担当者",
+   "target_label": "現場",
+   "relation_type": "対等な関係でやり取り",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-9",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-4",
+   "target": "wsTuqjMtPUAFl9iQP1-P-3",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-2",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "課長",
+   "target_label": "所長",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-7",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-5",
+   "target": "wsTuqjMtPUAFl9iQP1-P-4",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-2",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;",
+   "source_label": "担当者A",
+   "target_label": "課長",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-8",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-6",
+   "target": "wsTuqjMtPUAFl9iQP1-P-4",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-2",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;",
+   "source_label": "担当者B",
+   "target_label": "課長",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-52",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-78",
+   "target": "wsTuqjMtPUAFl9iQP1-P-4",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-78",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;",
+   "source_label": "現場",
+   "target_label": "課長",
+   "relation_type": "対等な関係でやり取り",
+   "is_legend_example": false
+  },
+  {
+   "id": "wsTuqjMtPUAFl9iQP1-P-81",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-80",
+   "target": "wsTuqjMtPUAFl9iQP1-P-82",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;",
+   "source_label": "図面屋（施工図作図者）",
+   "target_label": "確認検査機関",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-F1",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-5",
+   "target": "wsTuqjMtPUAFl9iQP1-P-6",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;",
+   "source_label": "担当者A",
+   "target_label": "担当者B",
+   "relation_type": "対等な関係でやり取り",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-F2",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-15",
+   "target": "wsTuqjMtPUAFl9iQP1-P-16",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;exitX=1;exitY=0.5455;exitDx=0;exitDy=0;entryX=0;entryY=0.9;entryDx=0;entryDy=0;",
+   "source_label": "設計者",
+   "target_label": "監理者",
+   "relation_type": "対等な関係でやり取り",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-F3",
+   "label": "",
+   "source": "wsTuqjMtPUAFl9iQP1-P-80",
+   "target": "wsTuqjMtPUAFl9iQP1-P-2",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.6667;entryDx=0;entryDy=0;",
+   "source_label": "図面屋（施工図作図者）",
+   "target_label": "現場監督",
+   "relation_type": "指揮命令系統上の上下関係",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-C1",
+   "label": "請負契約",
+   "source": "wsTuqjMtPUAFl9iQP1-P-14",
+   "target": "wsTuqjMtPUAFl9iQP1-P-69",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;strokeColor=#0066CC;strokeWidth=2;fontColor=#0066CC;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=0.4074;entryY=0;entryDx=0;entryDy=0;",
+   "source_label": "施主",
+   "target_label": "本社・支店",
+   "relation_type": "契約関係（会社間）",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-C2",
+   "label": "下請契約",
+   "source": "wsTuqjMtPUAFl9iQP1-P-69",
+   "target": "wsTuqjMtPUAFl9iQP1-P-17",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;strokeColor=#0066CC;strokeWidth=2;fontColor=#0066CC;exitX=1;exitY=0.0571;exitDx=0;exitDy=0;entryX=0.0702;entryY=1;entryDx=0;entryDy=0;",
+   "source_label": "本社・支店",
+   "target_label": "協力業者",
+   "relation_type": "契約関係（会社間）",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-C3",
+   "label": "購買契約",
+   "source": "wsTuqjMtPUAFl9iQP1-P-69",
+   "target": "wsTuqjMtPUAFl9iQP1-P-60",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;strokeColor=#0066CC;strokeWidth=2;fontColor=#0066CC;exitX=1;exitY=0.4286;exitDx=0;exitDy=0;entryX=0;entryY=0.55;entryDx=0;entryDy=0;",
+   "source_label": "本社・支店",
+   "target_label": "工場・資機材商社・メーカー",
+   "relation_type": "契約関係（会社間）",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-C4",
+   "label": "リース契約",
+   "source": "wsTuqjMtPUAFl9iQP1-P-54",
+   "target": "wsTuqjMtPUAFl9iQP1-P-69",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;strokeColor=#0066CC;strokeWidth=2;fontColor=#0066CC;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.8148;entryY=0;entryDx=0;entryDy=0;",
+   "source_label": "リース業者",
+   "target_label": "本社・支店",
+   "relation_type": "契約関係（会社間）",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-A1",
+   "label": "確認申請",
+   "source": "wsTuqjMtPUAFl9iQP1-P-14",
+   "target": "wsTuqjMtPUAFl9iQP1-P-82",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=classic;endFill=1;strokeColor=#D79B00;strokeWidth=2;dashed=1;fontColor=#D79B00;exitX=0.0238;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.6;entryDx=0;entryDy=0;",
+   "source_label": "施主",
+   "target_label": "確認検査機関",
+   "relation_type": "承認・検査・許認可",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-L1e",
+   "label": "契約関係（会社間）",
+   "source": "new-L1a",
+   "target": "new-L1b",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=none;endFill=0;strokeColor=#0066CC;strokeWidth=2;fontColor=#0066CC;",
+   "source_label": "当事者A",
+   "target_label": "当事者B",
+   "relation_type": "契約関係（会社間）",
+   "is_legend_example": true
+  },
+  {
+   "id": "new-L2e",
+   "label": "承認・検査・許認可",
+   "source": "new-L2a",
+   "target": "new-L2b",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=classic;endFill=1;strokeColor=#D79B00;strokeWidth=2;dashed=1;fontColor=#D79B00;",
+   "source_label": "申請・提出する側",
+   "target_label": "承認・検査する側",
+   "relation_type": "承認・検査・許認可",
+   "is_legend_example": true
+  },
+  {
+   "id": "new-A2",
+   "label": "中間・完了検査",
+   "source": "wsTuqjMtPUAFl9iQP1-P-2",
+   "target": "wsTuqjMtPUAFl9iQP1-P-82",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=classic;endFill=1;strokeColor=#D79B00;strokeWidth=2;dashed=1;fontColor=#D79B00;exitX=0;exitY=0.9333;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0;",
+   "source_label": "現場監督",
+   "target_label": "確認検査機関",
+   "relation_type": "承認・検査・許認可",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-NE",
+   "label": "苦情・要望",
+   "source": "new-N",
+   "target": "wsTuqjMtPUAFl9iQP1-P-78",
+   "parent": "1",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=classic;endFill=1;strokeColor=#C0392B;strokeWidth=2;dashed=1;dashPattern=1 3;fontColor=#C0392B;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.7805;entryDx=0;entryDy=0;",
+   "source_label": "近隣住民・近隣事業者",
+   "target_label": "現場",
+   "relation_type": "苦情・要望",
+   "is_legend_example": false
+  },
+  {
+   "id": "new-L3e",
+   "label": "苦情・要望",
+   "source": "new-L3a",
+   "target": "new-L3b",
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;endArrow=classic;endFill=1;strokeColor=#C0392B;strokeWidth=2;dashed=1;dashPattern=1 3;fontColor=#C0392B;",
+   "source_label": "影響を受ける側",
+   "target_label": "影響を与える側",
+   "relation_type": "苦情・要望",
+   "is_legend_example": true
+  }
+ ],
+ "containment": [
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-14",
+   "child": "wsTuqjMtPUAFl9iQP1-P-26",
+   "type": "contains",
+   "parent_label": "施主",
+   "child_label": "担当者"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-14",
+   "child": "wsTuqjMtPUAFl9iQP1-P-27",
+   "type": "contains",
+   "parent_label": "施主",
+   "child_label": "責任者"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-14",
+   "child": "wsTuqjMtPUAFl9iQP1-P-29",
+   "type": "contains",
+   "parent_label": "施主",
+   "child_label": "各部署の担当者"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-15",
+   "child": "wsTuqjMtPUAFl9iQP1-P-43",
+   "type": "contains",
+   "parent_label": "設計者",
+   "child_label": "意匠"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-15",
+   "child": "wsTuqjMtPUAFl9iQP1-P-44",
+   "type": "contains",
+   "parent_label": "設計者",
+   "child_label": "構造"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-15",
+   "child": "wsTuqjMtPUAFl9iQP1-P-45",
+   "type": "contains",
+   "parent_label": "設計者",
+   "child_label": "設備"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-16",
+   "child": "wsTuqjMtPUAFl9iQP1-P-51",
+   "type": "contains",
+   "parent_label": "監理者",
+   "child_label": "担当者"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-17",
+   "child": "wsTuqjMtPUAFl9iQP1-P-18",
+   "type": "contains",
+   "parent_label": "協力業者",
+   "child_label": "業者A"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-18",
+   "child": "wsTuqjMtPUAFl9iQP1-P-19",
+   "type": "contains",
+   "parent_label": "業者A",
+   "child_label": "職長"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-18",
+   "child": "wsTuqjMtPUAFl9iQP1-P-20",
+   "type": "contains",
+   "parent_label": "業者A",
+   "child_label": "職人A"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-18",
+   "child": "wsTuqjMtPUAFl9iQP1-P-21",
+   "type": "contains",
+   "parent_label": "業者A",
+   "child_label": "職人B"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-18",
+   "child": "wsTuqjMtPUAFl9iQP1-P-40",
+   "type": "contains",
+   "parent_label": "業者A",
+   "child_label": "責任者"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "child": "wsTuqjMtPUAFl9iQP1-P-64",
+   "type": "contains",
+   "parent_label": "官公庁",
+   "child_label": "土木課 （敷地外道路の掘削）"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "child": "wsTuqjMtPUAFl9iQP1-P-65",
+   "type": "contains",
+   "parent_label": "官公庁",
+   "child_label": "下水道課 （上下水配管への接続）"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "child": "wsTuqjMtPUAFl9iQP1-P-66",
+   "type": "contains",
+   "parent_label": "官公庁",
+   "child_label": "警察 （道路許可証発行）"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "child": "wsTuqjMtPUAFl9iQP1-P-67",
+   "type": "contains",
+   "parent_label": "官公庁",
+   "child_label": "経済産業省（電柱・電線への接続・引き込み）"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "child": "wsTuqjMtPUAFl9iQP1-P-76",
+   "type": "contains",
+   "parent_label": "官公庁",
+   "child_label": "消防署 （消防検査）"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-49",
+   "child": "wsTuqjMtPUAFl9iQP1-P-77",
+   "type": "contains",
+   "parent_label": "官公庁",
+   "child_label": "労基署"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-54",
+   "child": "wsTuqjMtPUAFl9iQP1-P-56",
+   "type": "contains",
+   "parent_label": "リース業者",
+   "child_label": "担当者"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-60",
+   "child": "wsTuqjMtPUAFl9iQP1-P-61",
+   "type": "contains",
+   "parent_label": "工場・資機材商社・メーカー",
+   "child_label": "担当者"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "child": "wsTuqjMtPUAFl9iQP1-P-12",
+   "type": "contains",
+   "parent_label": "凡例",
+   "child_label": "上位"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "child": "wsTuqjMtPUAFl9iQP1-P-11",
+   "type": "contains",
+   "parent_label": "凡例",
+   "child_label": "下位"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "child": "wsTuqjMtPUAFl9iQP1-P-31",
+   "type": "contains",
+   "parent_label": "凡例",
+   "child_label": "担当者A"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "child": "wsTuqjMtPUAFl9iQP1-P-33",
+   "type": "contains",
+   "parent_label": "凡例",
+   "child_label": "担当者B"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-69",
+   "child": "wsTuqjMtPUAFl9iQP1-P-72",
+   "type": "contains",
+   "parent_label": "本社・支店",
+   "child_label": "安全・環境担当"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-69",
+   "child": "wsTuqjMtPUAFl9iQP1-P-73",
+   "type": "contains",
+   "parent_label": "本社・支店",
+   "child_label": "建築本部"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-69",
+   "child": "wsTuqjMtPUAFl9iQP1-P-74",
+   "type": "contains",
+   "parent_label": "本社・支店",
+   "child_label": "設備本部"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-78",
+   "child": "wsTuqjMtPUAFl9iQP1-P-2",
+   "type": "contains",
+   "parent_label": "現場",
+   "child_label": "現場監督"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-2",
+   "child": "wsTuqjMtPUAFl9iQP1-P-3",
+   "type": "contains",
+   "parent_label": "現場監督",
+   "child_label": "所長"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-2",
+   "child": "wsTuqjMtPUAFl9iQP1-P-4",
+   "type": "contains",
+   "parent_label": "現場監督",
+   "child_label": "課長"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-2",
+   "child": "wsTuqjMtPUAFl9iQP1-P-5",
+   "type": "contains",
+   "parent_label": "現場監督",
+   "child_label": "担当者A"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-2",
+   "child": "wsTuqjMtPUAFl9iQP1-P-6",
+   "type": "contains",
+   "parent_label": "現場監督",
+   "child_label": "担当者B"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-78",
+   "child": "wsTuqjMtPUAFl9iQP1-P-80",
+   "type": "contains",
+   "parent_label": "現場",
+   "child_label": "図面屋（施工図作図者）"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-82",
+   "child": "wsTuqjMtPUAFl9iQP1-P-83",
+   "type": "contains",
+   "parent_label": "確認検査機関",
+   "child_label": "担当者"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "child": "new-L1a",
+   "type": "contains",
+   "parent_label": "凡例",
+   "child_label": "当事者A"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "child": "new-L1b",
+   "type": "contains",
+   "parent_label": "凡例",
+   "child_label": "当事者B"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "child": "new-L2a",
+   "type": "contains",
+   "parent_label": "凡例",
+   "child_label": "申請・提出する側"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "child": "new-L2b",
+   "type": "contains",
+   "parent_label": "凡例",
+   "child_label": "承認・検査する側"
+  },
+  {
+   "parent": "new-N",
+   "child": "new-N1",
+   "type": "contains",
+   "parent_label": "近隣住民・近隣事業者",
+   "child_label": "近隣住民"
+  },
+  {
+   "parent": "new-N",
+   "child": "new-N2",
+   "type": "contains",
+   "parent_label": "近隣住民・近隣事業者",
+   "child_label": "自治会・近隣事業者"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "child": "new-L3a",
+   "type": "contains",
+   "parent_label": "凡例",
+   "child_label": "影響を受ける側"
+  },
+  {
+   "parent": "wsTuqjMtPUAFl9iQP1-P-68",
+   "child": "new-L3b",
+   "type": "contains",
+   "parent_label": "凡例",
+   "child_label": "影響を与える側"
+  }
+ ],
+ "relation_types": {
+  "指揮命令系統上の上下関係": "黒・実線・矢印あり（凡例の「下位→上位」に対応）",
+  "対等な関係でやり取り": "黒・実線・矢印なし（凡例の担当者A―担当者Bに対応）",
+  "契約関係（会社間）": "青 #0066CC・太線・矢印なし。個別ラベルに請負契約／下請契約／購買契約／リース契約",
+  "承認・検査・許認可": "金 #D79B00・破線・矢印あり。個別ラベルに確認申請／中間・完了検査",
+  "苦情・要望": "赤 #C0392B・一点鎖線・矢印あり（近隣→現場）"
+ },
+ "classification_note": "relation_type は凡例エッジの色・線種・矢印と各エッジのstyleを照合して付与した推定。金色で矢印なしの例外が1本あり、その旨該当エッジに注記。"
+}

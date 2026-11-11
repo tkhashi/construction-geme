@@ -1,0 +1,269 @@
+{
+  "anchorName": "イトーヨーカドー",
+  "anchorSide": "E",
+  "anchorSize": 0.32,
+  "buildingName": "アリオ蘇我（シード再構成）",
+  "coreFracs": [
+    0.38,
+    0.55,
+    0.78,
+    0.94
+  ],
+  "courtFracRange": [
+    0.7,
+    0.81
+  ],
+  "floorHeight": 5400,
+  "floors": 2,
+  "foodCourt": {
+    "fracRange": [
+      0.36,
+      0.62
+    ],
+    "levels": [
+      1
+    ],
+    "seatRows": [
+      8
+    ],
+    "shopRows": [
+      9
+    ]
+  },
+  "for": "conversion_osm_ario_soga.json",
+  "gates": [
+    {
+      "edge": "south",
+      "frac": 0.85,
+      "name": "波のゲート"
+    },
+    {
+      "edge": "south",
+      "frac": 0.55,
+      "name": "うきわのゲート"
+    },
+    {
+      "edge": "south",
+      "frac": 0.4,
+      "name": "ふねのゲート"
+    },
+    {
+      "edge": "south",
+      "frac": 0.1,
+      "name": "アザラシのゲート"
+    },
+    {
+      "edge": "north",
+      "frac": 0.45,
+      "name": "かじとりのゲート"
+    },
+    {
+      "edge": "north",
+      "frac": 0.03,
+      "name": "ヨットのゲート"
+    },
+    {
+      "edge": "west",
+      "frac": 0.55,
+      "name": "いかりのゲート"
+    }
+  ],
+  "groundPrior": "coastal-lowland",
+  "mallRows": [
+    6,
+    7
+  ],
+  "notes": "階数・核店舗・モール・フードコート・ゲートは公開資料ベース（guide）。サービス面=東は推定、裏側諸室の配置は建築計画ノルム（program）。屋上駐車場はモデル対象外（site 注記のみ）。当初 annotation はガイド図形に目視で合わせたモデル座標で書かれていたが、変換の実方位（+X端=北北西339.7°）と照合すると180°ずれていた。証拠：serviceFace=E（実方位）は生成器がモデル-X端（南南東端）へ解決し荷捌きはそこに生成される一方、アンカーはモデル座標指定で +X端（北北西端）にあり、調査上の『アンカー東端・サービス東面』と両立しなかった。本版では L2（ガイド由来）の frac・行をすべて180°反転し、アンカーは anchorSide=E＋anchorSize で実方位指定に切替えた。L3（防災・機械・電気室）の frac と行は生成器の配置ポリシーであり地理情報ではないため反転していない。ゲートの edge は実方位の面、frac は反転後のモデル座標。 行の反転は現行プレートの行数16（j→15-j）で計算した。",
+  "quasiAnchors": [
+    {
+      "fracFrom": 0.83,
+      "name": "無印良品",
+      "rows": "south",
+      "side": "NW",
+      "use": "テナント"
+    },
+    {
+      "fracFrom": 0.9,
+      "name": "ペットの専門店コジマ",
+      "rows": "north",
+      "side": "SW",
+      "use": "大型店"
+    }
+  ],
+  "serviceFace": "E",
+  "source": "公式フロアガイド1F/2F・施設概要・全体像調査（ario_soga_whole_building_research.md）",
+  "spec": {
+    "structureSystem": {
+      "value": null,
+      "basis": "公開Web情報で確認できず（全体像調査）。値が無い場合は生成器のL4推論が補う"
+    },
+    "frameMethod": {
+      "value": null,
+      "basis": "不明。値が無い場合は在来工法を前提に推論する"
+    },
+    "foundationType": {
+      "value": null,
+      "basis": "不明。groundPrior（地域prior）から生成器が仮定する"
+    },
+    "exteriorWall": {
+      "value": null,
+      "basis": "不明（外壁種別：ALC／カーテンウォール等）"
+    },
+    "roofSpec": {
+      "value": null,
+      "basis": "不明（防水・仕上げ種別）"
+    },
+    "ceilingHeightMm": {
+      "value": null,
+      "basis": "不明。生成器既定（一般室3600／モール・物販4800）を使う"
+    },
+    "sprinkler": {
+      "value": true,
+      "basis": "個別確認なし。大規模物販の標準前提として生成器が採用【実務】"
+    },
+    "roofUse": {
+      "value": "駐車場",
+      "basis": "全体像調査：屋上駐車場2ゾーン＋平面駐車場（事実）"
+    },
+    "parking": {
+      "value": "屋上＋平面、アリオ分1,650台",
+      "basis": "施設概要（事実）"
+    }
+  },
+  "floorHeightBasis": "階数はフロアガイド（事実）。階高5400mmの原典は未記録（要確認）",
+  "site": {
+    "neighbors": {
+      "value": [
+        {
+          "edge": "north",
+          "type": "道路（国道357号）"
+        },
+        {
+          "edge": "south",
+          "type": "駐車場"
+        },
+        {
+          "edge": "east",
+          "type": "道路（サービス側）"
+        },
+        {
+          "edge": "west",
+          "type": "商業施設（フェスティバルウォーク）"
+        }
+      ],
+      "basis": "全体像調査ベース（面の読み：北=国道357・駅方面、南=車の受け口/駐車場、東=サービス側、西=隣接商業）"
+    },
+    "roads": {
+      "value": [
+        {
+          "edge": "north",
+          "name": "国道357号",
+          "width": 25000
+        }
+      ],
+      "basis": "全体像調査ベース"
+    },
+    "siteAreaM2": {
+      "value": 68500,
+      "basis": "施設概要（事実）"
+    },
+    "polygon": {
+      "value": null,
+      "basis": "敷地形状は未取得。生成器の仮置き矩形を使う（面積は siteAreaM2 と一致しない）"
+    }
+  },
+  "outline": {
+    "address": {
+      "value": "千葉市中央区川崎町",
+      "basis": "所在地（番地は未確認）"
+    },
+    "use": {
+      "value": "商業施設（ショッピングセンター）",
+      "basis": "施設概要"
+    },
+    "buildingAreaM2": {
+      "value": null,
+      "basis": "未確認"
+    },
+    "totalFloorAreaM2": {
+      "value": 57500,
+      "basis": "施設概要（約57,500㎡）"
+    },
+    "heightMm": {
+      "value": null,
+      "basis": "未確認（階数×階高からの推定値はモデル側で導出可能）"
+    },
+    "openedYear": {
+      "value": 2005,
+      "basis": "施設概要（2005-04-27開業）"
+    },
+    "operator": {
+      "value": "イトーヨーカ堂（アリオ）",
+      "basis": "アリオはイトーヨーカ堂のショッピングセンター"
+    },
+    "architect": {
+      "value": null,
+      "basis": "未確認"
+    },
+    "builder": {
+      "value": null,
+      "basis": "公開情報で確認できず（全体像調査）"
+    }
+  },
+  "zoning": {
+    "useDistrict": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）。自治体の都市計画情報で確認可能"
+    },
+    "fireZone": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "buildingCoverageLimit": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "floorAreaRatioLimit": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "heightDistrict": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "shadowRegulation": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    }
+  },
+  "systems": {
+    "powerReceiving": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）。テナント募集資料・環境報告書で拾える場合がある"
+    },
+    "waterSupply": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "drainage": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "airConditioning": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "heatSource": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    },
+    "elevators": {
+      "value": null,
+      "basis": "台数・配置はモデル内のEVシャフトで表現。仕様（定員・速度）は未収集"
+    },
+    "fireAlarm": {
+      "value": null,
+      "basis": "未調査（シードの枠のみ用意）"
+    }
+  }
+}

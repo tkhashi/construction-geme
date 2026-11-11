@@ -1,0 +1,1453 @@
+{
+ "building": {
+  "floorHeightDefault": 4500,
+  "grossAreaTarget": 1344,
+  "id": "bldg-example-01",
+  "name": "生成例：小規模商業施設（検証用）",
+  "structure": "S",
+  "use": "商業"
+ },
+ "compartments": [
+  {
+   "id": "fc:1F-A",
+   "kind": "面積区画",
+   "level": "L1",
+   "rooms": [
+    "room:1F-TS1",
+    "room:1F-TS2",
+    "room:1F-TS3",
+    "room:1F-TS4",
+    "room:1F-MALL"
+   ]
+  },
+  {
+   "id": "fc:1F-B",
+   "kind": "面積区画",
+   "level": "L1",
+   "rooms": [
+    "room:1F-TN1",
+    "room:1F-BY",
+    "room:1F-WC",
+    "room:1F-CORE"
+   ]
+  },
+  {
+   "id": "fc:2F-A",
+   "kind": "面積区画",
+   "level": "L2",
+   "rooms": [
+    "room:2F-TS1",
+    "room:2F-TS2",
+    "room:2F-TS3",
+    "room:2F-TS4",
+    "room:2F-MALL"
+   ]
+  },
+  {
+   "id": "fc:2F-B",
+   "kind": "面積区画",
+   "level": "L2",
+   "rooms": [
+    "room:2F-TN1",
+    "room:2F-REST",
+    "room:2F-FC",
+    "room:2F-CORE"
+   ]
+  },
+  {
+   "id": "fc:shaft-stair",
+   "kind": "竪穴区画",
+   "shafts": [
+    "shaft:stair-1"
+   ]
+  },
+  {
+   "id": "fc:shaft-ev",
+   "kind": "竪穴区画",
+   "shafts": [
+    "shaft:ev-1"
+   ]
+  },
+  {
+   "id": "fc:shaft-ps",
+   "kind": "竪穴区画",
+   "shafts": [
+    "shaft:ps-1"
+   ]
+  },
+  {
+   "id": "fc:shaft-ds",
+   "kind": "竪穴区画",
+   "shafts": [
+    "shaft:ds-1"
+   ]
+  }
+ ],
+ "cores": [
+  {
+   "id": "core:W",
+   "levelRange": [
+    "L1",
+    "L2"
+   ],
+   "rect": {
+    "xFrom": "X1",
+    "xTo": "X2",
+    "yFrom": "Y3",
+    "yTo": "Y4"
+   }
+  }
+ ],
+ "coverings": [
+  {
+   "id": "cov:mall-ceil",
+   "name": "化粧石膏ボード",
+   "part": "天井",
+   "target": "room:1F-MALL"
+  },
+  {
+   "id": "cov:mall-floor",
+   "name": "磁器質タイル",
+   "part": "床",
+   "target": "room:1F-MALL"
+  },
+  {
+   "id": "cov:ext-south",
+   "name": "ALC＋複層塗材",
+   "part": "外装",
+   "target": "wall:1F-Y1"
+  },
+  {
+   "id": "cov:ts1-floor",
+   "name": "長尺塩ビシート",
+   "part": "床",
+   "target": "room:1F-TS1"
+  }
+ ],
+ "curtainWalls": [
+  {
+   "id": "cw:1F-X5",
+   "kind": "カーテンウォール",
+   "level": "L1",
+   "line": {
+    "axis": "X5",
+    "from": "Y1",
+    "to": "Y4"
+   },
+   "mullionPitch": 1800
+  }
+ ],
+ "earthworks": [
+  {
+   "cells": {
+    "xFrom": "X1",
+    "xTo": "X5",
+    "yFrom": "Y1",
+    "yTo": "Y4"
+   },
+   "depth": 1500,
+   "id": "ew:excav",
+   "kind": "根切り"
+  }
+ ],
+ "equipmentRuns": [
+  {
+   "fromShaft": "shaft:ps-1",
+   "id": "run:water-1F-wc",
+   "kind": "給水",
+   "level": "L1",
+   "route": [
+    "room:1F-CORE",
+    "room:1F-MALL",
+    "room:1F-WC"
+   ]
+  },
+  {
+   "fromShaft": "shaft:ps-1",
+   "id": "run:drain-1F-wc",
+   "kind": "排水",
+   "level": "L1",
+   "route": [
+    "room:1F-CORE",
+    "room:1F-MALL",
+    "room:1F-WC"
+   ]
+  }
+ ],
+ "foundations": {
+  "footings": {
+   "rule": "each-column",
+   "size": {
+    "d": 2400,
+    "w": 2400
+   },
+   "thickness": 800,
+   "topElevation": -600
+  },
+  "gradeBeams": "all-grid-lines-below-ground",
+  "piles": null
+ },
+ "genericElements": [
+  {
+   "attachTo": "wall:1F-Y1",
+   "id": "ge:canopy",
+   "name": "庇",
+   "note": "主出入口上部"
+  },
+  {
+   "attachTo": "roof:main",
+   "id": "ge:coping",
+   "name": "笠木",
+   "note": "パラペット天端"
+  }
+ ],
+ "grid": {
+  "axesX": [
+   {
+    "name": "X1",
+    "offset": 0
+   },
+   {
+    "name": "X2",
+    "offset": 8000
+   },
+   {
+    "name": "X3",
+    "offset": 16000
+   },
+   {
+    "name": "X4",
+    "offset": 24000
+   },
+   {
+    "name": "X5",
+    "offset": 32000
+   }
+  ],
+  "axesY": [
+   {
+    "name": "Y1",
+    "offset": 0
+   },
+   {
+    "name": "Y2",
+    "offset": 7000
+   },
+   {
+    "name": "Y3",
+    "offset": 14000
+   },
+   {
+    "name": "Y4",
+    "offset": 21000
+   }
+  ],
+  "beamRule": "all-grid-lines-both-directions-each-level",
+  "columnExceptions": [],
+  "columnRule": "all-intersections"
+ },
+ "levels": [
+  {
+   "elevation": 0,
+   "floorHeight": 4500,
+   "id": "L1",
+   "name": "1F"
+  },
+  {
+   "elevation": 4500,
+   "floorHeight": 4500,
+   "id": "L2",
+   "name": "2F"
+  }
+ ],
+ "reinforcement": [
+  {
+   "id": "re:slab-L2",
+   "kind": "スラブ配筋",
+   "spec": "D13@200 ダブル",
+   "target": "slab:L2"
+  },
+  {
+   "id": "re:footing",
+   "kind": "基礎配筋",
+   "spec": "主筋D19・あばら筋D13@150",
+   "target": "foundation:each-column"
+  }
+ ],
+ "roof": {
+  "cells": {
+   "xFrom": "X1",
+   "xTo": "X5",
+   "yFrom": "Y1",
+   "yTo": "Y4"
+  },
+  "id": "roof:main",
+  "kind": "陸屋根（シート防水）",
+  "parapetHeight": 600,
+  "topLevel": "L2"
+ },
+ "rooms": [
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X1",
+    "xTo": "X2",
+    "yFrom": "Y1",
+    "yTo": "Y2"
+   },
+   "id": "room:1F-TS1",
+   "level": "L1",
+   "name": "テナントS1",
+   "use": "テナント",
+   "zoneId": "1F-W"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X2",
+    "xTo": "X3",
+    "yFrom": "Y1",
+    "yTo": "Y2"
+   },
+   "id": "room:1F-TS2",
+   "level": "L1",
+   "name": "テナントS2",
+   "use": "テナント",
+   "zoneId": "1F-C"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X3",
+    "xTo": "X4",
+    "yFrom": "Y1",
+    "yTo": "Y2"
+   },
+   "id": "room:1F-TS3",
+   "level": "L1",
+   "name": "テナントS3",
+   "use": "テナント",
+   "zoneId": "1F-C"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X4",
+    "xTo": "X5",
+    "yFrom": "Y1",
+    "yTo": "Y2"
+   },
+   "id": "room:1F-TS4",
+   "level": "L1",
+   "name": "テナントS4",
+   "use": "テナント",
+   "zoneId": "1F-E"
+  },
+  {
+   "ceilingHeight": 4200,
+   "cells": {
+    "xFrom": "X1",
+    "xTo": "X5",
+    "yFrom": "Y2",
+    "yTo": "Y3"
+   },
+   "id": "room:1F-MALL",
+   "level": "L1",
+   "name": "モール",
+   "use": "モール",
+   "zoneId": null
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X2",
+    "xTo": "X3",
+    "yFrom": "Y3",
+    "yTo": "Y4"
+   },
+   "id": "room:1F-TN1",
+   "level": "L1",
+   "name": "テナントN1",
+   "use": "テナント",
+   "zoneId": "1F-C"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X3",
+    "xTo": "X4",
+    "yFrom": "Y3",
+    "yTo": "Y4"
+   },
+   "id": "room:1F-BY",
+   "level": "L1",
+   "name": "バックヤード",
+   "use": "バックヤード",
+   "zoneId": "1F-C"
+  },
+  {
+   "ceilingHeight": 3000,
+   "cells": {
+    "xFrom": "X4",
+    "xTo": "X5",
+    "yFrom": "Y3",
+    "yTo": "Y4"
+   },
+   "id": "room:1F-WC",
+   "level": "L1",
+   "name": "便所・サービス",
+   "use": "WC",
+   "zoneId": "1F-E"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X1",
+    "xTo": "X2",
+    "yFrom": "Y3",
+    "yTo": "Y4"
+   },
+   "id": "room:1F-CORE",
+   "level": "L1",
+   "name": "コアホール",
+   "use": "コアホール",
+   "zoneId": "1F-W"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X1",
+    "xTo": "X2",
+    "yFrom": "Y1",
+    "yTo": "Y2"
+   },
+   "id": "room:2F-TS1",
+   "level": "L2",
+   "name": "テナントS1",
+   "use": "テナント",
+   "zoneId": "2F-W"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X2",
+    "xTo": "X3",
+    "yFrom": "Y1",
+    "yTo": "Y2"
+   },
+   "id": "room:2F-TS2",
+   "level": "L2",
+   "name": "テナントS2",
+   "use": "テナント",
+   "zoneId": "2F-C"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X3",
+    "xTo": "X4",
+    "yFrom": "Y1",
+    "yTo": "Y2"
+   },
+   "id": "room:2F-TS3",
+   "level": "L2",
+   "name": "テナントS3",
+   "use": "テナント",
+   "zoneId": "2F-C"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X4",
+    "xTo": "X5",
+    "yFrom": "Y1",
+    "yTo": "Y2"
+   },
+   "id": "room:2F-TS4",
+   "level": "L2",
+   "name": "テナントS4",
+   "use": "テナント",
+   "zoneId": "2F-E"
+  },
+  {
+   "ceilingHeight": 4200,
+   "cells": {
+    "xFrom": "X1",
+    "xTo": "X5",
+    "yFrom": "Y2",
+    "yTo": "Y3"
+   },
+   "id": "room:2F-MALL",
+   "level": "L2",
+   "name": "モール",
+   "use": "モール",
+   "zoneId": null
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X2",
+    "xTo": "X3",
+    "yFrom": "Y3",
+    "yTo": "Y4"
+   },
+   "id": "room:2F-TN1",
+   "level": "L2",
+   "name": "テナントN1",
+   "use": "テナント",
+   "zoneId": "2F-C"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X3",
+    "xTo": "X4",
+    "yFrom": "Y3",
+    "yTo": "Y4"
+   },
+   "id": "room:2F-REST",
+   "level": "L2",
+   "name": "レストラン",
+   "use": "飲食",
+   "zoneId": "2F-C"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X4",
+    "xTo": "X5",
+    "yFrom": "Y3",
+    "yTo": "Y4"
+   },
+   "id": "room:2F-FC",
+   "level": "L2",
+   "name": "フードコート",
+   "use": "飲食",
+   "zoneId": "2F-E"
+  },
+  {
+   "ceilingHeight": 3600,
+   "cells": {
+    "xFrom": "X1",
+    "xTo": "X2",
+    "yFrom": "Y3",
+    "yTo": "Y4"
+   },
+   "id": "room:2F-CORE",
+   "level": "L2",
+   "name": "コアホール",
+   "use": "コアホール",
+   "zoneId": "2F-W"
+  }
+ ],
+ "shafts": [
+  {
+   "coreId": "core:W",
+   "footprint": {
+    "d": 7000,
+    "w": 3600,
+    "x": 0,
+    "y": 14000
+   },
+   "id": "shaft:stair-1",
+   "kind": "階段",
+   "levelRange": [
+    "L1",
+    "L2"
+   ],
+   "stair": {
+    "going": 240,
+    "riser": 180,
+    "steps": 25
+   }
+  },
+  {
+   "coreId": "core:W",
+   "footprint": {
+    "d": 2300,
+    "w": 2300,
+    "x": 3600,
+    "y": 17500
+   },
+   "id": "shaft:ev-1",
+   "kind": "EV",
+   "levelRange": [
+    "L1",
+    "L2"
+   ]
+  },
+  {
+   "coreId": "core:W",
+   "footprint": {
+    "d": 3500,
+    "w": 1200,
+    "x": 5900,
+    "y": 17500
+   },
+   "id": "shaft:ps-1",
+   "kind": "PS",
+   "levelRange": [
+    "L1",
+    "L2"
+   ]
+  },
+  {
+   "coreId": "core:W",
+   "footprint": {
+    "d": 3500,
+    "w": 900,
+    "x": 7100,
+    "y": 17500
+   },
+   "id": "shaft:ds-1",
+   "kind": "DS",
+   "levelRange": [
+    "L1",
+    "L2"
+   ]
+  }
+ ],
+ "site": {
+  "buildingPlacement": {
+   "origin": [
+    0,
+    0
+   ],
+   "rotationDeg": 0
+  },
+  "gates": [
+   {
+    "atMm": 14000,
+    "edge": "south",
+    "name": "南ゲート",
+    "width": 6000
+   }
+  ],
+  "neighbors": [
+   {
+    "edge": "north",
+    "type": "住宅"
+   },
+   {
+    "edge": "south",
+    "type": "道路"
+   },
+   {
+    "edge": "east",
+    "type": "田畑"
+   },
+   {
+    "edge": "west",
+    "type": "側道"
+   }
+  ],
+  "polygon": [
+   [
+    -12000,
+    -10000
+   ],
+   [
+    46000,
+    -10000
+   ],
+   [
+    46000,
+    34000
+   ],
+   [
+    -12000,
+    34000
+   ]
+  ],
+  "roads": [
+   {
+    "edge": "south",
+    "name": "幹線道路",
+    "width": 12000
+   }
+  ]
+ },
+ "slabs": [
+  {
+   "cells": {
+    "xFrom": "X1",
+    "xTo": "X5",
+    "yFrom": "Y1",
+    "yTo": "Y4"
+   },
+   "id": "slab:L1",
+   "kind": "土間コンクリート",
+   "level": "L1",
+   "onGround": true,
+   "openings": [],
+   "thickness": 150
+  },
+  {
+   "cells": {
+    "xFrom": "X1",
+    "xTo": "X5",
+    "yFrom": "Y1",
+    "yTo": "Y4"
+   },
+   "id": "slab:L2",
+   "kind": "デッキ合成スラブ",
+   "level": "L2",
+   "openings": [
+    "shaft:stair-1",
+    "shaft:ev-1",
+    "shaft:ps-1",
+    "shaft:ds-1"
+   ],
+   "thickness": 150
+  }
+ ],
+ "walls": [
+  {
+   "id": "wall:1F-Y1",
+   "kind": "外壁",
+   "level": "L1",
+   "line": {
+    "axis": "Y1",
+    "from": "X1",
+    "to": "X5"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:1F-Y1-1",
+     "kind": "サッシ",
+     "offsetFromStart": 1000,
+     "sillHeight": 300,
+     "width": 6000
+    },
+    {
+     "height": 2400,
+     "id": "op:1F-Y1-2",
+     "kind": "両開き戸",
+     "note": "主出入口",
+     "offsetFromStart": 10600,
+     "sillHeight": 0,
+     "width": 2800
+    },
+    {
+     "height": 2100,
+     "id": "op:1F-Y1-3",
+     "kind": "サッシ",
+     "offsetFromStart": 17000,
+     "sillHeight": 300,
+     "width": 6000
+    },
+    {
+     "height": 2100,
+     "id": "op:1F-Y1-4",
+     "kind": "サッシ",
+     "offsetFromStart": 25000,
+     "sillHeight": 300,
+     "width": 6000
+    }
+   ],
+   "thickness": 200
+  },
+  {
+   "id": "wall:1F-Y4",
+   "kind": "外壁",
+   "level": "L1",
+   "line": {
+    "axis": "Y4",
+    "from": "X1",
+    "to": "X5"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:1F-Y4-1",
+     "kind": "片開き戸",
+     "note": "サービス出入口",
+     "offsetFromStart": 1000,
+     "sillHeight": 0,
+     "width": 1200
+    },
+    {
+     "height": 2100,
+     "id": "op:1F-Y4-2",
+     "kind": "サッシ",
+     "offsetFromStart": 10000,
+     "sillHeight": 300,
+     "width": 5000
+    },
+    {
+     "height": 2100,
+     "id": "op:1F-Y4-3",
+     "kind": "サッシ",
+     "offsetFromStart": 20000,
+     "sillHeight": 300,
+     "width": 5000
+    },
+    {
+     "height": 2100,
+     "id": "op:1F-Y4-4",
+     "kind": "サッシ",
+     "offsetFromStart": 26000,
+     "sillHeight": 300,
+     "width": 4000
+    }
+   ],
+   "thickness": 200
+  },
+  {
+   "id": "wall:1F-X1",
+   "kind": "外壁",
+   "level": "L1",
+   "line": {
+    "axis": "X1",
+    "from": "Y1",
+    "to": "Y4"
+   },
+   "openings": [],
+   "thickness": 200
+  },
+  {
+   "id": "wall:1F-Y2",
+   "kind": "間仕切",
+   "level": "L1",
+   "line": {
+    "axis": "Y2",
+    "from": "X1",
+    "to": "X5"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:1F-Y2-1",
+     "kind": "両開き戸",
+     "offsetFromStart": 3000,
+     "sillHeight": 0,
+     "width": 1600
+    },
+    {
+     "height": 2100,
+     "id": "op:1F-Y2-2",
+     "kind": "両開き戸",
+     "offsetFromStart": 11000,
+     "sillHeight": 0,
+     "width": 1600
+    },
+    {
+     "height": 2100,
+     "id": "op:1F-Y2-3",
+     "kind": "両開き戸",
+     "offsetFromStart": 19000,
+     "sillHeight": 0,
+     "width": 1600
+    },
+    {
+     "height": 2100,
+     "id": "op:1F-Y2-4",
+     "kind": "両開き戸",
+     "offsetFromStart": 27000,
+     "sillHeight": 0,
+     "width": 1600
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:1F-Y3a",
+   "kind": "間仕切",
+   "level": "L1",
+   "line": {
+    "axis": "Y3",
+    "from": "X1",
+    "to": "X2"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:1F-Y3a-1",
+     "kind": "片開き戸",
+     "note": "コア出入口",
+     "offsetFromStart": 3000,
+     "sillHeight": 0,
+     "width": 1000
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:1F-Y3b",
+   "kind": "間仕切",
+   "level": "L1",
+   "line": {
+    "axis": "Y3",
+    "from": "X2",
+    "to": "X5"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:1F-Y3b-1",
+     "kind": "両開き戸",
+     "offsetFromStart": 2000,
+     "sillHeight": 0,
+     "width": 1600
+    },
+    {
+     "height": 2100,
+     "id": "op:1F-Y3b-2",
+     "kind": "両開き戸",
+     "offsetFromStart": 10000,
+     "sillHeight": 0,
+     "width": 1600
+    },
+    {
+     "height": 2100,
+     "id": "op:1F-Y3b-3",
+     "kind": "両開き戸",
+     "offsetFromStart": 18000,
+     "sillHeight": 0,
+     "width": 1600
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:1F-X2a",
+   "kind": "間仕切",
+   "level": "L1",
+   "line": {
+    "axis": "X2",
+    "from": "Y1",
+    "to": "Y2"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:1F-X2a-1",
+     "kind": "片開き戸",
+     "offsetFromStart": 3000,
+     "sillHeight": 0,
+     "width": 900
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:1F-X3a",
+   "kind": "間仕切",
+   "level": "L1",
+   "line": {
+    "axis": "X3",
+    "from": "Y1",
+    "to": "Y2"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:1F-X3a-1",
+     "kind": "片開き戸",
+     "offsetFromStart": 3000,
+     "sillHeight": 0,
+     "width": 900
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:1F-X4a",
+   "kind": "間仕切",
+   "level": "L1",
+   "line": {
+    "axis": "X4",
+    "from": "Y1",
+    "to": "Y2"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:1F-X4a-1",
+     "kind": "片開き戸",
+     "offsetFromStart": 3000,
+     "sillHeight": 0,
+     "width": 900
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:1F-X2core",
+   "kind": "シャフト壁",
+   "level": "L1",
+   "line": {
+    "axis": "X2",
+    "from": "Y3",
+    "to": "Y4"
+   },
+   "openings": [],
+   "thickness": 200
+  },
+  {
+   "id": "wall:1F-X3b",
+   "kind": "間仕切",
+   "level": "L1",
+   "line": {
+    "axis": "X3",
+    "from": "Y3",
+    "to": "Y4"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:1F-X3b-1",
+     "kind": "片開き戸",
+     "offsetFromStart": 2000,
+     "sillHeight": 0,
+     "width": 900
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:1F-X4b",
+   "kind": "間仕切",
+   "level": "L1",
+   "line": {
+    "axis": "X4",
+    "from": "Y3",
+    "to": "Y4"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:1F-X4b-1",
+     "kind": "片開き戸",
+     "offsetFromStart": 2000,
+     "sillHeight": 0,
+     "width": 900
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:2F-Y1",
+   "kind": "外壁",
+   "level": "L2",
+   "line": {
+    "axis": "Y1",
+    "from": "X1",
+    "to": "X5"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:2F-Y1-1",
+     "kind": "サッシ",
+     "offsetFromStart": 1000,
+     "sillHeight": 300,
+     "width": 6000
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-Y1-2",
+     "kind": "サッシ",
+     "offsetFromStart": 9000,
+     "sillHeight": 300,
+     "width": 6000
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-Y1-3",
+     "kind": "サッシ",
+     "offsetFromStart": 17000,
+     "sillHeight": 300,
+     "width": 6000
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-Y1-4",
+     "kind": "サッシ",
+     "offsetFromStart": 25000,
+     "sillHeight": 300,
+     "width": 6000
+    }
+   ],
+   "thickness": 200
+  },
+  {
+   "id": "wall:2F-Y4",
+   "kind": "外壁",
+   "level": "L2",
+   "line": {
+    "axis": "Y4",
+    "from": "X1",
+    "to": "X5"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:2F-Y4-1",
+     "kind": "サッシ",
+     "offsetFromStart": 2000,
+     "sillHeight": 300,
+     "width": 5000
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-Y4-2",
+     "kind": "サッシ",
+     "offsetFromStart": 10000,
+     "sillHeight": 300,
+     "width": 5000
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-Y4-3",
+     "kind": "サッシ",
+     "offsetFromStart": 20000,
+     "sillHeight": 300,
+     "width": 5000
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-Y4-4",
+     "kind": "サッシ",
+     "offsetFromStart": 27000,
+     "sillHeight": 300,
+     "width": 3000
+    }
+   ],
+   "thickness": 200
+  },
+  {
+   "id": "wall:2F-X1",
+   "kind": "外壁",
+   "level": "L2",
+   "line": {
+    "axis": "X1",
+    "from": "Y1",
+    "to": "Y4"
+   },
+   "openings": [],
+   "thickness": 200
+  },
+  {
+   "id": "wall:2F-X5",
+   "kind": "外壁",
+   "level": "L2",
+   "line": {
+    "axis": "X5",
+    "from": "Y1",
+    "to": "Y4"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:2F-X5-1",
+     "kind": "サッシ",
+     "offsetFromStart": 1000,
+     "sillHeight": 300,
+     "width": 5000
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-X5-2",
+     "kind": "サッシ",
+     "offsetFromStart": 8000,
+     "sillHeight": 300,
+     "width": 5000
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-X5-3",
+     "kind": "サッシ",
+     "offsetFromStart": 15000,
+     "sillHeight": 300,
+     "width": 4000
+    }
+   ],
+   "thickness": 200
+  },
+  {
+   "id": "wall:2F-Y2",
+   "kind": "間仕切",
+   "level": "L2",
+   "line": {
+    "axis": "Y2",
+    "from": "X1",
+    "to": "X5"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:2F-Y2-1",
+     "kind": "両開き戸",
+     "offsetFromStart": 3200,
+     "sillHeight": 0,
+     "width": 1600
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-Y2-2",
+     "kind": "両開き戸",
+     "offsetFromStart": 11200,
+     "sillHeight": 0,
+     "width": 1600
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-Y2-3",
+     "kind": "両開き戸",
+     "offsetFromStart": 19200,
+     "sillHeight": 0,
+     "width": 1600
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-Y2-4",
+     "kind": "両開き戸",
+     "offsetFromStart": 27200,
+     "sillHeight": 0,
+     "width": 1600
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:2F-Y3a",
+   "kind": "間仕切",
+   "level": "L2",
+   "line": {
+    "axis": "Y3",
+    "from": "X1",
+    "to": "X2"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:2F-Y3a-1",
+     "kind": "片開き戸",
+     "note": "コア出入口",
+     "offsetFromStart": 3000,
+     "sillHeight": 0,
+     "width": 1000
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:2F-Y3b",
+   "kind": "間仕切",
+   "level": "L2",
+   "line": {
+    "axis": "Y3",
+    "from": "X2",
+    "to": "X5"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:2F-Y3b-1",
+     "kind": "両開き戸",
+     "offsetFromStart": 2200,
+     "sillHeight": 0,
+     "width": 1600
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-Y3b-2",
+     "kind": "両開き戸",
+     "offsetFromStart": 10200,
+     "sillHeight": 0,
+     "width": 1600
+    },
+    {
+     "height": 2100,
+     "id": "op:2F-Y3b-3",
+     "kind": "両開き戸",
+     "offsetFromStart": 18200,
+     "sillHeight": 0,
+     "width": 1600
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:2F-X2a",
+   "kind": "間仕切",
+   "level": "L2",
+   "line": {
+    "axis": "X2",
+    "from": "Y1",
+    "to": "Y2"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:2F-X2a-1",
+     "kind": "片開き戸",
+     "offsetFromStart": 3000,
+     "sillHeight": 0,
+     "width": 900
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:2F-X3a",
+   "kind": "間仕切",
+   "level": "L2",
+   "line": {
+    "axis": "X3",
+    "from": "Y1",
+    "to": "Y2"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:2F-X3a-1",
+     "kind": "片開き戸",
+     "offsetFromStart": 3000,
+     "sillHeight": 0,
+     "width": 900
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:2F-X4a",
+   "kind": "間仕切",
+   "level": "L2",
+   "line": {
+    "axis": "X4",
+    "from": "Y1",
+    "to": "Y2"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:2F-X4a-1",
+     "kind": "片開き戸",
+     "offsetFromStart": 3000,
+     "sillHeight": 0,
+     "width": 900
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:2F-X2core",
+   "kind": "シャフト壁",
+   "level": "L2",
+   "line": {
+    "axis": "X2",
+    "from": "Y3",
+    "to": "Y4"
+   },
+   "openings": [],
+   "thickness": 200
+  },
+  {
+   "id": "wall:2F-X3b",
+   "kind": "間仕切",
+   "level": "L2",
+   "line": {
+    "axis": "X3",
+    "from": "Y3",
+    "to": "Y4"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:2F-X3b-1",
+     "kind": "片開き戸",
+     "offsetFromStart": 2000,
+     "sillHeight": 0,
+     "width": 900
+    }
+   ],
+   "thickness": 120
+  },
+  {
+   "id": "wall:2F-X4b",
+   "kind": "間仕切",
+   "level": "L2",
+   "line": {
+    "axis": "X4",
+    "from": "Y3",
+    "to": "Y4"
+   },
+   "openings": [
+    {
+     "height": 2100,
+     "id": "op:2F-X4b-1",
+     "kind": "片開き戸",
+     "offsetFromStart": 2000,
+     "sillHeight": 0,
+     "width": 900
+    }
+   ],
+   "thickness": 120
+  }
+ ],
+ "zones": [
+  {
+   "cellRange": {
+    "xFrom": "X1",
+    "xTo": "X2",
+    "yFrom": "Y1",
+    "yTo": "Y4"
+   },
+   "id": "1F-W",
+   "level": "L1"
+  },
+  {
+   "cellRange": {
+    "xFrom": "X2",
+    "xTo": "X4",
+    "yFrom": "Y1",
+    "yTo": "Y4"
+   },
+   "id": "1F-C",
+   "level": "L1"
+  },
+  {
+   "cellRange": {
+    "xFrom": "X4",
+    "xTo": "X5",
+    "yFrom": "Y1",
+    "yTo": "Y4"
+   },
+   "id": "1F-E",
+   "level": "L1"
+  },
+  {
+   "cellRange": {
+    "xFrom": "X1",
+    "xTo": "X2",
+    "yFrom": "Y1",
+    "yTo": "Y4"
+   },
+   "id": "2F-W",
+   "level": "L2"
+  },
+  {
+   "cellRange": {
+    "xFrom": "X2",
+    "xTo": "X4",
+    "yFrom": "Y1",
+    "yTo": "Y4"
+   },
+   "id": "2F-C",
+   "level": "L2"
+  },
+  {
+   "cellRange": {
+    "xFrom": "X4",
+    "xTo": "X5",
+    "yFrom": "Y1",
+    "yTo": "Y4"
+   },
+   "id": "2F-E",
+   "level": "L2"
+  }
+ ]
+}

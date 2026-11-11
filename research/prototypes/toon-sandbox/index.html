@@ -1,0 +1,1377 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>3Dサンドボックス（実モデルでサイズと質感）</title>
+<style>
+:root{
+--bg:#dfeaf0;
+--panel:#ffffff;
+--panel-2:#f2f5f6;
+--ink:#22303a;
+--ink-2:#5a6b76;
+--line:#c9d6dd;
+--accent:#d96c33;
+--accent-ink:#ffffff;
+--teal:#1f7a6d;
+--shadow:0 10px 28px rgba(28,48,62,.18);
+--radius:14px;
+}
+@media (prefers-color-scheme: dark){
+:root{
+--bg:#18242c;
+--panel:#22323c;
+--panel-2:#1b2a33;
+--ink:#eef4f6;
+--ink-2:#a9bcc5;
+--line:#3a4f5b;
+--shadow:0 10px 28px rgba(0,0,0,.45);
+}
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+margin:0;
+font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic",Meiryo,system-ui,sans-serif;
+background:var(--bg);
+color:var(--ink);
+overflow:hidden;
+}
+#stage{position:fixed;inset:0}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#stage canvas:active{cursor:grabbing}
+
+.panel{
+position:fixed;left:14px;top:14px;z-index:10;
+width:min(348px,calc(100vw - 28px));
+background:var(--panel);
+border:1px solid var(--line);
+border-radius:var(--radius);
+box-shadow:var(--shadow);
+padding:14px 14px 12px;
+max-height:calc(100dvh - 28px);
+overflow-y:auto;
+}
+.panel h1{font-size:17px;line-height:1.35;margin:0 0 2px;font-weight:800}
+.panel.lead{font-size:12.5px;line-height:1.55;color:var(--ink-2);margin:0 0 12px}
+.seg{
+display:grid;grid-template-columns:1fr 1fr;
+background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:3px;
+margin-bottom:6px;
+}
+.seg button{
+appearance:none;border:0;background:transparent;color:var(--ink-2);
+font:inherit;font-size:13.5px;font-weight:700;
+padding:9px 4px;border-radius:7px;cursor:pointer;line-height:1.3;
+}
+.seg button small{display:block;font-size:10.5px;font-weight:500;opacity:.78}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button:focus-visible,.btn:focus-visible,.seg3 button:focus-visible,.bldgseg button:focus-visible,.views button:focus-visible,input[type="range"]:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+.bldgseg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 2px}
+.bldgseg button{
+appearance:none;font:inherit;font-size:12px;font-weight:700;cursor:pointer;
+border:1px solid var(--line);background:var(--panel-2);color:var(--ink-2);
+border-radius:8px;padding:8px 2px;line-height:1.3;
+}
+.bldgseg button small{display:block;font-size:10px;font-weight:500;opacity:.8}
+.bldgseg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.row{margin:10px 0}
+.row label{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;font-weight:700;margin-bottom:2px}
+.row label output{font-size:12.5px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+.row.hint{font-size:11px;color:var(--ink-2);margin-top:1px;line-height:1.45}
+input[type="range"]{width:100%;accent-color:var(--accent);height:26px;margin:0}
+
+.seg3{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:4px 0 2px}
+.seg3 button{
+appearance:none;font:inherit;font-size:12px;font-weight:700;cursor:pointer;
+border:1px solid var(--line);background:var(--panel-2);color:var(--ink-2);
+border-radius:8px;padding:7px 4px;
+}
+.seg3 button[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.seg4{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 2px}
+.seg4 button{
+appearance:none;font:inherit;font-size:12px;font-weight:700;cursor:pointer;
+border:1px solid var(--line);background:var(--panel-2);color:var(--ink-2);
+border-radius:8px;padding:7px 4px;
+}
+.seg4 button[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.seg4.four{grid-template-columns:repeat(4,1fr)}
+.seg4 button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.sectitle{
+margin:16px 0 2px;padding-top:12px;border-top:1px solid var(--line);
+font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--ink);
+display:flex;justify-content:space-between;align-items:baseline;
+}
+.sectitle span{font-size:10.5px;font-weight:600;color:var(--ink-2);letter-spacing:0}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+.chips button{
+appearance:none;font:inherit;font-size:11px;font-weight:700;cursor:pointer;
+border:1px solid var(--line);background:var(--panel);color:var(--ink-2);
+border-radius:999px;padding:4px 10px;font-variant-numeric:tabular-nums;
+}
+.chips button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.chips button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.warn{
+display:none;font-size:11px;line-height:1.5;margin-top:5px;
+color:#9a4a12;background:#fdf0e4;border:1px solid #eec39a;border-radius:8px;padding:6px 8px;
+}
+@media (prefers-color-scheme: dark){.warn{color:#f2c49b;background:#3a2a1c;border-color:#6b4a2c}}
+.warn.show{display:block}
+
+.facts{
+margin-top:12px;border-top:1px dashed var(--line);padding-top:10px;
+display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:11.5px;line-height:1.5;
+}
+.facts div b{display:block;font-size:10.5px;color:var(--ink-2);font-weight:600}
+.facts div span{font-weight:800;font-variant-numeric:tabular-nums}
+.facts.wide{grid-column:1/-1}
+.facts.wide span{font-weight:600}
+
+.btn{
+appearance:none;font:inherit;cursor:pointer;width:100%;
+margin-top:12px;padding:11px 10px;border-radius:10px;
+border:1px solid var(--teal);background:var(--teal);color:#fff;
+font-size:13.5px;font-weight:800;
+}
+.btn.done{background:var(--panel);color:var(--teal)}
+#copyNote{font-size:11.5px;color:var(--ink-2);margin:7px 0 0;line-height:1.5;min-height:1em}
+
+.views{position:fixed;right:14px;top:14px;z-index:10;display:flex;flex-direction:column;gap:6px}
+.views button{
+appearance:none;font:inherit;font-size:12px;font-weight:700;cursor:pointer;
+background:var(--panel);color:var(--ink);border:1px solid var(--line);
+border-radius:9px;padding:8px 12px;box-shadow:0 4px 14px rgba(28,48,62,.14);
+}
+.views button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+
+.scalebox{
+position:fixed;right:14px;bottom:14px;z-index:10;
+background:var(--panel);border:1px solid var(--line);border-radius:10px;
+box-shadow:0 4px 14px rgba(28,48,62,.14);
+padding:8px 12px 10px;font-size:11px;color:var(--ink-2);line-height:1.4;
+}
+.scalebar{height:6px;border:1.5px solid var(--ink);border-top:0;margin-top:3px;position:relative}
+.scalebar::before,.scalebar::after{content:"";position:absolute;top:-4px;width:1.5px;height:4px;background:var(--ink)}
+.scalebar::before{left:0}.scalebar::after{right:0}
+.scalebox b{color:var(--ink);font-size:11.5px}
+
+.draghint{
+position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:9;
+font-size:11.5px;color:var(--ink-2);background:var(--panel);
+border:1px solid var(--line);border-radius:999px;padding:5px 14px;white-space:nowrap;
+}
+@media (max-width:760px){
+.panel{left:10px;right:10px;top:10px;width:auto;padding:11px 12px 10px;max-height:calc(100dvh - 148px)}
+.panel h1{font-size:15.5px}
+.panel.lead{display:none}
+.facts{display:none}
+.views{top:auto;bottom:58px;right:10px;flex-direction:row}
+.scalebox{display:none}
+.draghint{bottom:10px}
+#copyNote{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="stage" aria-label="実物件モデルの3Dサンドボックス描画"></div>
+
+<section class="panel" aria-label="サンドボックスの操作">
+<h1>サンドボックス：実モデルでサイズと質感</h1>
+<p class="lead">題材は本編で使う実物件モデルそのもの（建物モデルJSONから生成：平面・柱・梁の本数・雁行した平面形状・階数・工区は実データどおり）です。平面は実寸のまま一切変えません。ここでOKした値だけを本編へ渡します。</p>
+
+<div class="sectitle" style="margin-top:2px;border-top:0;padding-top:0">物件 <span>本編の3物件・実寸モデル</span></div>
+<div class="bldgseg" role="group" aria-label="物件切替" id="grpBldg">
+<button type="button" data-bldg="park" aria-pressed="true">パークサイド<small>3階・216×100m</small></button>
+<button type="button" data-bldg="soga" aria-pressed="false">シーサイド<small>2階・364×104m</small></button>
+<button type="button" data-bldg="kame" aria-pressed="false">ガーデン<small>3階・300×156m</small></button>
+</div>
+
+<div class="sectitle">工事の段階 <span id="phaseName">躯体</span></div>
+<div class="row" style="margin-top:4px">
+<label for="rngProg">進捗 <output id="outProg">58%</output></label>
+<input id="rngProg" type="range" min="0" max="100" step="0.5" value="58" />
+<div class="chips" role="group" aria-label="段階プリセット">
+<button type="button" data-prog="5" aria-pressed="false">土工事</button>
+<button type="button" data-prog="15" aria-pressed="false">基礎</button>
+<button type="button" data-prog="48" aria-pressed="false">躯体</button>
+<button type="button" data-prog="82" aria-pressed="false">外装</button>
+<button type="button" data-prog="100" aria-pressed="false">竣工</button>
+</div>
+<div class="hint">躯体は階ごと・工区ごと（東→中→西）に、柱→梁→配筋→スラブの順で立ち上がります。段階ごとの重機・資材・人の見え方も判定材料にしてください。</div>
+</div>
+
+<div class="sectitle">縮尺プリセット</div>
+<div class="seg" role="group" aria-label="縮尺プリセット切替">
+<button id="btnConv" type="button" aria-pressed="false">従来縮尺<small>高さ・人・重機すべて実寸</small></button>
+<button id="btnToon" type="button" aria-pressed="true">候補の縮尺<small>高さ×2.6・人3.0m・重機×1.13</small></button>
+</div>
+
+<div class="sectitle">サイズ <span>平面は常に実寸</span></div>
+
+<div class="row">
+<label for="rngH">建物の高さ強調 <output id="outH">×2.6</output></label>
+<input id="rngH" type="range" min="1" max="2.6" step="0.1" value="2.6" />
+<div class="hint">平面は不変。階高だけを伸ばします。</div>
+</div>
+
+<div class="row">
+<label for="rngP">作業者の大きさ <output id="outP">3.0 m 表示</output></label>
+<input id="rngP" type="range" min="1.7" max="6.5" step="0.1" value="3" />
+<div class="hint">従来のドット表示の約10倍が 3.0m 前後です。重機とは連動しません（別々に詰められます）。</div>
+</div>
+
+<div class="row">
+<label for="rngM">重機の大きさ <output id="outM">×1.13</output></label>
+<input id="rngM" type="range" min="1" max="4.5" step="0.01" value="1.13" />
+<div class="chips" role="group" aria-label="重機サイズの目安">
+<button type="button" data-m="1.13" aria-pressed="true">×1.13 候補値</button>
+<button type="button" data-m="2" aria-pressed="false">×2</button>
+<button type="button" data-m="3" aria-pressed="false">×3</button>
+<button type="button" data-m="4.5" aria-pressed="false">×4.5 過大</button>
+</div>
+<div class="hint">クレーン／ユンボ／生コン車／ダンプを、各機の位置を動かさずにその場で拡大します。大きくするほど建物・吊り荷・作業者との干渉が出ます。その見え方も判定材料にしてください。</div>
+<div class="warn" id="machineWarn" role="note">重機がかなり大きい状態です。クレーンブームと建物・柱、ユンボと掘削ピット、生コン車とゲート周りのめり込み／はみ出しを確認してください。</div>
+</div>
+
+<div class="row">
+<label for="rngMat">資材の大きさ <output id="outMat">×1.00</output></label>
+<input id="rngMat" type="range" min="0.5" max="2.5" step="0.05" value="1" />
+<div class="hint">仮置き場の資材の山・束（鉄筋束／鉄骨材／パネル・ボード／足場パイプ）と、クレーンの吊り荷の表示スケールです。大きくすると置き場が窮屈になり、建屋への引き込みの大変さの見え方も変わります。</div>
+</div>
+
+<div class="row">
+<label for="rngCol">柱の太さ <output id="outCol">×1.00</output></label>
+<input id="rngCol" type="range" min="0.5" max="3" step="0.05" value="1" />
+<div class="hint">柱の断面（実寸0.40m角）だけを太く／細くします。平面位置・柱の本数は変わりません。太くしすぎると梁・スラブと重なって見えます。その具合も判定材料にしてください。</div>
+</div>
+
+<div class="row">
+<label for="rngSlab">スラブの厚さ <output id="outSlab">×1.00</output></label>
+<input id="rngSlab" type="range" min="0.5" max="3" step="0.05" value="1" />
+<div class="hint">床版・屋根スラブの厚み（実寸0.32m）だけを変えます。下面の位置は固定で、上方向に厚くなります。階高・平面は変わりません。</div>
+</div>
+
+<div class="row">
+<label>細部部材の表示量</label>
+<div class="seg3" role="group" aria-label="部材の間引き">
+<button id="btnFull" type="button" aria-pressed="false">全数（重い）</button>
+<button id="btnThin" type="button" aria-pressed="true">細部を1/10に間引き</button>
+</div>
+<div class="hint">施工中の階の配筋だけを対象に、ピッチ1.6m表示→16mへ間引きます。柱・梁・スラブの骨格（実本数）は間引きません。</div>
+</div>
+
+<div class="sectitle">質感 <span>トゥーンとしての見え方</span></div>
+
+<div class="row">
+<label>面の陰影</label>
+<div class="seg4" role="group" aria-label="陰影の付け方" id="grpShade">
+<button type="button" data-shade="flat" aria-pressed="false">フラット</button>
+<button type="button" data-shade="standard" aria-pressed="true">標準</button>
+<button type="button" data-shade="strong" aria-pressed="false">陰影強め</button>
+</div>
+<div class="hint">フラット＝階調を潰して単色寄り／陰影強め＝明暗の段差と光を強くします。</div>
+</div>
+
+<div class="row">
+<label>輪郭線</label>
+<div class="seg4 four" role="group" aria-label="輪郭線の有無と太さ" id="grpOutline">
+<button type="button" data-outline="off" aria-pressed="false">なし</button>
+<button type="button" data-outline="thin" aria-pressed="false">細い</button>
+<button type="button" data-outline="standard" aria-pressed="true">標準</button>
+<button type="button" data-outline="thick" aria-pressed="false">太い</button>
+</div>
+<div class="hint">部材のエッジ線です。骨格部材は裏面ハル方式で描きます。</div>
+</div>
+
+<div class="row">
+<label>色味</label>
+<div class="seg4" role="group" aria-label="色味" id="grpPalette">
+<button type="button" data-palette="standard" aria-pressed="true">標準</button>
+<button type="button" data-palette="vivid" aria-pressed="false">ビビッド</button>
+<button type="button" data-palette="soft" aria-pressed="false">ソフト</button>
+</div>
+<div class="hint">ビビッド＝彩度を上げて色を立てる／ソフト＝彩度を落として明るく柔らかくします。建物・重機・資材すべてに効きます。</div>
+</div>
+
+<div class="facts" aria-label="現在の設定値と物件情報">
+<div><b>物件</b><span id="factName">—</span></div>
+<div><b>規模</b><span id="factSpec">—</span></div>
+<div><b>平面（変更なし）</b><span id="factPlan">—</span></div>
+<div><b>建物高さ</b><span id="factH">—</span></div>
+<div><b>柱（全階合計）</b><span id="factCols">—</span></div>
+<div><b>梁（全階合計）</b><span id="factBeams">—</span></div>
+<div><b>重機</b><span id="factMachine">×1.13</span></div>
+<div><b>質感</b><span id="factTex">陰影 標準／輪郭 標準／色味 標準</span></div>
+<div><b>資材</b><span id="factMat">×1.00</span></div>
+<div><b>柱の太さ</b><span id="factCol">0.40 m（実寸）</span></div>
+<div><b>スラブの厚さ</b><span id="factSlab">0.32 m（実寸）</span></div>
+<div class="wide"><b>細部部材の表示</b><span id="factM">間引き表示</span></div>
+</div>
+
+<button class="btn" id="btnCopy" type="button">この設定でOK ― 設定値をコピー</button>
+<p id="copyNote" role="status"></p>
+</section>
+
+<div class="views" role="group" aria-label="視点">
+<button type="button" data-view="iso" aria-pressed="true">アイソメ</button>
+<button type="button" data-view="front" aria-pressed="false">正面</button>
+<button type="button" data-view="low" aria-pressed="false">見上げ</button>
+</div>
+
+<div class="scalebox" aria-hidden="true">
+<b id="scaleLabel">50 m</b>（平面は実寸スケール）<div class="scalebar" id="scaleBar" style="width:120px"></div>
+</div>
+
+<div class="draghint">ドラッグ：回転 ／ ホイール・ピンチ：拡大縮小</div>
+
+<script src="assets/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ============ real building models (from the game's building-model JSON) ============
+ax/ay: all axis offsets (m). sx/sy: structural axis indices (columns & girders only there).
+cells: per-floor footprint row-runs [xFromIdx,xToIdx,yFromIdx,yToIdx] in axis indices.
+cores: [xFromIdx,xToIdx,yFromIdx,yToIdx,floors]. col: column size (m), gir: girder depth (m). */
+var BUILDINGS = {"park":{"name":"パークサイドモール","spec":"S造3階・延床59,584㎡","floors":[5.8,5.8,5.8],"ax":[0.0,9.8,19.6,29.4,39.2,49.0,58.8,68.6,78.4,88.2,98.0,107.8,117.6,127.4,137.2,147.0,156.8,166.6,176.4,186.2,196.0,205.8,215.6],"ay":[0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0,100.0],"sx":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],"sy":[0,1,2,3,4,5,6,7,8,9,10],"cells":{"0":[[0,20,0,1],[0,20,1,2],[0,21,2,3],[0,21,3,4],[1,21,4,5],[1,21,5,6],[1,22,6,7],[1,22,7,8],[2,22,8,9],[2,22,9,10]],"1":[[0,20,0,1],[0,20,1,2],[0,21,2,3],[0,21,3,4],[1,21,4,5],[1,21,5,6],[1,22,6,7],[1,22,7,8],[2,22,8,9],[2,22,9,10]],"2":[[0,19,0,1],[0,20,1,2],[0,21,2,3],[0,21,3,4],[1,21,4,5],[1,21,5,6],[1,22,6,7],[1,22,7,8],[2,21,8,9],[2,20,9,10]]},"cores":[[2,3,2,4,3],[7,8,2,4,3],[12,13,2,4,3],[17,18,2,4,3],[3,4,6,8,3],[8,9,6,8,3],[13,14,6,8,3],[18,19,6,8,3],[4,5,9,10,3],[9,13,4,6,2],[9,13,4,6,3]],"exc":[[10,5],[11,5],[12,5]],"void":[93.1,122.5,45.0,55.0],"col":0.4,"gir":0.55},"soga":{"name":"シーサイドモール（アリオ蘇我モデル）","spec":"S造2階・延床約60,700㎡","floors":[5.4,5.4],"ax":[0.0,7.0,14.0,21.0,28.0,35.0,42.0,49.0,56.0,63.0,70.0,77.0,84.0,91.0,98.0,105.0,112.0,119.0,126.0,133.0,140.0,147.0,154.0,161.0,168.0,175.0,182.0,189.0,196.0,203.0,210.0,217.0,224.0,231.0,238.0,245.0,252.0,259.0,266.0,273.0,280.0,287.0,294.0,301.0,308.0,315.0,322.0,329.0,336.0,343.0,350.0,357.0,364.0],"ay":[0.0,6.5,13.0,19.5,26.0,32.5,39.0,45.5,52.0,58.5,65.0,71.5,78.0,84.5,91.0,97.5,104.0],"sx":[0,1,3,4,5,6,8,9,10,12,13,14,15,17,18,19,21,22,23,24,26,27,28,30,31,32,33,35,36,37,39,40,41,42,44,45,46,48,49,50,51,52],"sy":[0,1,3,4,6,7,8,10,11,12,14,15,16],"cells":{"0":[[0,8,0,1],[23,52,0,1],[0,50,1,2],[0,50,2,3],[0,50,3,4],[0,50,4,5],[0,50,5,6],[0,50,6,7],[0,50,7,8],[0,50,8,9],[0,50,9,10],[0,50,10,11],[0,32,11,12],[1,22,12,13],[23,26,12,13],[1,21,13,14],[23,26,13,14],[1,18,14,15],[1,17,15,16]],"1":[[0,8,0,1],[23,52,0,1],[0,50,1,2],[0,50,2,3],[0,50,3,4],[0,50,4,5],[0,50,5,6],[0,50,6,7],[0,50,7,8],[0,50,8,9],[0,50,9,10],[0,50,10,11],[0,32,11,12],[1,22,12,13],[23,26,12,13],[1,21,13,14],[23,26,13,14],[1,18,14,15],[1,17,15,16]]},"cores":[[2,4,5,7,2],[19,21,8,10,2],[28,30,8,10,2],[40,42,8,10,2],[48,50,8,10,2],[19,21,3,5,2],[28,30,3,5,2],[40,42,3,5,2],[48,50,3,5,2],[2,4,0,2,2],[2,4,8,10,2],[2,4,13,15,2],[7,9,4,6,2],[7,9,8,10,2],[12,14,4,6,2],[12,14,8,10,2],[23,25,8,10,2],[23,25,3,5,2],[34,36,8,10,2],[34,36,3,5,2],[35,40,6,8,1]],"exc":[[36,7],[37,7],[38,7],[39,7]],"void":[248.5,276.5,42.2,48.8],"col":0.4,"gir":0.8},"kame":{"name":"ガーデンモール（アリオ亀有モデル）","spec":"S造3階・延床約94,600㎡","floors":[5.4,5.4,5.4],"ax":[0.0,6.0,12.0,18.0,24.0,30.0,36.0,42.0,48.0,54.0,60.0,66.0,72.0,78.0,84.0,90.0,96.0,102.0,108.0,114.0,120.0,126.0,132.0,138.0,144.0,150.0,156.0,162.0,168.0,174.0,180.0,186.0,192.0,198.0,204.0,210.0,216.0,222.0,228.0,234.0,240.0,246.0,252.0,258.0,264.0,270.0,276.0,282.0,288.0,294.0,300.0],"ay":[0.0,6.0,12.0,18.0,24.0,30.0,36.0,42.0,48.0,54.0,60.0,66.0,72.0,78.0,84.0,90.0,96.0,102.0,108.0,114.0,120.0,126.0,132.0,138.0,144.0,150.0,156.0],"sx":[0,1,3,4,6,7,9,10,12,13,15,16,18,19,21,22,24,25,27,28,30,31,33,34,36,37,39,40,42,43,45,46,48,49,50],"sy":[0,1,3,4,6,7,9,10,12,13,15,16,18,19,21,22,24,25,26],"cells":{"0":[[39,40,0,1],[33,40,1,2],[33,41,2,3],[33,41,3,4],[33,41,4,5],[32,42,5,6],[25,29,6,7],[31,42,6,7],[24,42,7,8],[10,12,8,9],[24,43,8,9],[4,6,9,10],[9,13,9,10],[20,45,9,10],[3,48,10,11],[3,49,11,12],[2,49,12,13],[1,49,13,14],[1,49,14,15],[0,49,15,16],[0,49,16,17],[0,49,17,18],[0,49,18,19],[0,48,19,20],[0,48,20,21],[0,48,21,22],[0,48,22,23],[0,47,23,24],[5,12,24,25],[14,18,24,25],[23,24,24,25],[25,27,24,25],[28,45,24,25],[26,27,25,26],[36,42,25,26]],"1":[[39,40,0,1],[33,40,1,2],[33,41,2,3],[33,41,3,4],[33,41,4,5],[32,42,5,6],[25,29,6,7],[31,42,6,7],[24,42,7,8],[10,12,8,9],[24,43,8,9],[4,6,9,10],[9,13,9,10],[20,45,9,10],[3,48,10,11],[3,49,11,12],[2,49,12,13],[1,49,13,14],[1,49,14,15],[0,49,15,16],[0,49,16,17],[0,49,17,18],[0,49,18,19],[0,48,19,20],[0,48,20,21],[0,48,21,22],[0,48,22,23],[0,47,23,24],[5,12,24,25],[14,18,24,25],[23,24,24,25],[25,27,24,25],[28,45,24,25],[26,27,25,26],[36,42,25,26]],"2":[[39,40,0,1],[33,40,1,2],[33,41,2,3],[33,41,3,4],[33,41,4,5],[32,42,5,6],[25,29,6,7],[31,42,6,7],[24,42,7,8],[10,12,8,9],[24,43,8,9],[4,6,9,10],[9,13,9,10],[20,45,9,10],[3,48,10,11],[3,49,11,12],[2,49,12,13],[1,49,13,14],[1,49,14,15],[0,49,15,16],[0,49,16,17],[0,49,17,18],[0,49,18,19],[0,48,19,20],[0,48,20,21],[0,48,21,22],[0,48,22,23],[0,47,23,24],[5,12,24,25],[14,18,24,25],[23,24,24,25],[25,27,24,25],[28,45,24,25],[26,27,25,26],[36,42,25,26]]},"cores":[[45,47,15,17,3],[1,3,18,20,3],[8,10,18,20,3],[23,25,18,20,3],[35,37,18,20,3],[1,3,13,15,3],[8,10,13,15,3],[23,25,13,15,3],[35,37,13,15,3],[33,35,8,10,3],[33,35,23,25,3],[38,40,1,3,3],[38,40,8,10,3],[38,40,23,25,3],[43,45,14,16,3],[43,45,18,20,3],[43,45,23,25,3],[15,17,18,20,3],[15,17,13,15,3],[29,31,18,20,3],[29,31,13,15,3],[21,27,16,18,2]],"exc":[[1,20],[1,21],[1,22],[1,23],[2,21],[2,22],[2,23],[3,20],[3,21],[3,22],[3,23],[4,19],[4,20],[4,21],[4,22],[4,23],[5,19],[5,20],[5,21],[5,22],[5,23],[5,24],[6,19],[6,20],[6,21],[6,22],[6,23],[6,24],[7,19],[7,20],[7,21],[7,22],[7,23],[7,24],[8,20],[8,21],[8,22],[8,23],[8,24],[9,21],[9,22],[9,23],[9,24],[10,24],[22,17],[23,17],[24,17],[25,17],[26,17]],"void":[129.0,159.0,99.0,105.0],"col":0.4,"gir":0.7}};
+
+/* ============ parameters ============ */
+var CONV = { height:1.0, person:1.7, machine:1.0, mat:1.0, col:1.0, slab:1.0};
+var TOON = { height:2.6, person:3.0, machine:1.13, mat:1.0, col:1.0, slab:1.0};
+var P = { height:TOON.height, person:TOON.person, machine:TOON.machine, mat:1.0, col:1.0, slab:1.0};
+var target = { height:TOON.height, person:TOON.person, machine:TOON.machine, mat:1.0, col:1.0, slab:1.0};
+var thin = true;
+var TEX = { shade:"standard", outline:"standard", palette:"standard"};
+var SHADE_LABEL = { flat:"フラット", standard:"標準", strong:"陰影強め"};
+var OUTLINE_LABEL = { off:"なし", thin:"細い", standard:"標準", thick:"太い"};
+var PALETTE_LABEL = { standard:"標準", vivid:"ビビッド", soft:"ソフト"};
+var PROG = 0.58, PROG_T = 0.58; /* construction progress 0..1 */
+
+/* phases: earthworks / foundation / frame / exterior / finish */
+var PH = { earth:[0, 0.10], found:[0.10, 0.20], frame:[0.20, 0.75], ext:[0.75, 0.90], fin:[0.90, 1.0]};
+
+/* ============ renderer / scene ============ */
+var stage = document.getElementById("stage");
+var renderer = new THREE.WebGLRenderer({ antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+stage.appendChild(renderer.domElement);
+
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcfe0ea);
+
+var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 2000);
+var camTarget = new THREE.Vector3(0, 8, 0);
+var az = 0.72, el = 0.52, viewSize = 280, fitView = 280;
+var viewGoal = { az:0.72, el:0.52, viewSize:280};
+
+function makeGrad(arr){
+var t = new THREE.DataTexture(new Uint8Array(arr), arr.length, 1, THREE.RedFormat);
+t.minFilter = THREE.NearestFilter;
+t.magFilter = THREE.NearestFilter;
+t.needsUpdate = true;
+return t;
+}
+var gradTexFlat = makeGrad([215, 228, 242, 255]);
+var gradTexStd = makeGrad([90, 150, 205, 255]);
+var gradTexStrong = makeGrad([30, 80, 165, 255]);
+var gradTex = gradTexStd;
+
+var matRegistry = [];
+function mat(color){
+var m = new THREE.MeshToonMaterial({ color:color, gradientMap:gradTex});
+matRegistry.push({ mat:m, base:new THREE.Color(color)});
+return m;
+}
+var OUTLINE = 0x2b3640;
+var hullMat = new THREE.MeshBasicMaterial({ color:OUTLINE, side:THREE.BackSide});
+var BOXG = new THREE.BoxGeometry(1, 1, 1);
+
+/* small one-off boxes (site, machines, materials) with edge lines */
+var outlineLines = [];
+function box(w, h, d, color, x, y, z, parent, opts){
+opts = opts || {};
+var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), opts.mat || mat(color));
+m.position.set(x, y, z);
+if (opts.ry) m.rotation.y = opts.ry;
+if (opts.rz) m.rotation.z = opts.rz;
+if (opts.rx) m.rotation.x = opts.rx;
+m.castShadow = opts.shadow!== false;
+m.receiveShadow = true;
+(parent || scene).add(m);
+if (opts.outline!== false){
+var e = new THREE.LineSegments(
+new THREE.EdgesGeometry(m.geometry, 20),
+new THREE.LineBasicMaterial({ color:OUTLINE, transparent:true, opacity:0.45})
+);
+m.add(e);
+outlineLines.push(e);
+}
+return m;
+}
+function cyl(rt, rb, h, color, x, y, z, parent, opts){
+opts = opts || {};
+var m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, opts.seg || 14), opts.mat || mat(color));
+m.position.set(x, y, z);
+if (opts.rz) m.rotation.z = opts.rz;
+if (opts.rx) m.rotation.x = opts.rx;
+if (opts.ry) m.rotation.y = opts.ry;
+m.castShadow = opts.shadow!== false;
+m.receiveShadow = true;
+(parent || scene).add(m);
+return m;
+}
+function sph(r, color, x, y, z, parent, opts){
+opts = opts || {};
+var m = new THREE.Mesh(new THREE.SphereGeometry(r, opts.seg || 16, 12), opts.mat || mat(color));
+m.position.set(x, y, z);
+if (opts.sy) m.scale.y = opts.sy;
+m.castShadow = opts.shadow!== false;
+m.receiveShadow = true;
+(parent || scene).add(m);
+return m;
+}
+
+var hemi = new THREE.HemisphereLight(0xffffff, 0x8a97a0, 0.95);
+scene.add(hemi);
+var sun = new THREE.DirectionalLight(0xfff4e0, 1.55);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.bias = -0.0006;
+scene.add(sun);
+var sunTarget = new THREE.Object3D(); scene.add(sunTarget); sun.target = sunTarget;
+
+/* ============ instanced member categories ============
+Items are sorted by birth (progress at which they appear); the renderer
+shows a prefix via InstancedMesh.count. A BackSide hull twin gives the
+toon outline. Scaffold additionally has deaths (removal near completion). */
+var cats = [];
+function makeCat(items, material, opts){
+opts = opts || {};
+items.sort(function(a, b){ return a.b - b.b;});
+var n = items.length;
+var mesh = new THREE.InstancedMesh(BOXG, material, Math.max(n, 1));
+mesh.frustumCulled = false;
+mesh.castShadow = opts.shadow!== false;
+mesh.receiveShadow = true;
+mesh.count = 0;
+var hull = null;
+if (opts.hull){
+hull = new THREE.InstancedMesh(BOXG, hullMat, Math.max(n, 1));
+hull.frustumCulled = false;
+hull.count = 0;
+}
+var cat = { items:items, mesh:mesh, hull:hull, births:null, deaths:null};
+cat.births = items.map(function(it){ return it.b;});
+if (items.length && items[0].d!== undefined) cat.deaths = items.map(function(it){ return it.d;});
+cats.push(cat);
+fillCatMatrices(cat, 1.07);
+return cat;
+}
+var _m4 = new THREE.Matrix4(), _q = new THREE.Quaternion(), _v = new THREE.Vector3(), _s = new THREE.Vector3();
+function fillCatMatrices(cat, hullScale){
+var i, it;
+for (i = 0; i < cat.items.length; i++){
+it = cat.items[i];
+_v.set(it.p[0], it.p[1], it.p[2]); _s.set(it.s[0], it.s[1], it.s[2]);
+_m4.compose(_v, _q, _s);
+cat.mesh.setMatrixAt(i, _m4);
+if (cat.hull){
+_s.set(it.s[0] * hullScale, it.s[1] * (1 + (hullScale - 1) * 0.4), it.s[2] * hullScale);
+_m4.compose(_v, _q, _s);
+cat.hull.setMatrixAt(i, _m4);
+}
+}
+cat.mesh.instanceMatrix.needsUpdate = true;
+if (cat.hull) cat.hull.instanceMatrix.needsUpdate = true;
+}
+function upperBound(arr, v){
+var lo = 0, hi = arr.length;
+while (lo < hi){ var mid = (lo + hi) >> 1; if (arr[mid] <= v) lo = mid + 1; else hi = mid;}
+return lo;
+}
+function applyCatCounts(){
+cats.forEach(function(cat){
+var born = upperBound(cat.births, PROG);
+var count = born;
+if (cat.deaths){
+/* deaths were assigned in reverse item order: removal eats from the end */
+var dead = 0, i;
+for (i = cat.items.length - 1; i >= 0; i--){
+if (cat.deaths[i] <= PROG) dead++; else break;
+}
+count = Math.max(0, Math.min(born, cat.items.length - dead));
+}
+cat.mesh.count = count;
+if (cat.hull) cat.hull.count = count;
+});
+}
+
+/* ============ per-building scene construction ============ */
+var world = null; /* whole site group (rebuilt per building) */
+var bldg = null; /* Y-scaled building group */
+var curKey = "park", B = null;
+var W = 0, Dp = 0, REAL_H = 0, floorTops = [];
+var totals = { cols:0, beams:0};
+var soloMembers = []; /* {obj, b, d} non-instanced progress members */
+var rebarSets = { full:[], thin:[]}; /* {mesh, f, zone} */
+var pitGroup = null, pitFloorMeshes = [], pitWallMeshes = [];
+var stockPiles = []; /* {obj, th} material piles with stock thresholds */
+var craneUnit = null, excavUnit = null, mixerUnit = null, dumpUnit = null;
+var hookLoad = null; /* crane's carried material (follows the material scale) */
+var memberCats = { col:null, slab:null, roof:null}; /* categories the thickness sliders rescale */
+var frameWorkers = [], groundWorkers = [];
+var craneSwing = null, hookGroup = null, excavArm = null, mixerDrum = null;
+
+function zoneOf(x){ return x > W * 2 / 3? 0: (x > W / 3? 1: 2);} /* 0=east 1=center 2=west */
+
+function buildBuilding(key){
+if (world){ scene.remove(world);}
+cats = []; soloMembers = []; rebarSets = { full:[], thin:[]};
+stockPiles = []; frameWorkers = []; groundWorkers = [];
+pitFloorMeshes = []; pitWallMeshes = [];
+outlineLines = outlineLines.filter(function(){ return false;});
+B = BUILDINGS[key]; curKey = key;
+var ax = B.ax, ay = B.ay, sx = B.sx, sy = B.sy;
+W = ax[ax.length - 1]; Dp = ay[ay.length - 1];
+floorTops = []; REAL_H = 0;
+B.floors.forEach(function(h){ REAL_H += h; floorTops.push(REAL_H);});
+var nF = B.floors.length;
+function X(i){ return ax[i] - W / 2;} /* model x -> world x */
+function Z(j){ return Dp / 2 - ay[j];} /* model y (north+) -> world z */
+function cellSet(f){
+var s = {};
+B.cells[String(f)].forEach(function(r){
+for (var i = r[0]; i < r[1]; i++) for (var j = r[2]; j < r[3]; j++) s[i + "," + j] = true;
+});
+return s;
+}
+function has(s, i, j){ return!!s[i + "," + j];}
+
+world = new THREE.Group(); scene.add(world);
+bldg = new THREE.Group(); world.add(bldg);
+
+/* ---------- site ground / fence / road ---------- */
+var siteW = W + 84, siteD = Dp + 68;
+var pitX0 = -W / 2 - 2, pitX1 = W / 2 + 2, pitZ0 = -Dp / 2 - 2, pitZ1 = Dp / 2 + 2;
+box(siteW, 1.2, siteD, 0xb3a78f, 0, -3.31, 0, world, { outline:false, shadow:false });
+(function(){
+var gm = mat(0xc6bba3), gh = 2.87, gy = -1.275;
+function strip(w, d, x, z){ var m = new THREE.Mesh(new THREE.BoxGeometry(w, gh, d), gm); m.position.set(x, gy, z); m.receiveShadow = true; world.add(m); }
+strip(siteW, siteD / 2 - pitZ1, 0, (pitZ1 + siteD / 2) / 2);
+strip(siteW, siteD / 2 + pitZ0, 0, (pitZ0 - siteD / 2) / 2);
+strip(pitX0 + siteW / 2, pitZ1 - pitZ0, (-siteW / 2 + pitX0) / 2, 0);
+strip(siteW / 2 - pitX1, pitZ1 - pitZ0, (pitX1 + siteW / 2) / 2, 0);
+var top = mat(0xccc2ab);
+function cap(w, d, x, z){ var m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.1, d), top); m.position.set(x, 0.17, z); m.receiveShadow = true; world.add(m); }
+cap(siteW, siteD / 2 - pitZ1, 0, (pitZ1 + siteD / 2) / 2);
+cap(siteW, siteD / 2 + pitZ0, 0, (pitZ0 - siteD / 2) / 2);
+cap(pitX0 + siteW / 2, pitZ1 - pitZ0, (-siteW / 2 + pitX0) / 2, 0);
+cap(siteW / 2 - pitX1, pitZ1 - pitZ0, (pitX1 + siteW / 2) / 2, 0);
+})();
+var backfill = box(pitX1 - pitX0, 0.24, pitZ1 - pitZ0, 0xc6bba3, 0, 0.02, 0, world, { outline:false, shadow:false });
+soloMembers.push({ obj:backfill, b:0.198, d:Infinity });
+var gnd = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), mat(0xa9c09c));
+gnd.rotation.x = -Math.PI / 2; gnd.position.y = -1.28; gnd.receiveShadow = true; world.add(gnd);
+box(siteW + 30, 0.14, 9, 0x707b81, 0, 0.06, siteD / 2 + 8, world, { outline:false, shadow:false}); /* road south */
+(function(){ /* footprint guide frame: proves the plane never changes */
+var g = new THREE.Group(); world.add(g);
+var c = 0xd96c33, t = 0.7, y = 0.26;
+box(W + 2.4, 0.18, t, c, 0, y, -Dp / 2 - 1.2, g, { outline:false, shadow:false});
+box(W + 2.4, 0.18, t, c, 0, y, Dp / 2 + 1.2, g, { outline:false, shadow:false});
+box(t, 0.18, Dp + 2.4, c, -W / 2 - 1.2, y, 0, g, { outline:false, shadow:false});
+box(t, 0.18, Dp + 2.4, c, W / 2 + 1.2, y, 0, g, { outline:false, shadow:false});
+})();
+(function(){ /* fence: far + sides solid, near (south) translucent */
+var g = new THREE.Group(); world.add(g);
+var fw = siteW - 4, fd = siteD - 4;
+box(fw, 3, 0.25, 0xe8ecec, 0, 1.5, -fd / 2, g);
+box(0.25, 3, fd, 0xe8ecec, -fw / 2, 1.5, 0, g);
+box(0.25, 3, fd, 0xe8ecec, fw / 2, 1.5, 0, g);
+var nearMat = new THREE.MeshToonMaterial({ color:0xe8ecec, gradientMap:gradTex, transparent:true, opacity:0.20});
+matRegistry.push({ mat:nearMat, base:new THREE.Color(0xe8ecec)});
+var near = box(fw, 3, 0.25, 0, 0, 1.5, fd / 2, g, { mat:nearMat, outline:false, shadow:false});
+near.castShadow = false;
+box(11, 3.4, 0.4, 0x39505e, W * 0.22, 1.7, fd / 2, g); /* gate */
+})();
+
+/* ---------- excavation pit (earthworks) ---------- */
+pitGroup = new THREE.Group(); world.add(pitGroup);
+var soilMat = mat(0x9a7d5c), soilDark = mat(0x8a6f4f);
+var pitFloor = box(pitX1 - pitX0, 0.3, pitZ1 - pitZ0, 0, 0, -2.3, 0, pitGroup, { mat:soilDark, outline:false, shadow:false });
+pitFloorMeshes.push(pitFloor);
+[[pitX1 - pitX0, 0, pitZ0 + 0.25], [pitX1 - pitX0, 0, pitZ1 - 0.25]].forEach(function(w){
+var m = box(w[0], 2.4, 0.5, 0, w[1], -1.2, w[2], pitGroup, { mat:soilMat, outline:false, shadow:false });
+pitWallMeshes.push(m);
+});
+[[pitZ1 - pitZ0, pitX0 + 0.25], [pitZ1 - pitZ0, pitX1 - 0.25]].forEach(function(w){
+var m = box(0.5, 2.4, w[0], 0, w[1], -1.2, 0, pitGroup, { mat:soilMat, outline:false, shadow:false });
+pitWallMeshes.push(m);
+});
+/* spoil heap */
+var heap = new THREE.Mesh(new THREE.ConeGeometry(4.2, 3, 18), mat(0x8a6f4f));
+heap.position.set(-W / 2 - 16, 1.4, Dp * 0.18); heap.castShadow = true; heap.receiveShadow = true;
+world.add(heap); soloMembers.push({ obj:heap, b:0.005, d:0.24});
+
+/* ---------- member item collection ---------- */
+var foundItems = [], colItems = [], beamItems = [], slabItems = [], roofItems = [];
+var wallItemsA = [], wallItemsB = [], scafItems = [], parapetItems = [], footItems = [], fbeamItems = [];
+totals = { cols:0, beams:0};
+var fSpanF = (PH.frame[1] - PH.frame[0]) / nF;
+var eSpanF = (PH.ext[1] - PH.ext[0]) / nF;
+
+for (var f = 0; f < nF; f++){
+var cs = cellSet(f);
+var yBase = f === 0? 0: floorTops[f - 1];
+var yTop = floorTops[f], fh = B.floors[f];
+var frameList = []; /* {kind, zone, xc, make} sorted later */
+var si, sj, i2, j2;
+/* columns on structural intersections touched by this floor's footprint */
+var colPts = {};
+sx.forEach(function(ii){ sy.forEach(function(jj){
+if (has(cs, ii - 1, jj - 1) || has(cs, ii, jj - 1) || has(cs, ii - 1, jj) || has(cs, ii, jj)) colPts[ii + "," + jj] = [ii, jj];
+});});
+for (var ck in colPts){
+var cp = colPts[ck];
+frameList.push({ kind:0, zone:zoneOf(ax[cp[0]]), xc:ax[cp[0]],
+p:[X(cp[0]), yBase + fh / 2, Z(cp[1])], s:[B.col, fh, B.col]});
+totals.cols++;
+if (f === 0) footItems.push({ zone:zoneOf(ax[cp[0]]), xc:ax[cp[0]], kind:0,
+p:[X(cp[0]), -0.55, Z(cp[1])], s:[2.4, 1.1, 2.4]});
+}
+/* girders along structural axes */
+function beamRun(axisIsX, fixedIdx, from, to){
+frameList.push({ kind:1, zone:zoneOf((from + to) / 2), xc:(from + to) / 2,
+p: axisIsX? [(from + to) / 2 - W / 2, yTop - B.gir / 2, Z(fixedIdx)]
+: [X(fixedIdx), yTop - B.gir / 2, Dp / 2 - (from + to) / 2],
+s: axisIsX? [to - from, B.gir, B.col * 0.8]: [B.col * 0.8, B.gir, to - from]});
+totals.beams++;
+}
+/* girders: one item per span between adjacent structural intersections,
+so drawn and counted beams match the real member count of the source
+model (never merged into long runs) */
+sy.forEach(function(jj){
+for (si = 0; si < sx.length - 1; si++){
+var ok = (has(cs, sx[si], jj - 1) || has(cs, sx[si], jj)) && colPts[sx[si] + "," + jj] && colPts[sx[si + 1] + "," + jj];
+if (ok) beamRun(true, jj, ax[sx[si]], ax[sx[si + 1]]);
+}
+});
+sx.forEach(function(ii){
+for (sj = 0; sj < sy.length - 1; sj++){
+var ok = (has(cs, ii - 1, sy[sj]) || has(cs, ii, sy[sj])) && colPts[ii + "," + sy[sj]] && colPts[ii + "," + sy[sj + 1]];
+if (ok) beamRun(false, ii, ay[sy[sj]], ay[sy[sj + 1]]);
+}
+});
+/* foundation beams (floor 0 only) reuse the same spans at ground level */
+if (f === 0){
+frameList.forEach(function(it){
+if (it.kind!== 1) return;
+fbeamItems.push({ zone:it.zone, xc:it.xc, kind:1,
+p:[it.p[0], -0.35, it.p[2]], s:[it.s[0], 0.9, Math.max(it.s[2], 0.7)]});
+});
+}
+/* slabs as footprint row-runs */
+B.cells[String(f)].forEach(function(r){
+var w = ax[r[1]] - ax[r[0]], d = ay[r[3]] - ay[r[2]];
+var cxm = (ax[r[0]] + ax[r[1]]) / 2;
+frameList.push({ kind:2, zone:zoneOf(cxm), xc:cxm,
+p:[cxm - W / 2, yTop + 0.06, Dp / 2 - (ay[r[2]] + ay[r[3]]) / 2], s:[w - 0.25, 0.32, d - 0.25], roof:(f === nF - 1)});
+});
+/* assign frame births: zone (E->C->W), then kind (col->beam->slab), then east->west */
+frameList.sort(function(a, b){ return (a.zone - b.zone) || (a.kind - b.kind) || (b.xc - a.xc);});
+var fStart = PH.frame[0] + f * fSpanF;
+frameList.forEach(function(it, idx){
+var birth = fStart + fSpanF * ((idx + 0.5) / frameList.length);
+var item = { p:it.p, s:it.s, b:birth, bs:it.s.slice(), bp:it.p.slice()};
+if (it.kind === 0) colItems.push(item);
+else if (it.kind === 1) beamItems.push(item);
+else if (it.roof) roofItems.push(item);
+else slabItems.push(item);
+});
+
+/* exterior: scaffold + walls on exposed edges, per floor */
+var extList = [];
+var segIdx = 0;
+for (var key3 in cs){
+var ij2 = key3.split(","), ci = +ij2[0], cj = +ij2[1];
+var mk = function(cxw, czw, len, isX, outX, outZ){
+extList.push({ kind:1, zone:zoneOf(cxw + W / 2), xc:cxw + W / 2, alt:(segIdx++) % 2,
+p:[cxw, yBase + fh * 0.46, czw], s: isX? [len, fh * 0.92, 0.24]: [0.24, fh * 0.92, len]});
+/* scaffold: posts + rails just outside this edge */
+var px = cxw + outX * 1.35, pz = czw + outZ * 1.35;
+extList.push({ kind:0, zone:zoneOf(cxw + W / 2), xc:cxw + W / 2, scaf:true,
+p:[px, yBase + fh / 2, pz], s: isX? [len, fh, len? 0.16: 0.16]: [0.16, fh, len], postAt:[cxw + outX * 1.35, czw + outZ * 1.35]});
+};
+if (!has(cs, ci, cj - 1)) mk((ax[ci] + ax[ci + 1]) / 2 - W / 2, Dp / 2 - ay[cj] + 0.12, ax[ci + 1] - ax[ci], true, 0, 1);
+if (!has(cs, ci, cj + 1)) mk((ax[ci] + ax[ci + 1]) / 2 - W / 2, Dp / 2 - ay[cj + 1] - 0.12, ax[ci + 1] - ax[ci], true, 0, -1);
+if (!has(cs, ci - 1, cj)) mk(ax[ci] - W / 2 - 0.12, Dp / 2 - (ay[cj] + ay[cj + 1]) / 2, ay[cj + 1] - ay[cj], false, -1, 0);
+if (!has(cs, ci + 1, cj)) mk(ax[ci + 1] - W / 2 + 0.12, Dp / 2 - (ay[cj] + ay[cj + 1]) / 2, ay[cj + 1] - ay[cj], false, 1, 0);
+}
+extList.sort(function(a, b){ return (a.zone - b.zone) || (a.kind - b.kind) || (b.xc - a.xc);});
+var eStart = PH.ext[0] + f * eSpanF;
+extList.forEach(function(it, idx){
+var birth = eStart + eSpanF * ((idx + 0.5) / extList.length);
+if (it.scaf){
+/* removal near completion, top floor first = reverse creation order overall */
+scafItems.push({ p:it.p, s:[0.18, it.s[1], 0.18], b:birth, d:0, px:it.p[0], pz:it.p[2],
+rail1:{ p:[it.p[0], 0, it.p[2]], s:it.s}});
+} else {
+(it.alt? wallItemsB: wallItemsA).push({ p:it.p, s:it.s, b:birth});
+}
+});
+/* parapet on the roof outline */
+if (f === nF - 1){
+var pIdx = 0;
+for (var key4 in cs){
+var ij3 = key4.split(","), pi = +ij3[0], pj = +ij3[1];
+var pmk = function(cxw, czw, len, isX){
+parapetItems.push({ p:[cxw, yTop + 0.55, czw], s: isX? [len, 1.1, 0.22]: [0.22, 1.1, len],
+b: PH.fin[0] + 0.05 * ((pIdx++ % 40) / 40) + 0.03 * Math.random()});
+};
+if (!has(cs, pi, pj - 1)) pmk((ax[pi] + ax[pi + 1]) / 2 - W / 2, Dp / 2 - ay[pj] + 0.11, ax[pi + 1] - ax[pi], true);
+if (!has(cs, pi, pj + 1)) pmk((ax[pi] + ax[pi + 1]) / 2 - W / 2, Dp / 2 - ay[pj + 1] - 0.11, ax[pi + 1] - ax[pi], true);
+if (!has(cs, pi - 1, pj)) pmk(ax[pi] - W / 2 - 0.11, Dp / 2 - (ay[pj] + ay[pj + 1]) / 2, ay[pj + 1] - ay[pj], false);
+if (!has(cs, pi + 1, pj)) pmk(ax[pi + 1] - W / 2 + 0.11, Dp / 2 - (ay[pj] + ay[pj + 1]) / 2, ay[pj + 1] - ay[pj], false);
+}
+}
+}
+/* scaffold rails need full-length thin boxes, posts are separate items:
+rebuild scaffold items as posts at segment ends + rails per segment */
+var scafFinal = [];
+(function(){
+/* scafItems currently holds one entry per wall segment (post placeholder + rail info).
+Expand: rail boxes keep segment length; posts are thin tall boxes at the same spot. */
+scafItems.forEach(function(it){
+var isX = it.s[0] > it.s[2], len = Math.max(it.s[0], it.s[2]), fh = it.s[1];
+var railS = isX ? [len, 0.14, 0.14] : [0.14, 0.14, len];
+scafFinal.push({ p:[it.p[0], it.p[1] + fh * 0.30, it.p[2]], s:railS, b:it.b, d:0});
+scafFinal.push({ p:[it.p[0], it.p[1] - fh * 0.18, it.p[2]], s:railS, b:it.b, d:0});
+scafFinal.push({ p:it.p, s:[0.18, fh, 0.18], b:it.b, d:0});
+});
+/* deaths: top floors are later in creation; removal eats from the end of the
+birth-sorted array, so assign deaths in reverse index order */
+var n = scafFinal.length;
+scafFinal.forEach(function(it, idx){ it.d = 0.945 + 0.05 * ((n - 1 - idx) / Math.max(n - 1, 1));});
+})();
+
+/* foundation births */
+var allFound = footItems.concat(fbeamItems);
+B.cells["0"].forEach(function(r){
+var w = ax[r[1]] - ax[r[0]], d = ay[r[3]] - ay[r[2]];
+var cxm = (ax[r[0]] + ax[r[1]]) / 2;
+allFound.push({ zone:zoneOf(cxm), xc:cxm, kind:2,
+p:[cxm - W / 2, -0.12, Dp / 2 - (ay[r[2]] + ay[r[3]]) / 2], s:[w - 0.2, 0.3, d - 0.2]});
+});
+allFound.sort(function(a, b){ return (a.zone - b.zone) || (a.kind - b.kind) || (b.xc - a.xc);});
+var footArr = [], fbeamArr = [], gndSlabArr = [];
+allFound.forEach(function(it, idx){
+var item = { p:it.p, s:it.s, b: PH.found[0] + (PH.found[1] - PH.found[0]) * ((idx + 0.5) / allFound.length)};
+if (it.kind === 0) footArr.push(item); else if (it.kind === 1) fbeamArr.push(item); else gndSlabArr.push(item);
+});
+
+/* cores (stairs / shafts): per-floor segments, born with the frame */
+var coreMat = mat(0xdfd9cb);
+B.cores.forEach(function(c){
+var cxw = (ax[c[0]] + ax[c[1]]) / 2 - W / 2, czw = Dp / 2 - (ay[c[2]] + ay[c[3]]) / 2;
+var w = ax[c[1]] - ax[c[0]], d = ay[c[3]] - ay[c[2]];
+var topF = Math.min(c[4], nF);
+for (var cf = 0; cf < topF; cf++){
+var yB = cf === 0? 0: floorTops[cf - 1];
+var m = box(w, B.floors[cf], d, 0, cxw, yB + B.floors[cf] / 2, czw, bldg, { mat:coreMat});
+soloMembers.push({ obj:m, b: PH.frame[0] + cf * fSpanF + fSpanF * 0.15, d:Infinity});
+}
+if (topF === nF){ /* rooftop penthouse on some cores */
+var ph = box(w * 0.8, 2.6, d * 0.8, 0, cxw, REAL_H + 1.3, czw, bldg, { mat:coreMat});
+soloMembers.push({ obj:ph, b:0.93, d:Infinity});
+}
+});
+
+/* ---------- create instanced categories ---------- */
+var colMat = mat(0xe9e5da), beamMat = mat(0xd96c33), slabMat = mat(0xcfccc2), roofMat = mat(0xdcd7c8);
+var wallMatA = mat(0xe3ddcb), wallMatB = mat(0xd8d0ba), scafMat = mat(0x7e8b91);
+var concMat = mat(0xb9b2a4), parMat = mat(0xcfc9ba);
+var catCols = makeCat(colItems, colMat, { hull:true});
+var catBeams = makeCat(beamItems, beamMat, { hull:true});
+var catSlabs = makeCat(slabItems, slabMat, { hull:true});
+var catRoof = makeCat(roofItems, roofMat, { hull:true});
+memberCats = { col:catCols, slab:catSlabs, roof:catRoof};
+lastColApplied = -1; lastSlabApplied = -1; /* force thickness refill for the new building */
+var catWallA = makeCat(wallItemsA, wallMatA, { hull:true});
+var catWallB = makeCat(wallItemsB, wallMatB, { hull:true});
+var catScaf = makeCat(scafFinal, scafMat, { shadow:false});
+var catPar = makeCat(parapetItems, parMat, { hull:true});
+var catFoot = makeCat(footArr, concMat, { hull:true});
+var catFbeam = makeCat(fbeamArr, concMat, { hull:true});
+var catGnd = makeCat(gndSlabArr, concMat, { hull:true});
+[catCols, catBeams, catSlabs, catRoof, catWallA, catWallB, catScaf, catPar, catFoot, catFbeam, catGnd]
+.forEach(function(c){ bldg.add(c.mesh); if (c.hull) bldg.add(c.hull);});
+/* foundation categories live below grade: keep them outside the Y-scaled group */
+[catFoot, catFbeam, catGnd].forEach(function(c){ world.add(c.mesh); if (c.hull) world.add(c.hull);});
+
+buildRebar();
+buildYardAndMachines();
+applyTexture();
+refreshCountsFact();
+}
+
+/* rebar over the floor currently being framed, per zone (east/center/west) */
+function buildRebar(){
+rebarSets = { full:[], thin:[]};
+var ax = B.ax, ay = B.ay, nF = B.floors.length;
+var fSpanF = (PH.frame[1] - PH.frame[0]) / nF;
+var rebarMatF = mat(0x8a4b32);
+[["full", 1.6], ["thin", 16]].forEach(function(cfg){
+var pitch = cfg[1];
+for (var f = 0; f < nF; f++){
+for (var zone = 0; zone < 3; zone++){
+var items = [];
+var zx0 = zone === 0? W * 2 / 3: (zone === 1? W / 3: 0);
+var zx1 = zone === 0? W: (zone === 1? W * 2 / 3: W / 3);
+B.cells[String(f)].forEach(function(r){
+var ix0 = Math.max(ax[r[0]], zx0), ix1 = Math.min(ax[r[1]], zx1);
+if (ix1 - ix0 < 2) return;
+var yTop = floorTops[f] + 0.3;
+var x;
+for (x = ix0 + pitch / 2; x < ix1; x += pitch)
+items.push({ p:[x - W / 2, yTop, Dp / 2 - (ay[r[2]] + ay[r[3]]) / 2], s:[0.09, 0.09, ay[r[3]] - ay[r[2]] - 0.7], b:0});
+var z;
+for (z = ay[r[2]] + pitch / 2; z < ay[r[3]]; z += pitch)
+items.push({ p:[(ix0 + ix1) / 2 - W / 2, yTop + 0.09, Dp / 2 - z], s:[ix1 - ix0 - 0.7, 0.09, 0.09], b:0});
+});
+if (!items.length) continue;
+var mesh = new THREE.InstancedMesh(BOXG, rebarMatF, items.length);
+mesh.frustumCulled = false; mesh.castShadow = false; mesh.receiveShadow = true;
+var cat = { items:items, mesh:mesh, hull:null, births:items.map(function(){ return 0;}), deaths:null};
+fillCatMatrices(cat, 1);
+mesh.count = items.length;
+mesh.visible = false;
+bldg.add(mesh);
+var fStart = PH.frame[0] + f * fSpanF;
+rebarSets[cfg[0]].push({ mesh:mesh,
+from: fStart + fSpanF * (zone / 3) + fSpanF * 0.10,
+to: fStart + fSpanF * ((zone + 1) / 3)});
+}
+}
+});
+}
+
+/* ============ workers ============ */
+function makeWorker(vest, helmet){
+var g = new THREE.Group();
+box(0.16, 0.34, 0.18, 0x3c4a55, -0.11, 0.17, 0, g, { outline:false});
+box(0.16, 0.34, 0.18, 0x3c4a55, 0.11, 0.17, 0, g, { outline:false});
+box(0.52, 0.36, 0.3, vest, 0, 0.52, 0, g);
+box(0.13, 0.3, 0.15, vest, -0.34, 0.55, 0, g, { outline:false});
+box(0.13, 0.3, 0.15, vest, 0.34, 0.55, 0, g, { outline:false});
+sph(0.21, 0xf2c49b, 0, 0.82, 0, g);
+var helm = sph(0.24, helmet, 0, 0.9, 0, g); helm.scale.y = 0.62;
+cyl(0.3, 0.3, 0.05, helmet, 0, 0.86, 0, g, { outline:false, shadow:false});
+return g;
+}
+
+/* ============ yard, machines, people (per building layout) ============ */
+function buildYardAndMachines(){
+var g = new THREE.Group(); world.add(g);
+var yardZ = Dp / 2 + 9;
+var i, j;
+/* rebar bundles on sleepers along the south yard */
+var bundleSpots = Math.max(3, Math.floor(W / 55));
+for (i = 0; i < bundleSpots; i++){
+var bx0 = -W / 2 + 12 + i * (W - 24) / Math.max(bundleSpots - 1, 1);
+var pile = new THREE.Group(); pile.position.set(bx0, 0, yardZ + 6); g.add(pile);
+box(7, 0.35, 0.5, 0x8a6f4f, 0, 0.35, 0, pile, { shadow:false});
+for (j = 0; j < 4; j++) cyl(0.14, 0.14, 7, 0x8a4b32, 0, 0.75 + j * 0.3, 0, pile, { rz:Math.PI/2, shadow:false});
+stockPiles.push({ obj:pile, th: 0.15 + 0.2 * (i % 3)});
+}
+/* steel beam stock */
+var steel = new THREE.Group(); steel.position.set(W * 0.18, 0, yardZ + 6); g.add(steel);
+for (i = 0; i < 3; i++) box(9, 0.7, 0.6, 0xd96c33, 0, 0.6 + i * 0.75, 0, steel);
+box(9, 0.3, 0.9, 0x8a6f4f, 0, 0.2, 0, steel, { shadow:false});
+stockPiles.push({ obj:steel, th:0.3});
+/* panel / board stacks */
+var panels = new THREE.Group(); panels.position.set(W * 0.34, 0, yardZ + 5); g.add(panels);
+for (i = 0; i < 5; i++) box(3.6, 0.22, 1.9, 0xd8cfb4, 0, 0.35 + i * 0.24, 0, panels, { shadow:false});
+for (i = 0; i < 4; i++) box(2.8, 0.22, 1.5, 0xbfd4d9, 4.6, 0.35 + i * 0.24, 0, panels, { shadow:false});
+stockPiles.push({ obj:panels, th:0.55});
+/* scaffold pipe bundle */
+var pipes = new THREE.Group(); pipes.position.set(-W * 0.3, 0, yardZ + 6); g.add(pipes);
+for (i = 0; i < 5; i++) cyl(0.11, 0.11, 6, 0x7e8b91, 0, 0.5 + (i % 2) * 0.25, Math.floor(i / 2) * 0.3, pipes, { rz:Math.PI/2, shadow:false});
+stockPiles.push({ obj:pipes, th:0.65});
+/* cones + site office */
+[[-W / 2 + 6, yardZ + 10], [W * 0.22 - 6, yardZ + 11], [W * 0.22 + 6, yardZ + 11], [W / 2 - 6, yardZ + 10]].forEach(function(p){
+var cone = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.1, 12), mat(0xe2543e));
+cone.position.set(p[0], 0.55, p[1]); cone.castShadow = true; g.add(cone);
+box(1.1, 0.18, 1.1, 0xe2543e, p[0], 0.09, p[1], g, { shadow:false});
+});
+box(11, 3.2, 4, 0xf0ede4, -W / 2 - 18, 1.6, -Dp / 2 + 8, g);
+box(11.4, 0.3, 4.4, 0x39505e, -W / 2 - 18, 3.35, -Dp / 2 + 8, g, { shadow:false});
+box(2.4, 1.2, 0.15, 0x9fc6d4, -W / 2 - 16, 1.9, -Dp / 2 + 10.1, g, { shadow:false});
+
+/* ---- machines ---- */
+var machines = new THREE.Group(); world.add(machines);
+/* rough-terrain crane, south side */
+craneUnit = new THREE.Group(); craneUnit.position.set(W * 0.2, 0, Dp / 2 + 9.5); craneUnit.rotation.y = Math.PI / 2 - 0.35; machines.add(craneUnit);
+(function(){
+var g2 = craneUnit;
+box(6.4, 1.1, 3, 0x39505e, 0, 1.15, 0, g2);
+[[-2.2, -1.7], [2.2, -1.7], [-2.2, 1.7], [2.2, 1.7]].forEach(function(p){
+cyl(0.85, 0.85, 0.6, 0x2b2f33, p[0], 0.85, p[1], g2, { rx:Math.PI/2});
+});
+box(3.6, 1.5, 2.6, 0xf2b705, -0.4, 2.4, 0, g2);
+box(1.5, 1.1, 1.4, 0x9fc6d4, 1.6, 2.5, 0.7, g2);
+craneSwing = new THREE.Group(); craneSwing.position.set(-0.4, 3.1, 0); g2.add(craneSwing);
+var boom = box(16, 0.65, 0.65, 0xf2b705, 5.6, 3.4, 0, craneSwing);
+boom.rotation.z = 0.72;
+hookGroup = new THREE.Group(); hookGroup.position.set(11.2, 0, 0); craneSwing.add(hookGroup);
+box(0.08, 7.5, 0.08, 0x2b2f33, 0, -3.75 + 3.1, 0, hookGroup, { outline:false, shadow:false});
+hookLoad = box(8, 0.7, 0.55, 0xd96c33, 0, -4.6 + 3.1, 0, hookGroup);
+})();
+/* excavator (in the pit during earthworks) */
+excavUnit = new THREE.Group(); excavUnit.position.set(-W * 0.28, 0, 0); excavUnit.rotation.y = 0.9; machines.add(excavUnit);
+(function(){
+var g2 = excavUnit;
+box(3.6, 0.8, 2.4, 0x2b2f33, 0, 0.4, 0, g2);
+cyl(1.05, 1.05, 2.5, 0x44484c, 0, 0.4, 0, g2, { rx:Math.PI/2, shadow:false});
+box(2.8, 1.5, 2.2, 0xe2703a, -0.2, 1.55, 0, g2);
+box(1.1, 1, 1.1, 0x9fc6d4, 0.7, 1.7, 0.5, g2);
+excavArm = new THREE.Group(); excavArm.position.set(1.2, 2.1, 0); g2.add(excavArm);
+var b1 = box(3.6, 0.5, 0.5, 0xe2703a, 1.6, 0.7, 0, excavArm); b1.rotation.z = 0.5;
+var b2 = box(2.6, 0.4, 0.4, 0xe2703a, 3.6, 0.6, 0, excavArm); b2.rotation.z = -0.7;
+box(1, 0.7, 0.9, 0x5a6266, 4.7, -0.5, 0, excavArm);
+})();
+/* mixer truck near the gate */
+mixerUnit = new THREE.Group(); mixerUnit.position.set(W * 0.22 - 12, 0, Dp / 2 + 16); mixerUnit.rotation.y = 2.75; machines.add(mixerUnit);
+(function(){
+var g2 = mixerUnit;
+box(6.8, 0.7, 2.4, 0x39505e, 0, 0.95, 0, g2);
+[[-2.4, -1.3], [0.4, -1.3], [2.4, -1.3], [-2.4, 1.3], [0.4, 1.3], [2.4, 1.3]].forEach(function(p){
+cyl(0.62, 0.62, 0.4, 0x2b2f33, p[0], 0.62, p[1], g2, { rx:Math.PI/2, shadow:false});
+});
+box(1.8, 1.7, 2.3, 0xf0ede4, 2.6, 2.1, 0, g2);
+box(1, 0.8, 2.0, 0x9fc6d4, 3.2, 2.4, 0, g2, { shadow:false});
+mixerDrum = cyl(1.15, 1.15, 3.6, 0xe8ecec, -0.9, 2.5, 0, g2, { rz:Math.PI/2});
+cyl(1.16, 1.16, 0.5, 0xd96c33, -0.9, 2.5, 0, g2, { rz:Math.PI/2, shadow:false});
+})();
+/* dump truck by the pit */
+dumpUnit = new THREE.Group(); dumpUnit.position.set(-W / 2 - 15, 0, Dp * 0.3); dumpUnit.rotation.y = 0.25; machines.add(dumpUnit);
+(function(){
+var g2 = dumpUnit;
+box(5.6, 0.7, 2.2, 0x39505e, 0, 0.9, 0, g2);
+[[-1.9, -1.2], [1.9, -1.2], [-1.9, 1.2], [1.9, 1.2]].forEach(function(p){
+cyl(0.6, 0.6, 0.4, 0x2b2f33, p[0], 0.6, p[1], g2, { rx:Math.PI/2, shadow:false});
+});
+box(1.6, 1.5, 2.1, 0x37a06b, 2.2, 1.95, 0, g2);
+box(3.6, 1.1, 2.2, 0x8f9aa0, -0.8, 2, 0, g2);
+var spoil = new THREE.Mesh(new THREE.ConeGeometry(1.15, 0.9, 12), mat(0x8a6f4f));
+spoil.position.set(-0.8, 2.9, 0); spoil.scale.z = 1.7; spoil.castShadow = true; g2.add(spoil);
+})();
+
+/* ---- people ---- */
+function addGround(vest, helmet, x, z, ry){
+var w = makeWorker(vest, helmet); w.position.set(x, 0, z); w.rotation.y = ry;
+world.add(w); groundWorkers.push(w); return w;
+}
+addGround(0xe2703a, 0xffffff, -W * 0.2, Dp * 0.2, 0.6);
+addGround(0xe2703a, 0xf2b705, -W / 2 - 10, Dp * 0.28, -0.8);
+addGround(0x2e7fb8, 0xffffff, W * 0.15, yardZ + 4, 3.1);
+addGround(0x37a06b, 0xf2b705, W * 0.3, -Dp * 0.2, -1.4);
+addGround(0xe2703a, 0xffffff, -W * 0.35, -Dp * 0.3, 0.9);
+for (i = 0; i < 3; i++){
+var fw = makeWorker([0xe2703a, 0x2e7fb8, 0x37a06b][i], i === 1? 0xffffff: 0xf2b705);
+bldg.add(fw); frameWorkers.push(fw);
+}
+/* sun + camera fit for this building */
+var R = Math.max(W, Dp) * 0.72;
+sun.position.set(R * 0.55, R * 0.85, R * 0.3);
+sun.shadow.camera.left = -R; sun.shadow.camera.right = R;
+sun.shadow.camera.top = R; sun.shadow.camera.bottom = -R;
+sun.shadow.camera.far = R * 3.2;
+sun.shadow.camera.updateProjectionMatrix();
+fitView = Math.max(W, Dp) * 1.32;
+viewGoal.viewSize = fitView; viewSize = fitView;
+layout();
+}
+
+/* ============ progress application ============ */
+function phaseInfo(p){
+var nF = B.floors.length;
+if (p < PH.earth[1]) return { name:"土工事", detail:"土工事（掘削）"};
+if (p < PH.found[1]) return { name:"基礎", detail:"基礎工事"};
+if (p < PH.frame[1]){
+var fSpanF = (PH.frame[1] - PH.frame[0]) / nF;
+var f = Math.min(nF - 1, Math.floor((p - PH.frame[0]) / fSpanF));
+var zone = Math.min(2, Math.floor(((p - PH.frame[0] - f * fSpanF) / fSpanF) * 3));
+return { name:"躯体", detail:"躯体 " + (f + 1) + "階・" + ["東", "中", "西"][zone] + "工区"};
+}
+if (p < PH.ext[1]) return { name:"外装", detail:"外装工事"};
+if (p < 0.999) return { name:"仕上げ", detail:"内装・仕上げ"};
+return { name:"竣工", detail:"竣工"};
+}
+function frontState(p){
+/* construction front: floor index + x position in model coords */
+var nF = B.floors.length;
+if (p < PH.frame[0]) return { floor:0, x:W * 0.8, active:false};
+if (p >= PH.frame[1]) return { floor:nF - 1, x:W * 0.1, active:false};
+var fSpanF = (PH.frame[1] - PH.frame[0]) / nF;
+var f = Math.min(nF - 1, Math.floor((p - PH.frame[0]) / fSpanF));
+var q = (p - PH.frame[0] - f * fSpanF) / fSpanF; /* 0..1 within floor */
+return { floor:f, x: W * (1 - q), active:true, q:q};
+}
+var lastProgApplied = -1;
+function applyProgress(){
+if (Math.abs(PROG - lastProgApplied) < 0.0004) return;
+lastProgApplied = PROG;
+applyCatCounts();
+soloMembers.forEach(function(sm){ sm.obj.visible = PROG >= sm.b && PROG < sm.d;});
+/* pit: deepens during earthworks, gone once the ground slab lands */
+var depth = 2.4 * Math.min(1, PROG / PH.earth[1]);
+if (pitGroup){
+pitGroup.visible = PROG < 0.205;
+pitFloorMeshes.forEach(function(m){ m.position.y = -depth + 0.15;});
+pitWallMeshes.forEach(function(m){ m.scale.y = Math.max(depth / 2.4, 0.01); m.position.y = -depth / 2;});
+}
+if (excavUnit) excavUnit.position.y = PROG < PH.found[1] ? -depth + 0.15 : 0;
+if (excavUnit) excavUnit.visible = PROG < 0.30;
+if (dumpUnit) dumpUnit.visible = PROG < 0.30;
+if (craneUnit) craneUnit.visible = PROG >= 0.08;
+if (mixerUnit) mixerUnit.visible = PROG >= PH.frame[0] && PROG < PH.ext[1];
+var fs = frontState(PROG);
+if (craneUnit && fs.active) craneUnit.position.x = Math.max(-W / 2 + 14, Math.min(W / 2 - 14, fs.x - W / 2));
+/* workers on the frame stand at the front, on the floor being built */
+frameWorkers.forEach(function(w, i){
+w.visible = fs.active;
+if (fs.active){
+var yTop = floorTops[fs.floor];
+w.position.set(fs.x - W / 2 + (i - 1) * 3.2, yTop + 0.25, Dp / 2 - (6 + i * 5));
+w.rotation.y = [0.6, 2.4, -0.7][i];
+}
+});
+/* rebar sets: visible only while their floor/zone is at the slab stage */
+var set = thin? rebarSets.thin: rebarSets.full;
+var all = rebarSets.full.concat(rebarSets.thin);
+all.forEach(function(r){ r.mesh.visible = false;});
+set.forEach(function(r){ r.mesh.visible = PROG >= r.from && PROG < r.to;});
+/* material stock: builds up with the frame, fullest right after frame, drawn down at finish */
+var stock = PROG < PH.frame[0]? 0.25: (PROG < PH.frame[1]? 0.25 + 0.75 * (PROG - PH.frame[0]) / (PH.frame[1] - PH.frame[0]): (PROG < 0.95? 1: 0.3));
+stockPiles.forEach(function(sp){ sp.obj.visible = stock >= sp.th;});
+document.getElementById("phaseName").textContent = phaseInfo(PROG).detail;
+document.getElementById("outProg").textContent = Math.round(PROG * 100) + "%";
+}
+
+/* ============ apply scale parameters ============ */
+var lastColApplied = -1, lastSlabApplied = -1;
+function applyMemberScales(){
+/* column cross-section and slab thickness are baked into instance
+matrices, so refill only when the (lerped) values actually moved */
+var hs = (typeof HULL_SCALE!== "undefined")? HULL_SCALE[TEX.outline]: 1.07;
+if (memberCats.col && Math.abs(P.col - lastColApplied) > 0.0005){
+lastColApplied = P.col;
+memberCats.col.items.forEach(function(it){
+it.s[0] = it.bs[0] * P.col; it.s[2] = it.bs[2] * P.col;
+});
+fillCatMatrices(memberCats.col, hs);
+}
+if (Math.abs(P.slab - lastSlabApplied) > 0.0005){
+lastSlabApplied = P.slab;
+[memberCats.slab, memberCats.roof].forEach(function(cat){
+if (!cat) return;
+cat.items.forEach(function(it){
+it.s[1] = it.bs[1] * P.slab;
+/* keep the slab underside fixed; thickness grows upward */
+it.p[1] = it.bp[1] - it.bs[1] / 2 + it.s[1] / 2;
+});
+fillCatMatrices(cat, hs);
+});
+}
+}
+function applyParams(){
+if (bldg) bldg.scale.y = P.height;
+groundWorkers.forEach(function(w){ w.scale.setScalar(P.person);});
+frameWorkers.forEach(function(w){ w.scale.setScalar(P.person);});
+[craneUnit, excavUnit, mixerUnit, dumpUnit].forEach(function(u){ if (u) u.scale.setScalar(P.machine);});
+stockPiles.forEach(function(sp){ sp.obj.scale.setScalar(P.mat);});
+if (hookLoad) hookLoad.scale.setScalar(P.mat);
+applyMemberScales();
+camTarget.y = REAL_H * P.height * 0.30;
+}
+
+/* ============ texture (shading / outline / palette) ============ */
+var HULL_SCALE = { off:1, thin:1.035, standard:1.07, thick:1.14};
+function applyTexture(){
+var tex = TEX.shade === "flat"? gradTexFlat: (TEX.shade === "strong"? gradTexStrong: gradTexStd);
+if (TEX.shade === "flat"){ sun.intensity = 0.85; hemi.intensity = 1.3;}
+else if (TEX.shade === "strong"){ sun.intensity = 2.05; hemi.intensity = 0.65;}
+else { sun.intensity = 1.55; hemi.intensity = 0.95;}
+var op = { off:0, thin:0.2, standard:0.45, thick:0.92}[TEX.outline];
+outlineLines.forEach(function(e){
+e.visible = TEX.outline!== "off";
+e.material.opacity = op;
+});
+cats.forEach(function(cat){
+if (!cat.hull) return;
+cat.hull.visible = TEX.outline!== "off";
+fillCatMatrices(cat, HULL_SCALE[TEX.outline]);
+});
+matRegistry.forEach(function(r){
+r.mat.gradientMap = tex;
+var c = r.base.clone();
+if (TEX.palette === "vivid") c.offsetHSL(0, 0.20, -0.02);
+if (TEX.palette === "soft") c.offsetHSL(0, -0.24, 0.07);
+r.mat.color.copy(c);
+r.mat.needsUpdate = true;
+});
+}
+
+/* ============ camera controls ============ */
+var effView = 280;
+function layout(){
+var wpx = stage.clientWidth, hpx = stage.clientHeight;
+if (!wpx ||!hpx) return;
+renderer.setSize(wpx, hpx);
+var aspect = wpx / hpx;
+effView = viewSize * (aspect < 1? Math.min(1.9, 1 / Math.sqrt(aspect)): 1);
+camera.left = -effView * aspect / 2; camera.right = effView * aspect / 2;
+camera.top = effView / 2; camera.bottom = -effView / 2;
+camera.updateProjectionMatrix();
+var pxPerM = hpx / effView;
+document.getElementById("scaleBar").style.width = Math.max(24, 50 * pxPerM) + "px";
+}
+window.addEventListener("resize", layout);
+
+function updateCamera(){
+var d = 900;
+camera.position.set(
+camTarget.x + d * Math.cos(el) * Math.sin(az),
+camTarget.y + d * Math.sin(el),
+camTarget.z + d * Math.cos(el) * Math.cos(az)
+);
+camera.lookAt(camTarget);
+}
+var dragging = false, lastX = 0, lastY = 0, pinchD = 0;
+var cvs = renderer.domElement;
+cvs.addEventListener("pointerdown", function(e){ dragging = true; lastX = e.clientX; lastY = e.clientY; cvs.setPointerCapture(e.pointerId);});
+cvs.addEventListener("pointermove", function(e){
+if (!dragging) return;
+viewGoal.az -= (e.clientX - lastX) * 0.006;
+viewGoal.el += (e.clientY - lastY) * 0.004;
+viewGoal.el = Math.max(0.14, Math.min(1.25, viewGoal.el));
+lastX = e.clientX; lastY = e.clientY;
+});
+cvs.addEventListener("pointerup", function(){ dragging = false;});
+cvs.addEventListener("pointercancel", function(){ dragging = false;});
+cvs.addEventListener("wheel", function(e){
+e.preventDefault();
+viewGoal.viewSize = Math.max(fitView * 0.12, Math.min(fitView * 1.6, viewGoal.viewSize * (e.deltaY > 0? 1.1: 0.9)));
+}, { passive:false});
+cvs.addEventListener("touchmove", function(e){
+if (e.touches.length === 2){
+var dx = e.touches[0].clientX - e.touches[1].clientX;
+var dy = e.touches[0].clientY - e.touches[1].clientY;
+var nd = Math.sqrt(dx * dx + dy * dy);
+if (pinchD > 0) viewGoal.viewSize = Math.max(fitView * 0.12, Math.min(fitView * 1.6, viewGoal.viewSize * pinchD / nd));
+pinchD = nd;
+}
+}, { passive:true});
+cvs.addEventListener("touchend", function(){ pinchD = 0;});
+
+var viewBtns = document.querySelectorAll(".views button");
+viewBtns.forEach(function(b){
+b.addEventListener("click", function(){
+viewBtns.forEach(function(x){ x.setAttribute("aria-pressed", "false");});
+b.setAttribute("aria-pressed", "true");
+var v = b.getAttribute("data-view");
+if (v === "iso"){ viewGoal.az = 0.72; viewGoal.el = 0.52; viewGoal.viewSize = fitView;}
+if (v === "front"){ viewGoal.az = 0; viewGoal.el = 0.34; viewGoal.viewSize = fitView * 0.88;}
+if (v === "low"){ viewGoal.az = 0.85; viewGoal.el = 0.17; viewGoal.viewSize = fitView * 0.78;}
+});
+});
+
+/* ============ UI wiring ============ */
+var btnConv = document.getElementById("btnConv"), btnToon = document.getElementById("btnToon");
+var rngH = document.getElementById("rngH"), rngP = document.getElementById("rngP"), rngM = document.getElementById("rngM");
+var rngMat = document.getElementById("rngMat"), rngCol = document.getElementById("rngCol"), rngSlab = document.getElementById("rngSlab");
+var rngProg = document.getElementById("rngProg");
+var outH = document.getElementById("outH"), outP = document.getElementById("outP"), outM = document.getElementById("outM");
+var outMat = document.getElementById("outMat"), outCol = document.getElementById("outCol"), outSlab = document.getElementById("outSlab");
+var factH = document.getElementById("factH"), factM = document.getElementById("factM");
+var factMat = document.getElementById("factMat"), factCol = document.getElementById("factCol"), factSlab = document.getElementById("factSlab");
+var factMachine = document.getElementById("factMachine"), factTex = document.getElementById("factTex");
+var machineWarn = document.getElementById("machineWarn");
+var btnFull = document.getElementById("btnFull"), btnThin = document.getElementById("btnThin");
+var mChips = document.querySelectorAll(".chips button[data-m]");
+var progChips = document.querySelectorAll(".chips button[data-prog]");
+
+function refreshCountsFact(){
+document.getElementById("factName").textContent = B.name;
+document.getElementById("factSpec").textContent = B.spec;
+document.getElementById("factPlan").textContent = W.toFixed(0) + " m × " + Dp.toFixed(0) + " m";
+document.getElementById("factCols").textContent = totals.cols.toLocaleString("ja-JP") + " 本";
+document.getElementById("factBeams").textContent = totals.beams.toLocaleString("ja-JP") + " 本";
+}
+function refreshLabels(){
+outH.textContent = "×" + target.height.toFixed(1);
+outP.textContent = target.person.toFixed(1) + " m 表示";
+outM.textContent = "×" + target.machine.toFixed(2);
+outMat.textContent = "×" + target.mat.toFixed(2);
+outCol.textContent = "×" + target.col.toFixed(2);
+outSlab.textContent = "×" + target.slab.toFixed(2);
+factMat.textContent = "×" + target.mat.toFixed(2);
+factCol.textContent = B.col.toFixed(2) + " m → " + (B.col * target.col).toFixed(2) + " m（×" + target.col.toFixed(2) + "）";
+factSlab.textContent = "0.32 m → " + (0.32 * target.slab).toFixed(2) + " m（×" + target.slab.toFixed(2) + "）";
+factH.textContent = "実寸" + REAL_H.toFixed(1) + " m → " + (REAL_H * target.height).toFixed(1) + " m";
+factMachine.textContent = "×" + target.machine.toFixed(2);
+factM.textContent = thin? "配筋ピッチ 16m に間引き（骨格は実本数）": "配筋ピッチ 1.6m 表示（骨格は実本数）";
+factTex.textContent = "陰影 " + SHADE_LABEL[TEX.shade] + "／輪郭 " + OUTLINE_LABEL[TEX.outline] + "／色味 " + PALETTE_LABEL[TEX.palette];
+machineWarn.classList.toggle("show", target.machine >= 2.5);
+mChips.forEach(function(c){
+c.setAttribute("aria-pressed", Math.abs(parseFloat(c.getAttribute("data-m")) - target.machine) < 0.005? "true": "false");
+});
+progChips.forEach(function(c){
+c.setAttribute("aria-pressed", Math.abs(parseFloat(c.getAttribute("data-prog")) - PROG_T * 100) < 3? "true": "false");
+});
+}
+function setMode(m){
+var src = m === "toon"? TOON: CONV;
+target.height = src.height; target.person = src.person; target.machine = src.machine;
+rngH.value = src.height; rngP.value = src.person; rngM.value = src.machine;
+btnConv.setAttribute("aria-pressed", m === "conv"? "true": "false");
+btnToon.setAttribute("aria-pressed", m === "toon"? "true": "false");
+refreshLabels();
+}
+btnConv.addEventListener("click", function(){ setMode("conv");});
+btnToon.addEventListener("click", function(){ setMode("toon");});
+rngH.addEventListener("input", function(){ target.height = parseFloat(rngH.value); refreshLabels();});
+rngP.addEventListener("input", function(){ target.person = parseFloat(rngP.value); refreshLabels();});
+rngM.addEventListener("input", function(){ target.machine = parseFloat(rngM.value); refreshLabels();});
+rngMat.addEventListener("input", function(){ target.mat = parseFloat(rngMat.value); refreshLabels();});
+rngCol.addEventListener("input", function(){ target.col = parseFloat(rngCol.value); refreshLabels();});
+rngSlab.addEventListener("input", function(){ target.slab = parseFloat(rngSlab.value); refreshLabels();});
+mChips.forEach(function(c){
+c.addEventListener("click", function(){
+target.machine = parseFloat(c.getAttribute("data-m"));
+rngM.value = target.machine;
+refreshLabels();
+});
+});
+rngProg.addEventListener("input", function(){ PROG_T = parseFloat(rngProg.value) / 100; refreshLabels();});
+progChips.forEach(function(c){
+c.addEventListener("click", function(){
+PROG_T = parseFloat(c.getAttribute("data-prog")) / 100;
+rngProg.value = PROG_T * 100;
+refreshLabels();
+});
+});
+
+/* building switcher */
+var bldgBtns = document.querySelectorAll("#grpBldg button");
+bldgBtns.forEach(function(b){
+b.addEventListener("click", function(){
+var k = b.getAttribute("data-bldg");
+if (k === curKey) return;
+bldgBtns.forEach(function(x){ x.setAttribute("aria-pressed", x === b? "true": "false");});
+lastProgApplied = -1;
+buildBuilding(k);
+applyParams();
+refreshLabels();
+});
+});
+
+/* texture control groups */
+function wireTexGroup(id, attr, key){
+var btns = document.querySelectorAll("#" + id + " button");
+btns.forEach(function(b){
+b.addEventListener("click", function(){
+TEX[key] = b.getAttribute(attr);
+btns.forEach(function(x){ x.setAttribute("aria-pressed", x === b? "true": "false");});
+applyTexture();
+refreshLabels();
+});
+});
+}
+wireTexGroup("grpShade", "data-shade", "shade");
+wireTexGroup("grpOutline", "data-outline", "outline");
+wireTexGroup("grpPalette", "data-palette", "palette");
+
+function setThin(v){
+thin = v;
+btnFull.setAttribute("aria-pressed", v? "false": "true");
+btnThin.setAttribute("aria-pressed", v? "true": "false");
+lastProgApplied = -1; /* force rebar set swap */
+refreshLabels();
+}
+btnFull.addEventListener("click", function(){ setThin(false);});
+btnThin.addEventListener("click", function(){ setThin(true);});
+
+document.getElementById("btnCopy").addEventListener("click", function(){
+var btn = this;
+var text = "物件：" + B.name + "（" + B.spec + "）／平面：" +
+W.toFixed(0) + "×" + Dp.toFixed(0) + "m（実寸のまま）／進捗：" + Math.round(PROG_T * 100) + "%（" + phaseInfo(PROG_T).detail + "）" +
+"／高さ強調：×" + target.height.toFixed(1) + "（実寸" + REAL_H.toFixed(1) + "m→" + (REAL_H * target.height).toFixed(1) + "m）" +
+"／作業者：" + target.person.toFixed(1) + "m表示／重機：×" + target.machine.toFixed(2) +
+"／資材：×" + target.mat.toFixed(2) +
+"／柱の太さ：×" + target.col.toFixed(2) + "（" + B.col.toFixed(2) + "m→" + (B.col * target.col).toFixed(2) + "m）" +
+"／スラブの厚さ：×" + target.slab.toFixed(2) + "（0.32m→" + (0.32 * target.slab).toFixed(2) + "m）" +
+"／細部部材：" + (thin? "配筋を1/10に間引き": "配筋も全数表示") +
+"／質感：陰影=" + SHADE_LABEL[TEX.shade] + "・輪郭線=" + OUTLINE_LABEL[TEX.outline] + "・色味=" + PALETTE_LABEL[TEX.palette];
+var note = document.getElementById("copyNote");
+function done(ok){
+btn.textContent = ok? "コピーしました ✓ この設定で進めてください": "コピーできませんでした";
+btn.classList.add("done");
+note.textContent = text;
+}
+if (navigator.clipboard && navigator.clipboard.writeText){
+navigator.clipboard.writeText(text).then(function(){ done(true);}, function(){ done(false);});
+} else { done(false);}
+});
+
+/* ============ boot + animation loop ============ */
+buildBuilding("park");
+applyParams();
+refreshLabels();
+
+var clock = new THREE.Clock();
+function tick(){
+requestAnimationFrame(tick);
+var t = clock.getElapsedTime();
+var k = 0.10;
+P.height += (target.height - P.height) * k;
+P.person += (target.person - P.person) * k;
+P.machine += (target.machine - P.machine) * k;
+P.mat += (target.mat - P.mat) * k;
+P.col += (target.col - P.col) * k;
+P.slab += (target.slab - P.slab) * k;
+PROG += (PROG_T - PROG) * 0.07;
+if (Math.abs(PROG_T - PROG) < 0.0005) PROG = PROG_T;
+applyParams();
+applyProgress();
+az += (viewGoal.az - az) * 0.09;
+el += (viewGoal.el - el) * 0.09;
+if (Math.abs(viewGoal.viewSize - viewSize) > 0.05){
+viewSize += (viewGoal.viewSize - viewSize) * 0.12;
+layout();
+}
+updateCamera();
+if (!reduced){
+if (craneSwing) craneSwing.rotation.y = Math.sin(t * 0.22) * 0.3;
+if (hookGroup) hookGroup.rotation.z = Math.sin(t * 0.9) * 0.03;
+if (excavArm) excavArm.rotation.z = Math.sin(t * 0.7) * 0.09;
+if (mixerDrum) mixerDrum.rotation.x = t * 1.4;
+groundWorkers.forEach(function(w, i){ w.position.y = Math.abs(Math.sin(t * 2.2 + i * 1.7)) * 0.03 * P.person;});
+}
+renderer.render(scene, camera);
+}
+layout();
+updateCamera();
+tick();
+})();
+</script>
+</body>
+</html>

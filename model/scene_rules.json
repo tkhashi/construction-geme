@@ -1,0 +1,652 @@
+{
+ "schema": "scene-rules/1.0",
+ "meta": {
+  "name": "現場3Dビュー生成 展開規則テーブル",
+  "version": "1.0",
+  "created": "2026-11-10",
+  "role": "S3D-1 描画キュー展開の規則の正。コード（scene_expand.py）は実行エンジンだけを持ち、タスク種別ごとの「どの部材が・どの順で・誰が・どう動いて現れるか」はこの表で決める。規則を変えるときはこの表を直して再生成する（生成物を直接編集しない）。",
+  "sources": [
+   "3D_VIEW_SPEC.md §3.0〜§3.9（描写原則：部材は1つずつ、フェード出現禁止、節単位、打設フロント、足場JIT、天井裏の順序、屋上フロー）",
+   "model/WORK_STRUCTURE_V2.md §2（工区共通の流れ・天井裏の内部順序・高所作業車の階別搬入）、§3（検査チェーン）、§6（外装レーン）、外構工事・屋上工事・屋上屋外設備の各節",
+   "ConstructionPlan のタスク分類（plan_generate.py の WBS：phase と task id パターン）"
+  ],
+  "authority": "ユーザーの実務訂正 ＞ 調査資料 ＞ 外部素材（上流パイプラインと同じ）"
+ },
+ "global": {
+  "craneReachM": 30,
+  "craneStationStepM": 30,
+  "craneStationOffsetM": 7,
+  "awpPerLevel": 2,
+  "faceBudgetOpaque": 100000,
+  "stockYard": "建物南側の敷地内空地（根切り範囲外）。鉄骨・束材の仮置き位置はここに決定的に割り付ける",
+  "crewByTrade": {
+   "監督": 2,
+   "仮設": 6,
+   "墨出し": 2,
+   "土工": 5,
+   "杭": 5,
+   "基礎": 6,
+   "鉄骨": 6,
+   "コンクリート": 6,
+   "防水": 3,
+   "鳶": 5,
+   "外装": 5,
+   "電気": 4,
+   "衛生": 4,
+   "空調": 4,
+   "設備支持": 3,
+   "設備": 4,
+   "設備2次": 3,
+   "器具付け": 3,
+   "軽鉄": 4,
+   "ボード": 4,
+   "仕上げ": 4,
+   "床": 3,
+   "建具": 3,
+   "美装": 4,
+   "EV": 3,
+   "外構": 5,
+   "揚重": 3,
+   "検査": 2
+  },
+  "crewBasis": "default（班人数は計画 resources.tradePeak の上限を超えない範囲のゲーム用既定。計画は班の並行数を持つがタスク単位の人数は持たないため）"
+ },
+ "tolerancesM": {
+  "_comment": "SV-02 支持・突出チェックの種別別許容（3D_VIEW_SPEC.md §6 回帰チェック観点が正）",
+  "extWallPanel": 0.4,
+  "sash": 0.4,
+  "cornerColumn": 0.55,
+  "scaffoldUnit": 1.6,
+  "canopy": 1.7,
+  "interior": 0.05,
+  "roof": 0.4,
+  "frame": 0.6,
+  "site": 0.5,
+  "foundation": 1.5,
+  "batterBoard": 2.0,
+  "_comment_foundation": "基礎型枠の半幅（最大1.35m: フーチング2.4m＋型枠余裕）＋根切り余掘りを許容する。基礎部材の支持判定の本体は「中心が柱位置と一致」で担保",
+  "_comment_batterBoard": "遣り方は定義として建物隅から1.5m外側に置く（＋板の半幅）。敷地ポリゴンが placeholder の物件では実効敷地（ポリゴン∪平面）＋2.0mで判定"
+ },
+ "taskKinds": [
+  {
+   "kind": "prepDocs",
+   "idRegex": "^prep-1$",
+   "phase": "prep",
+   "generator": "actionOnly",
+   "desc": "着工届出・施工計画確定。幾何なし。監督の action イベントのみ（現場事務所位置）。",
+   "basis": "rule",
+   "source": "計画タスク分類"
+  },
+  {
+   "kind": "prepSite",
+   "idRegex": "^prep-2$",
+   "phase": "prep",
+   "generator": "siteSetup",
+   "desc": "仮設工事：仮囲い（敷地ポリゴン周長、ゲート位置に開口部材）を南→西→北→東の順に place。仮設事務所・詰所・仮設トイレは敷地南西の空地に place。担当：仮設班。",
+   "basis": "default",
+   "source": "3D_VIEW_SPEC §3-1／WORK_STRUCTURE_V2 着工時の順序"
+  },
+  {
+   "kind": "prepSurvey",
+   "idRegex": "^prep-3$",
+   "phase": "prep",
+   "generator": "survey",
+   "desc": "遣り方・基準墨：建物四隅の遣り方枠を place し、墨出し班の work イベント。",
+   "basis": "default",
+   "source": "WORK_STRUCTURE_V2 §2"
+  },
+  {
+   "kind": "prepUtility",
+   "idRegex": "^prep-4$",
+   "phase": "prep",
+   "generator": "tempUtility",
+   "desc": "仮設電気・水道引込：引込柱と仮設分電盤を南ゲート脇に place。",
+   "basis": "default",
+   "source": "WORK_STRUCTURE_V2 着工時の順序"
+  },
+  {
+   "kind": "earthRetaining",
+   "idRegex": "^earth-1$",
+   "phase": "earthwork",
+   "generator": "retaining",
+   "desc": "山留め：親杭横矢板パネルを建物外周に沿って時計回りに place（単位3.6m）。担当：土工班。撤去は最後の基礎埋戻しタスクに remove を付ける。",
+   "basis": "inferred",
+   "source": "計画 methods（山留め＝親杭横矢板）／WORK_STRUCTURE_V2 §2"
+  },
+  {
+   "kind": "earthExcavate",
+   "idRegex": "^earth-2$",
+   "phase": "earthwork",
+   "generator": "excavation",
+   "desc": "根切り・残土搬出：掘削タイル（単位セル）が西→東・南→北のスイープ順に現れる（掘削フロント）。ユンボとダンプの move/work イベントを伴う。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.1（掘削フロント前進・ダンプで搬出）"
+  },
+  {
+   "kind": "earthBlinding",
+   "idRegex": "^earth-3$",
+   "phase": "earthwork",
+   "generator": "blinding",
+   "desc": "床付け・地業・捨てコン：捨てコン板を掘削底にセル順に place。地下ピット（EVシャフト直下のピット床・壁）もこのタスクで place。",
+   "basis": "inferred",
+   "source": "3D_VIEW_SPEC §3.1（地下ピット：EVピット等を一段深く）"
+  },
+  {
+   "kind": "pileTest",
+   "idRegex": "^pile-1$",
+   "phase": "piling",
+   "generator": "pileTest",
+   "desc": "試験杭：最初の柱位置に杭1本を place（杭打ち機の move を伴う）。",
+   "basis": "rule",
+   "source": "計画タスク分類"
+  },
+  {
+   "kind": "pileMain",
+   "idRegex": "^pile-2$",
+   "phase": "piling",
+   "generator": "piles",
+   "desc": "本杭：柱位置ごとに杭が1本ずつ place される（杭打ち機が柱位置を巡回する move イベント列）。順序は西→東・南→北。",
+   "basis": "rule",
+   "source": "建物モデル foundations.piles.rule=each-structural-column／3D_VIEW_SPEC §3.1"
+  },
+  {
+   "kind": "pileHead",
+   "idRegex": "^pile-3$",
+   "phase": "piling",
+   "generator": "pileHead",
+   "desc": "杭頭処理：全杭に state イベント（杭頭レベルへの切断・処理）。幾何は不変、レンダラは state で天端を揃える。",
+   "basis": "rule",
+   "source": "計画タスク分類"
+  },
+  {
+   "kind": "fndForm",
+   "idRegex": "^fnd-(.+)-1$",
+   "phase": "foundation",
+   "generator": "footingForm",
+   "desc": "基礎配筋・型枠（工区）：工区内の柱位置ごとに型枠部材が place される。基礎梁は型枠ラン（軸線ごとの連続ラン、工区で分割）が place される。担当：基礎班。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.1（基礎：型枠→配筋→打設）"
+  },
+  {
+   "kind": "fndPour",
+   "idRegex": "^fnd-(.+)-2$",
+   "phase": "foundation",
+   "generator": "footingPour",
+   "desc": "基礎打設・養生（工区）：フーチング本体と基礎梁本体が place され、直後に state=養生。ポンプ車・生コン車の work イベントを伴う。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.1"
+  },
+  {
+   "kind": "fndBackfill",
+   "idRegex": "^fnd-(.+)-3$",
+   "phase": "foundation",
+   "generator": "backfill",
+   "desc": "型枠解体・埋戻し（工区）：型枠の remove と、工区内掘削タイルへの state=埋戻し。最後の工区のこのタスクで山留めも remove する。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.1"
+  },
+  {
+   "kind": "steelSection",
+   "idRegex": "^frm-s(\\d+)-1$",
+   "phase": "frame",
+   "generator": "steelSection",
+   "desc": "節建方：その節の柱が 搬入（トラック→仮置き場に stock）→クレーンで1本ずつ lift→place の順で建つ。続いてその節の階の大梁が place（1スパン1本）。ブレースも place。届かない位置は着地點への lift の後に carry（横引き）イベントを挟む。クレーンはステーション間を move する。 コア内の階段も階ごとに一体で設置（stairFlight×2/階・シャフト）。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.0・§3.2（節単位／ラフター＋横引き原則／作業半径30m）"
+  },
+  {
+   "kind": "steelTorque",
+   "idRegex": "^frm-s(\\d+)-2$",
+   "phase": "frame",
+   "generator": "steelTorque",
+   "desc": "本締め・建入れ直し：その節の柱・大梁・ブレース全数に state=本締め（色替え）のイベント。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3（建方→建入れ直し・本締め）"
+  },
+  {
+   "kind": "deckPlace",
+   "idRegex": "^frm-s(\\d+)-(L\\d+)-d$",
+   "phase": "frame",
+   "generator": "deck",
+   "desc": "デッキ敷き・先行仕込み（階）：小梁（ベイ中央1本）が先に place され、デッキプレートがベイ単位で西→東に place される。スリーブ・インサートは表現省略（仕様で省略可）。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3・§3.0"
+  },
+  {
+   "kind": "floorPour",
+   "idRegex": "^frm-s(\\d+)-(L\\d+)-c$",
+   "phase": "frame",
+   "generator": "floorPour",
+   "desc": "床配筋・打設・養生（階）：配筋束の stock → 配筋マットがベイ単位で広がる（1ベイ1マット、本数は D13@200 から算出してメタデータ保持）→ デッキ部材に state=打設（打設フロント＝ベイ順）→ state=養生。1Fは土間スラブ部材そのものが打設順に place される。ポンプ車・生コン車の work を伴う。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.0（鉄筋は束→1本ずつ／打設フロント）"
+  },
+  {
+   "kind": "roofBase",
+   "idRegex": "^roof-1$",
+   "phase": "roofExterior",
+   "generator": "roofBase",
+   "desc": "屋根下地・防水：パラペットが周順に place（u前半）→ 防水シート部材が屋根ベイ単位で工区スイープ順に place（灰→黒の層）。担当：防水班。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.8／WORK_STRUCTURE_V2 屋上工事"
+  },
+  {
+   "kind": "roofFinish",
+   "idRegex": "^roof-2$",
+   "phase": "roofExterior",
+   "generator": "roofFinish",
+   "desc": "屋根立上り・保護・ドレン通水確認：保護コンクリート板がベイ順に place（明灰）→ ドレン部材（屋根矩形の隅・内寄り）が place → 通水確認の inspect イベント。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.8"
+  },
+  {
+   "kind": "faceScaffold",
+   "idRegex": "^face-(.+)-1$",
+   "phase": "roofExterior",
+   "generator": "faceScaffold",
+   "desc": "足場組立（JIT）：当該面×階×工区の境界ランに沿って足場ユニットを1枠ずつ place。高所作業の直前にだけ立てる（全面一斉は禁止）。担当：鳶班。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.5／WORK_STRUCTURE_V2 §8"
+  },
+  {
+   "kind": "facePanel",
+   "idRegex": "^face-(.+)-2$",
+   "phase": "roofExterior",
+   "generator": "facePanel",
+   "desc": "外壁パネル建込み：開口を避けて分割した壁セグメント（全高・腰壁・垂れ壁）をベイ順に揚重→place。外壁は躯体完了後にのみ現れる。担当：外装班＋クレーン。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.5"
+  },
+  {
+   "kind": "faceSash",
+   "idRegex": "^face-(.+)-3$",
+   "phase": "roofExterior",
+   "generator": "faceSash",
+   "desc": "サッシ・ガラス・出入口：開口種別（サッシ/戸/シャッター、role: shopfront/entrance/loading）ごとに部材を place。庇は genericElements の attachTo から生成。担当：外装班。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.5／建物モデル walls.openings.role（v0.7）"
+  },
+  {
+   "kind": "faceSeal",
+   "idRegex": "^face-(.+)-4$",
+   "phase": "roofExterior",
+   "generator": "faceSeal",
+   "desc": "シーリング・雨仕舞い確認：当該面のパネル群に state「シーリング・雨仕舞い」を一括付与＋確認 inspect。雨仕舞いは4点セット成立が条件。担当：外装班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 外装レーン"
+  },
+  {
+   "kind": "faceScaffoldOut",
+   "idRegex": "^face-(.+)-5$",
+   "phase": "roofExterior",
+   "generator": "faceScaffoldOut",
+   "desc": "足場解体：当該面の足場ユニットを remove。足場解体＝その面の外装完了宣言であり、外構の着手条件。担当：鳶班。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.5／WORK_STRUCTURE_V2"
+  },
+  {
+   "kind": "elecService",
+   "idRegex": "^elec-0a$",
+   "phase": "mepInterior",
+   "generator": "elecService",
+   "desc": "屋外引込・受変電基礎：引込柱（南ゲート付近）→埋設ケーブル→屋上キュービクル基礎（DSコア直上）を place。担当：電気班。",
+   "basis": "inferred",
+   "source": "WORK_STRUCTURE_V2 設備3系統／屋上設備調査（キュービクルは屋上）"
+  },
+  {
+   "kind": "elecCubicle",
+   "idRegex": "^elec-0b$",
+   "phase": "mepInterior",
+   "generator": "elecCubicle",
+   "desc": "キュービクル据付・幹線立上げ：キュービクルを搬入（stock）→クレーン揚重（lift）→据付（place）。幹線立管は設備推論の電気「幹線 立管」ランから EPS 内に生成。受電そのものは insp-power-act のゲート。担当：電気班＋クレーン。",
+   "basis": "rule",
+   "source": "屋上設備調査（受電ゲート）／generated_equipment"
+  },
+  {
+   "kind": "inspDoc",
+   "idRegex": "^insp-(.+)-doc$",
+   "phase": "inspection",
+   "generator": "inspDoc",
+   "desc": "検査書類作成：仮設事務所での action イベントのみ（部材なし）。担当：監督。",
+   "basis": "rule",
+   "source": "計画タスク分類（検査チェーン 書類→申請→実施）"
+  },
+  {
+   "kind": "inspApp",
+   "idRegex": "^insp-(.+)-app$",
+   "phase": "inspection",
+   "generator": "inspApp",
+   "desc": "検査申請・依頼：仮設事務所での action イベントのみ。担当：監督。",
+   "basis": "rule",
+   "source": "計画タスク分類（検査チェーン）"
+  },
+  {
+   "kind": "inspAct",
+   "idRegex": "^insp-(.+)-act$",
+   "phase": "inspection",
+   "generator": "inspAct",
+   "desc": "検査実施：検査対象位置に検査員アクター＋inspect イベント。insp-power-act は state「受電」の gate イベントを伴う（試運転・EV試運転・内装電気の前提）。担当：検査員＋監督。",
+   "basis": "rule",
+   "source": "計画タスク分類（gate=true）／屋上設備調査"
+  },
+  {
+   "kind": "liftIn",
+   "idRegex": "^lift-in-(L\\d+)$",
+   "phase": "mepInterior",
+   "generator": "liftIn",
+   "desc": "高所作業車搬入：階ごとに2台。ゲートで stock → クレーン揚重で階端の荷揚げ位置へ lift → 階内へ自走 move。天井裏・天井作業の前提。担当：揚重班＋クレーン。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 §2（AWP）／天井裏調査"
+  },
+  {
+   "kind": "liftOut",
+   "idRegex": "^lift-out-(L\\d+)$",
+   "phase": "mepInterior",
+   "generator": "liftOut",
+   "desc": "高所作業車搬出：荷揚げ位置へ自走 → クレーンで吊り下ろし → remove。天井ボード完了後。担当：揚重班＋クレーン。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 §2（AWP）"
+  },
+  {
+   "kind": "zoneSurvey",
+   "idRegex": "^z-(.+)-sumi$",
+   "phase": "mepInterior",
+   "generator": "zoneSurvey",
+   "desc": "墨出し：工区中心での action イベント（部材なし）。内装チェーンの起点。担当：墨出し班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 内装チェーン"
+  },
+  {
+   "kind": "zoneLgs",
+   "idRegex": "^z-(.+)-lgs$",
+   "phase": "mepInterior",
+   "generator": "zoneLgs",
+   "desc": "LGS下地：中心セルが当該工区に属する間仕切壁ごとに下地フレームを1枚ずつ place（ランナー＋スタッドの枠として表現）。壁位置は建物モデルの walls が正。担当：軽鉄班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2／天井裏・内装調査（LGSは枠組み段階を表示）"
+  },
+  {
+   "kind": "zonePs",
+   "idRegex": "^z-(.+)-ps$",
+   "phase": "mepInterior",
+   "generator": "zonePs",
+   "desc": "PS縦管：工区内の PS シャフトごとに縦管を place。配管の背骨。担当：衛生班。",
+   "basis": "inferred",
+   "source": "天井裏・内装調査（PS立管）"
+  },
+  {
+   "kind": "zoneHanger",
+   "idRegex": "^z-(.+)-hanger$",
+   "phase": "mepInterior",
+   "generator": "zoneHanger",
+   "desc": "吊りボルト・支持材：空調ダクトランの経路上に支持チャンネルを place。ダクトより先に現れる。担当：設備支持班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 §2 天井裏の順序"
+  },
+  {
+   "kind": "zoneHvac",
+   "idRegex": "^z-(.+)-hvac1$",
+   "phase": "mepInterior",
+   "generator": "zoneHvac",
+   "desc": "ダクト・冷媒（隠蔽）：設備推論の空調ランから、ダクト（シャフト中心→X→Yのマンハッタン経路、天井裏最上位）を place → 冷媒管ペア → 室内機（対象室中心、躯体から吊り）。DS立管は階ごとに生成。天井裏で最大占有・最初に入るのがダクト。担当：空調班。",
+   "basis": "inferred",
+   "source": "WORK_STRUCTURE_V2 §2／天井裏調査／generated_equipment"
+  },
+  {
+   "kind": "zonePlumb",
+   "idRegex": "^z-(.+)-plmb1$",
+   "phase": "mepInterior",
+   "generator": "zonePlumb",
+   "desc": "衛生配管（隠蔽）：設備推論の衛生 横引きランをダクトより低い位置に place。担当：衛生班。",
+   "basis": "inferred",
+   "source": "天井裏調査／generated_equipment"
+  },
+  {
+   "kind": "zoneElec",
+   "idRegex": "^z-(.+)-elec1$",
+   "phase": "mepInterior",
+   "generator": "zoneElec",
+   "desc": "電気ラック（隠蔽）：設備推論の電気 横引きランからケーブルラックを place。ランが無い工区は最寄りPS→工区中心のラックを推論生成（basis=inferred を明記）。担当：電気班。",
+   "basis": "inferred",
+   "source": "天井裏調査／generated_equipment"
+  },
+  {
+   "kind": "zoneBoard",
+   "idRegex": "^z-(.+)-board$",
+   "phase": "mepInterior",
+   "generator": "zoneBoard",
+   "desc": "天井下地・ボード：室ごとに天井下地格子（野縁）→間仕切ボード→天井ボードの順に place。天井ボード＝隠蔽の成立であり、隠蔽設備（ダクト・配管・ラック）の後でのみ現れる。天井高は室の ceilingHeight。担当：ボード班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 §2／天井裏調査"
+  },
+  {
+   "kind": "zoneMep2",
+   "idRegex": "^z-(.+)-mep2$",
+   "phase": "mepInterior",
+   "generator": "zoneMep2",
+   "desc": "設備2次：室ごとにコンセント・スイッチ等のセット部材を place。担当：設備2次班。",
+   "basis": "default",
+   "source": "WORK_STRUCTURE_V2 内装チェーン"
+  },
+  {
+   "kind": "zoneFinish",
+   "idRegex": "^z-(.+)-finish$",
+   "phase": "mepInterior",
+   "generator": "zoneFinish",
+   "desc": "仕上げ：工区の壁ボード・天井ボードに state「仕上げ」を付与（新規部材なし）。担当：仕上げ班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 内装チェーン"
+  },
+  {
+   "kind": "zoneFloor",
+   "idRegex": "^z-(.+)-floor$",
+   "phase": "mepInterior",
+   "generator": "zoneFloor",
+   "desc": "床仕上げ：室ごとに床仕上げ板をスラブ直上に place。担当：床班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 内装チェーン"
+  },
+  {
+   "kind": "zoneDoor",
+   "idRegex": "^z-(.+)-door$",
+   "phase": "mepInterior",
+   "generator": "zoneDoor",
+   "desc": "建具：間仕切壁の開口（敷居なし・サッシ以外）ごとに建具を place。開口位置は建物モデルが正。担当：建具班。",
+   "basis": "rule",
+   "source": "建物モデル walls.openings"
+  },
+  {
+   "kind": "zoneFixture",
+   "idRegex": "^z-(.+)-mep3$",
+   "phase": "mepInterior",
+   "generator": "zoneFixture",
+   "desc": "器具付け：室ごとに照明セット、ダクトラン対象室に吹出口、水回り室（トイレ・洗面・給湯等）に衛生器具セットを place。受電ゲート（insp-power-act）成立が前提。担当：器具付け班。",
+   "basis": "default",
+   "source": "WORK_STRUCTURE_V2／受電ゲート"
+  },
+  {
+   "kind": "zoneClean",
+   "idRegex": "^z-(.+)-clean$",
+   "phase": "mepInterior",
+   "generator": "zoneClean",
+   "desc": "美装：工区中心での action イベント（部材なし）。担当：美装班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 内装チェーン"
+  },
+  {
+   "kind": "evRail",
+   "idRegex": "^ev-1$",
+   "phase": "elevator",
+   "generator": "evRail",
+   "desc": "EVレール：gameIntegration の乗用＋荷物用シャフトごとにガイドレール2本を全高で place。EVは危険な単線工程。担当：EV班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 EV単線"
+  },
+  {
+   "kind": "evCar",
+   "idRegex": "^ev-2$",
+   "phase": "elevator",
+   "generator": "evCar",
+   "desc": "EVかご・巻上機：シャフトごとにかごと頂部巻上機を place。担当：EV班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 EV単線"
+  },
+  {
+   "kind": "evTest",
+   "idRegex": "^ev-3$",
+   "phase": "elevator",
+   "generator": "evTest",
+   "desc": "EV配線・試運転：かごの move（昇降）イベント＋state「試運転調整」。受電ゲート成立が前提。担当：EV班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2／受電ゲート"
+  },
+  {
+   "kind": "evRelease",
+   "idRegex": "^ev-4$",
+   "phase": "elevator",
+   "generator": "evRelease",
+   "desc": "EV養生・工事用解放：かごに state「養生・工事用解放」。解放後は縦動線バフの起点（レンダラ側の解釈）。担当：EV班。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 EV単線"
+  },
+  {
+   "kind": "extBuried",
+   "idRegex": "^ext-1$",
+   "phase": "exteriorWorks",
+   "generator": "extBuried",
+   "desc": "外構 埋設配管・排水：敷地を4セクター（南・北駐車場／東荷捌き場／西緑地）に分け、各セクターに埋設管2線を place。ユンボの move を伴う。担当：外構班。",
+   "basis": "inferred",
+   "source": "3D_VIEW_SPEC §3.7／外構調査"
+  },
+  {
+   "kind": "extBase",
+   "idRegex": "^ext-2$",
+   "phase": "exteriorWorks",
+   "generator": "extBase",
+   "desc": "外構 路盤・縁石：セクターを12mタイルに割り、路盤板をタイル順に place。担当：外構班。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.7"
+  },
+  {
+   "kind": "extPave",
+   "idRegex": "^ext-3$",
+   "phase": "exteriorWorks",
+   "generator": "extPave",
+   "desc": "外構 舗装：緑地以外のセクターに舗装板をタイル順に place。フィニッシャーとローラーの move を伴う。担当：外構班。",
+   "basis": "rule",
+   "source": "3D_VIEW_SPEC §3.7／外構調査"
+  },
+  {
+   "kind": "extFinish",
+   "idRegex": "^ext-4$",
+   "phase": "exteriorWorks",
+   "generator": "extFinish",
+   "desc": "外構 植栽・ライン・美装：駐車場セクターに区画線と照明柱、西緑地に樹木、荷捌き場に照明柱を place。担当：外構班。",
+   "basis": "default",
+   "source": "3D_VIEW_SPEC §3.7"
+  },
+  {
+   "kind": "closeTest",
+   "idRegex": "^close-1$",
+   "phase": "closing",
+   "generator": "closeTest",
+   "desc": "総合試運転：工区ごとに action イベント。受電ゲート成立が前提。担当：設備班。",
+   "basis": "rule",
+   "source": "計画タスク分類／受電ゲート"
+  },
+  {
+   "kind": "closeInspect",
+   "idRegex": "^close-[2-5]$",
+   "phase": "closing",
+   "generator": "closeInspect",
+   "desc": "社内自主検査→監理者検査→施主検査→完了検査：主出入口に検査員＋inspect イベント。順序は計画の依存が保証。担当：検査員＋監督。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2 竣工検査の順序"
+  },
+  {
+   "kind": "closeHandover",
+   "idRegex": "^close-6$",
+   "phase": "closing",
+   "generator": "closeHandover",
+   "desc": "引渡し：仮設群（仮囲い・事務所・仮設電柱等）を remove し、gate「引渡し」イベントで締める。担当：監督。",
+   "basis": "rule",
+   "source": "WORK_STRUCTURE_V2"
+  },
+  {
+   "kind": "roofOutdoorUnits",
+   "idRegex": null,
+   "phase": "roofEquipment",
+   "generator": null,
+   "taskBinding": null,
+   "desc": "室外機（屋上）：架台→揚重据付→冷媒配管→受電後ファン試運転。ただし ConstructionPlan に室外機の独立タスクが存在しない（空調は工区 hvac1/mep3 に内包）ため、計画に無い作業を発明しない。gap として登録のみ。",
+   "basis": "gap",
+   "source": "屋上設備調査／WORK_STRUCTURE_V2（主ゲーム側の系統）",
+   "gapNote": "ConstructionPlan に室外機タスクなし。計画側にタスクが新設されたら本規則を有効化する。"
+  },
+  {
+   "kind": "waterTank",
+   "idRegex": null,
+   "phase": "roofEquipment",
+   "generator": null,
+   "taskBinding": null,
+   "desc": "受水槽（屋外・南側）：基礎→FRPパネル組立→埋設配管→清掃・消毒→水質検査→給水開始。室外機と同様、ConstructionPlan に独立タスクが無いため gap 登録のみ。",
+   "basis": "gap",
+   "source": "屋上設備調査／WORK_STRUCTURE_V2（主ゲーム側の系統）",
+   "gapNote": "ConstructionPlan に受水槽タスクなし。計画側にタスクが新設されたら本規則を有効化する。"
+  }
+ ],
+ "aggregation": {
+  "_comment": "部材粒度の原則は全数（柱・梁・杭・基礎・外壁・建具は1つずつ）。ただし面状に進む施工と対で施工される配管は、実態の施工単位に合わせて集約する。集約しても出現順序（フロントの進行）は帯・ベイ単位で保持される。",
+  "rowRun": {
+   "kinds": [
+    "excavationTile",
+    "blinding",
+    "roofSheet",
+    "roofProtection"
+   ],
+   "unit": "行（Y方向のセル列）ごとの連続ラン",
+   "reason": "掘削底・捨てコンは面の進捗、防水シートはロールの帯として施工されるため"
+  },
+  "structuralBay": {
+   "kinds": [
+    "deckPanel",
+    "rebarMat",
+    "groundSlab"
+   ],
+   "unit": "行 × 構造スパン（構造軸間）",
+   "reason": "デッキプレート・配筋・土間打設は構造ベイ単位で施工される。配筋の本数は rebarMat.bars に保持"
+  },
+  "pairSet": {
+   "kinds": [
+    "refrigerantPipe"
+   ],
+   "unit": "液管＋ガス管のペア1式（pair=true）",
+   "reason": "冷媒配管は常に対で施工・保温されるため"
+  }
+ },
+ "viewTiers": {
+  "_comment": "描画階層（3D_VIEW_SPEC §3.9 の段階描画が根拠）。全体表示では天井裏はダクト＋ラックのみ、内装部材は描かない。面数予算（不透明面10万）は全体表示に対する見積もりに適用し、全詳細の合計も併記する。",
+  "detailKinds": [
+   "lgsFrame",
+   "wallBoard",
+   "ceilFrame",
+   "ceilingBoard",
+   "floorFinish",
+   "doorLeaf",
+   "outletSet",
+   "lightSet",
+   "diffuser",
+   "plumbFixtureSet",
+   "indoorUnit",
+   "hangerSet",
+   "refrigerantPipe",
+   "plumbPipe",
+   "psRiser",
+   "ductRiser"
+  ],
+  "wholeViewMepKinds": [
+   "duct",
+   "cableRack"
+  ]
+ }
+}

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>現場監督 — 立て直しの14日間（試作 v0.4）</title>
+<style>
+  html{background:#f5efe2}
+  body{font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;max-width:780px;margin:0 auto;padding:20px;line-height:1.7;color:#191919 !important;background:#f5efe2 !important}
+  h1{font-size:22px;line-height:1.4;color:#191919} h2{font-size:17px;margin-top:26px;color:#191919}
+  p,div,span{color:#191919}
+  .card{background:#ffffff;border:2px solid #222;border-radius:12px;padding:16px;margin:14px 0;color:#191919}
+  .stats{display:flex;gap:8px;flex-wrap:wrap}
+  .stat{flex:1;min-width:100px;background:#ffffff;border:1px solid #bbb;border-radius:8px;padding:8px 10px;color:#191919}
+  .stat b{font-size:20px;display:block;color:#191919}
+  button{display:block;width:100%;text-align:left;margin:8px 0;padding:12px;border:2px solid #222;border-radius:10px;background:#ffffff;color:#191919 !important;font-size:15px;cursor:pointer}
+  button:hover{background:#ffe9a8} button:disabled{opacity:.45;cursor:default}
+  .tag{display:inline-block;background:#222;color:#fff !important;border-radius:20px;padding:2px 10px;font-size:12px}
+  .tag.warn{background:#b45309}.tag.bad{background:#b00020}
+  .log{background:#141414;color:#f2f2f2 !important;border-radius:10px;padding:12px;font-size:13px;white-space:pre-wrap;max-height:240px;overflow:auto}
+  .small{font-size:13px;color:#555}
+  .srow{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:12px}
+  .slabel{width:150px;flex:none;text-align:right}
+  .strack{position:relative;flex:1;height:18px;background:#efe9da;border:1px solid #ccc;border-radius:4px;overflow:hidden}
+  .splan{position:absolute;top:2px;height:14px;border:2px solid #94a3b8;border-radius:3px}
+  .sdone{position:absolute;top:5px;height:8px;background:#2b6cb0;border-radius:2px;transition:width .8s}
+  .sproj{position:absolute;top:5px;height:8px;background:repeating-linear-gradient(45deg,#90cdf4 0 5px,#dbeafe 5px 10px);border-radius:2px;transition:width .8s}
+  .sproj.late{background:repeating-linear-gradient(45deg,#f87171 0 5px,#fee2e2 5px 10px)}
+  .stoday{position:absolute;top:0;height:18px;border-left:2px dashed #e8590c}
+  .sval{width:110px;flex:none}
+  .board{display:flex;flex-wrap:wrap;gap:2px;margin:8px 0}
+  .cell{width:13px;height:13px;border-radius:3px;background:#ddd;border:1px solid #c8c8c8}
+  .cell.past{background:#a8a29e}.cell.now{background:#e8590c;border-color:#7c2d12;box-shadow:0 0 0 2px #ffd8a8}.cell.mile{background:#ffe9a8;border-color:#b45309}
+</style>
+</head>
+<body>
+<h1>🏗️ 現場監督 — 立て直しの14日間</h1>
+<p class="small">試作 v0.4 ／ 計画は正しく組んである。巡回もKYも、毎日全部やる。それでも現場は、外部の都合で崩れていく。あなたの仕事は「当てる」ことでも「天秤で選ぶ」ことでもなく、<b>崩れた工程を立て直すこと</b>。計画では14日目に完了、契約工期は15日目——バッファは1日だけ。</p>
+
+<div class="board" id="board"></div>
+<p class="small">キャリアマップ：全80マス（現在は現場1の途中）。</p>
+
+<div class="stats">
+  <div class="stat">📅 日付<b id="day">1日目</b></div>
+  <div class="stat">⏳ 完了見込み<b id="proj">14日目</b></div>
+  <div class="stat">💴 予算<b id="money">100</b></div>
+  <div class="stat">😮‍💨 現場の疲労<b id="fatigue">0</b></div>
+  <div class="stat">🔧 是正の借り<b id="debt">0件</b></div>
+  <div class="stat">🏢 打設の予約<b id="pour">9日目</b></div>
+</div>
+
+<h2>📊 工程表（枠＝計画 ／ 濃色＝実績 ／ 縞＝見込み。赤い縞は遅れの伝播）</h2>
+<div class="card" id="sched"></div>
+
+<div id="game"></div>
+<h2>現場日報ログ</h2>
+<div class="log" id="log"></div>
+<p><button onclick="resetGame()">🔄 はじめからやり直す</button></p>
+<p class="small">遊んだあと教えてほしいこと：① どこで「計画が崩れた」と感じた？ ② 立て直しの手は足りた？ ③ 理不尽さは「現場あるある」の範囲だった？</p>
+
+<script>
+let S;
+const DAYS=16;
+const TASKS=[
+ {id:'t1', name:'仮設・墨出し', crew:'鳶・墨出し', dur:1, pred:[], outdoor:false},
+ {id:'t2', name:'1F 型枠', crew:'型枠大工', dur:2, pred:['t1'], outdoor:true},
+ {id:'t3', name:'1F 配筋', crew:'鉄筋屋', dur:3, pred:['t2'], outdoor:false},
+ {id:'t4', name:'スリーブ・インサート', crew:'設備・電気', dur:1, pred:['t3'], outdoor:false},
+ {id:'t5', name:'配筋検査', crew:'監理者立会い', dur:1, pred:['t3','t4'], outdoor:false, mile:true},
+ {id:'t6', name:'1F コンクリート打設', crew:'ポンプ・土工', dur:1, pred:['t5'], outdoor:true, mile:true, key:true},
+ {id:'t7', name:'2F 型枠', crew:'型枠大工', dur:2, pred:['t6'], outdoor:true},
+ {id:'t8', name:'2F 配筋', crew:'鉄筋屋', dur:2, pred:['t7'], outdoor:false},
+ {id:'t9', name:'養生・検査・引渡し準備', crew:'全業者', dur:1, pred:['t8'], outdoor:false},
+];
+const DUR0={}; TASKS.forEach(t=>DUR0[t.id]=t.dur);
+const PLAN={};
+(function(){ const fin={}; TASKS.forEach(t=>{ const s=t.pred.length? Math.max(...t.pred.map(p=>fin[p]))+1 : 1; PLAN[t.id]=[s, s+t.dur-1]; fin[t.id]=s+t.dur-1; }); })();
+const PLAN_FINISH=PLAN['t9'][1];
+const DEADLINE=15;
+const RAIN={3:true, 11:true};
+const BASELINE=[
+ "巡回：全工区を回り、指摘はその場で是正指示。KY：本日の作業と危険を全員で共有した。",
+ "朝礼・KY終了。巡回では全工区を確認し、気になる点は職長へ直接伝えた。",
+ "全工区巡回済み。KYでは今日の作業手順と危険箇所を全班に周知した。",
+];
+function resetGame(){
+  TASKS.forEach(t=>t.dur=DUR0[t.id]);
+  S={day:1, phase:"morning", money:100, fatigue:0, debt:0, debtTotal:0,
+     ot:false, otUsedYesterday:false, boost:{}, senkou:{}, pourBooked:9, pourMoved:false,
+     shortage:false, shortageHard:false, deliverySlow:false, slowDay:0,
+     findingsDone:false, hiyariDone:false, changeAccepted:false,
+     work:{}, started:{}, finished:{}, shock:null, _acts:[]};
+  TASKS.forEach(t=>{ S.work[t.id]=0; });
+  document.getElementById("log").textContent="工事開始。計画は14日目完了、契約工期は15日目。";
+  log("段取りは組んである。あとは現場が計画通りに進むかどうか——大抵、進まない。");
+  render();
+}
+function log(m){ const el=document.getElementById("log"); el.textContent += "\n"+m; el.scrollTop=el.scrollHeight; }
+function T(id){ return TASKS.find(t=>t.id===id); }
+function isDone(id){ return S.work[id] >= T(id).dur - 1e-9; }
+function predDone(id){ return T(id).pred.every(p=> S.finished[p] !== undefined && S.finished[p] < S.day); }
+function canStart(id){
+  if(S.started[id] || isDone(id)) return false;
+  if(predDone(id)) return true;
+  return !!S.senkou[id] && T(id).pred.every(p=> (S.finished[p]!==undefined && S.finished[p]<S.day) || S.work[p]/T(p).dur >= 0.7);
+}
+function nextWorkDay(){ return (S.phase==="evening"||S.phase==="done") ? S.day+1 : S.day; }
+function projDates(){
+  const fin={}, out={};
+  TASKS.forEach(t=>{
+    let s,f;
+    if(isDone(t.id)){ s=S.started[t.id]; f=S.finished[t.id]; }
+    else if(S.started[t.id]){ s=S.started[t.id]; const rem=t.dur - S.work[t.id]; f=(nextWorkDay()-1) + Math.ceil(rem - 1e-9); }
+    else { const predFin=t.pred.length? Math.max(...t.pred.map(p=>fin[p])) : 0; s=Math.max(predFin+1, nextWorkDay()); f=s + Math.ceil(t.dur) - 1; }
+    fin[t.id]=f; out[t.id]=[s,f];
+  });
+  return out;
+}
+function projFinish(){ return projDates()['t9'][1]; }
+function signals(){
+  const s=[];
+  if(S.day===1) s.push("天気予報：3日目は小雨の見込み（屋外作業は進みが落ちる）");
+  if(S.day===2) s.push("天気予報：明日は小雨の見込み");
+  if(S.day===4) s.push("配筋の職長、夕方の電話の歯切れが悪かった（何か抱えていそうだ）");
+  if(S.day===6) s.push("噂：支店の動きが慌ただしい。本社の安全パトロールが近いかもしれない");
+  if(S.day===9) s.push("天気予報：11日目は小雨の見込み");
+  if(S.day===9) s.push("施主が間取りの変更を考えているという話が、設計経由で聞こえてきた");
+  return s;
+}
+function morningShock(){
+  if(S.day===4) return {title:"朝の電話 — 鉄筋の搬入が遅れる", text:"運送会社から連絡。鉄筋の搬入が昼過ぎになるという。配筋は今日から始まる予定だった。",
+    choices:[
+     {t:"昼過ぎの搬入を待つ", f:()=>{ S.deliverySlow=true; log("搬入待ち：今日の配筋は半日分しか進まない。"); }},
+     {t:"別便を手配する（費用がかかる）", f:()=>{ S.money-=4; log("別便を手配：費用はかかったが、搬入は朝のうちに揃った。"); }}]};
+  if(S.day===5) return {title:"朝の電話 — 配筋の職人が2人来れない", text:"職長から電話。「他の現場が押していて、今日と明日、職人が2人回せない」。配筋は工程の真ん中だ。",
+    choices:[
+     {t:"他社に応援を頼む（費用がかかる）", f:()=>{ S.money-=8; log("応援手配：費用はかかったが、人数は揃った。"); }},
+     {t:"その人数で進める", f:()=>{ S.shortage=true; log("人数不足のまま進める：今日と明日の配筋は半分しか進まない。"); }},
+     {t:"職長に無理を言って来てもらう", f:()=>{ S.shortageHard=true; log("無理を言った：今日は来てくれた。だが職人の疲労が溜まっている——明日が心配だ。"); }}]};
+  if(S.day===10 && !S.changeAccepted) return {title:"設計変更の打診 — 間取りを変えたい", text:"施主から、2Fの間取り変更の打診。配筋の組み直しが必要になる話だ。今の工程の余裕で結末が変わる。",
+    choices:[
+     {t:"変更を受ける", f:()=>{ S.changeAccepted=true; T('t8').dur+=1; log("変更を受けた：2F配筋が1日分増えた。施主は満足そうだ。"); }},
+     {t:"工程表を見せて、影響を説明する", f:()=>{ if(projFinish()<=PLAN_FINISH){ log("説明した：完了見込みが計画内にある今なら、変更は次期工事に回すことで話がついた。変更は見送られた。"); } else { S.changeAccepted=true; T('t8').dur+=1; S.money-=5; log("説明したが：すでに工程が遅れている状態では押し切れなかった。変更は入り、調整費もかかった。"); } }}]};
+  return null;
+}
+function startWork(){
+  S.shock=null; S.phase="work"; render();
+  setTimeout(()=>{ simulateDay(); if(S.phase!=="done"){ S.phase="evening"; } render(); }, 600);
+}
+function simulateDay(){
+  const d=S.day;
+  if(RAIN[d]) log("☔ 小雨。屋外作業は進みが落ちる（多少の雨では止まれないのがこの仕事）。");
+  if(d===7) log("🏢 予告なしの本社パトロール。現場は止まり、若手は露払いの清掃、所長が表で対応した。作業は半日分しか進まない。");
+  if(d===S.pourBooked && !S.started['t6'] && !isDone('t6')){
+    S.money-=12; S.pourBooked=projDates()['t6'][0];
+    log("💸 打設の予約日に間に合わず、生コンとポンプ車のキャンセル料がかかった。予約は見込み日に組み直した（"+S.pourBooked+"日目）。");
+  }
+  const otUsed=S.ot; S.ot=false; S.otUsedYesterday=otUsed;
+  if(otUsed){ S.fatigue+=1; log("🌙 昨夜決めた残業で、今日は作業を積み増した。"); }
+  if(S.slowDay===d) log("⚠️ 昨日のヒヤリハットを受け、安全確認を入念にやった。全体の進みは半分になる。");
+  TASKS.forEach(t=>{
+    if(isDone(t.id)) return;
+    if(!S.started[t.id] && !canStart(t.id)) return;
+    if(!S.started[t.id]){ S.started[t.id]=d; log("▶ 開始：「"+t.name+"」（"+t.crew+"）"); }
+    let v=1;
+    if(RAIN[d] && t.outdoor) v*=0.4;
+    if(d===7) v*=0.5;
+    if(S.shortage && t.id==='t3') v*=0.5;
+    if(S.shortageHard && d===6 && t.id==='t3') v*=0.5;
+    if(S.deliverySlow && d===4 && t.id==='t3') v*=0.5;
+    if(S.slowDay===d) v*=0.5;
+    if(S.boost[t.id] && S.boost[t.id]>=d) v*=1.6;
+    if(otUsed) v+=0.5;
+    if(S.fatigue>=3) v*=0.85;
+    S.work[t.id]+=v;
+    if(isDone(t.id)){
+      S.work[t.id]=t.dur; S.finished[t.id]=d;
+      log("✔ 完了：「"+t.name+"」（計画 "+PLAN[t.id][1]+"日目 ／ 実績 "+d+"日目）");
+      if(t.id==='t5' && S.debt>0 && !S.findingsDone){
+        S.findingsDone=true; const n=S.debt; S.debt=0;
+        t.dur+=0.5*n; S.work[t.id]=t.dur-0.5*n; delete S.finished[t.id];
+        S.money-=3*n;
+        log("🔍 配筋検査の指摘 "+n+"件：先行作業で進めた部分の是正が必要になった。検査は終わらず、是正対応が続く（調整費もかかった）。");
+      }
+    }
+  });
+  S.deliverySlow=false;
+  if(S.fatigue>=4 && !S.hiyariDone){
+    S.hiyariDone=true; S.fatigue=2; S.slowDay=d+1;
+    log("⚠️ ヒヤリハット：疲労の溜まった職人が足場でよろけた。大事にはならなかったが、明日は安全確認で全体の進みが半分になる。");
+  }
+  if(isDone('t9')) finishGame();
+}
+function eveningActions(){
+  const acts=[];
+  TASKS.forEach(t=>{
+    if(S.money>=8 && !isDone(t.id) && (S.started[t.id] || predDone(t.id)) && !(S.boost[t.id]>=S.day+1)){
+      acts.push({t:"応援を手配する：「"+t.name+"」（手配費がかかる。明日・明後日の進みが速くなる）", f:()=>{ S.money-=8; S.boost[t.id]=S.day+2; log("応援手配：「"+t.name+"」に職人を増やした。"); }});
+    }
+  });
+  acts.push({t:"明日は残業して積み増す（人件費がかかる。現場の疲労が溜まる）", f:()=>{ if(S.money>=6){ S.money-=6; S.ot=true; log("残業を決めた：明日は積み増す。"); } else { log("予算が足りず、残業は組めなかった。"); } }});
+  TASKS.forEach(t=>{
+    if(!S.started[t.id] && !isDone(t.id) && !predDone(t.id) && t.pred.length && t.pred.every(p=> S.work[p]/T(p).dur>=0.7) && !S.senkou[t.id]){
+      acts.push({t:"先行を許可する：「"+t.name+"」を前工程の完了前に始める（検査で是正が返ってくるかもしれない）", f:()=>{ S.senkou[t.id]=true; S.debt+=1; S.debtTotal+=1; log("先行許可：「"+t.name+"」を始めた。終わっていない部分との取り合いは、後で効いてくるかもしれない。"); }});
+    }
+  });
+  if(!isDone('t6') && !S.started['t6']){
+    const ps=projDates()['t6'][0];
+    if(ps>S.pourBooked && S.money>=6) acts.push({t:"打設日を "+ps+"日目に変更する交渉をする（調整費がかかる。当日のキャンセルよりは安い）", f:()=>{ S.money-=6; S.pourBooked=ps; S.pourMoved=true; log("打設日を変更："+ps+"日目で組み直した。関係者への連絡は済ませた。"); }});
+  }
+  acts.push({t:"このまま進める（立て直しはしない）", f:()=>{ log("立て直しはしなかった。計画の回復は現場の踏ん張りにかかる。"); }});
+  return acts.slice(0,5);
+}
+function nextDay(){
+  if(!S.otUsedYesterday && S.fatigue>0) S.fatigue-=1;
+  S.day++;
+  if(S.day>17){ finishGame(); return; }
+  S.phase="morning"; S.shock=morningShock(); render();
+}
+function renderBoard(){
+  const miles={0:"入社",13:"現場2",27:"課長",45:"大規模現場",60:"所長",79:"定年"};
+  let h=""; const cur=S.phase==="done"?10:3;
+  for(let i=0;i<80;i++){ let cls="cell"; if(i<cur) cls+=" past"; if(i===cur) cls+=" now"; if(miles[i]!==undefined) cls+=" mile"; h+=`<div class="${cls}" title="${miles[i]||(i+1)+'マス目'}"></div>`; }
+  document.getElementById("board").innerHTML=h;
+}
+function renderSched(){
+  const proj=projDates();
+  const todayLeft=((Math.min(S.day,DAYS)-1)/DAYS*100).toFixed(1);
+  document.getElementById("sched").innerHTML = TASKS.map(t=>{
+    const [ps,pe]=PLAN[t.id]; const [as,af]=proj[t.id];
+    const done=isDone(t.id), started=S.started[t.id];
+    let bars=`<div class="splan" style="left:${((ps-1)/DAYS*100)}%;width:${((pe-ps+1)/DAYS*100)}%"></div>`;
+    if(started){
+      const aLeft=(started-1)/DAYS*100;
+      const doneW=S.work[t.id]/DAYS*100;
+      bars+=`<div class="sdone" style="left:${aLeft}%;width:${doneW}%"></div>`;
+      if(!done){
+        const remFrom=(started-1)+S.work[t.id];
+        const remW=Math.max(0,(af-remFrom)/DAYS*100);
+        bars+=`<div class="sproj ${af>pe?'late':''}" style="left:${aLeft+doneW}%;width:${remW}%"></div>`;
+      }
+    } else {
+      bars+=`<div class="sproj ${af>pe?'late':''}" style="left:${((as-1)/DAYS*100)}%;width:${((af-as+1)/DAYS*100)}%"></div>`;
+    }
+    const status= done? "完了（"+S.finished[t.id]+"日目）" : started? "作業中・見込み"+af+"日目" : "開始見込み"+as+"日目";
+    return `<div class="srow"><div class="slabel">${t.mile?'◆ ':''}${t.name}</div><div class="strack">${bars}<div class="stoday" style="left:${todayLeft}%"></div></div><div class="sval">${status}</div></div>`;
+  }).join("");
+}
+function render(){
+  renderBoard(); renderSched();
+  document.getElementById("day").textContent=S.day+"日目";
+  document.getElementById("proj").textContent= isDone('t9')? "完了" : projFinish()+"日目"+(projFinish()>DEADLINE?"（工期超過）":projFinish()>PLAN_FINISH?"（計画より遅れ）":"");
+  document.getElementById("money").textContent=S.money;
+  document.getElementById("fatigue").textContent=S.fatigue;
+  document.getElementById("debt").textContent=S.debt+"件";
+  document.getElementById("pour").textContent=S.pourBooked+"日目";
+  const g=document.getElementById("game");
+  if(S.phase==="done"){ return; }
+  if(S.phase==="morning"){
+    if(S.shock){
+      const sh=S.shock;
+      g.innerHTML=`<div class="card"><span class="tag bad">早朝の連絡</span><h2>${sh.title}</h2><p>${sh.text}</p>
+      ${sh.choices.map((c,i)=>`<button onclick="resolveShock(${i})">${c.t}</button>`).join("")}</div>`;
+    } else {
+      const sig=signals();
+      g.innerHTML=`<div class="card"><span class="tag">朝</span><h2>${S.day}日目 — 朝礼・KY・巡回</h2>
+      <p>${BASELINE[S.day % BASELINE.length]}</p>
+      ${sig.length? "<p><b>今日の材料：</b><br>"+sig.map(x=>"・"+x).join("<br>")+"</p>" : "<p>特記事項なし。</p>"}
+      <button onclick="startWork()">作業開始 →</button></div>`;
+    }
+  } else if(S.phase==="work"){
+    g.innerHTML=`<div class="card"><span class="tag">日中</span><h2>現場は動いている…</h2><p>巡回と確認を続けながら、作業の進みを見ている。</p></div>`;
+  } else if(S.phase==="evening"){
+    const pf=projFinish();
+    S._acts=eveningActions();
+    g.innerHTML=`<div class="card"><span class="tag warn">夕方 — 工程の立て直し</span><h2>${S.day}日目の終わり</h2>
+    <p>完了見込みは <b>${pf}日目</b>（計画 ${PLAN_FINISH}日目／工期 ${DEADLINE}日目）。${pf>PLAN_FINISH? "遅れが後工程に伝わっている。工程表の赤い縞がそれだ。" : "計画の範囲内にある。"}</p>
+    <p>今夜できる立て直しは1つだけ。</p>
+    ${S._acts.map((a,i)=>`<button onclick="doAction(${i})">${a.t}</button>`).join("")}</div>`;
+  }
+}
+function resolveShock(i){ S.shock.choices[i].f(); S.shock=null; render(); }
+function doAction(i){ S._acts[i].f(); if(S.phase==="done") return; render(); setTimeout(()=>{ if(S.phase!=="done") nextDay(); }, 400); }
+function finishGame(){
+  if(S.phase==="done") return;
+  S.phase="done";
+  const f=S.finished['t9'];
+  let title, body;
+  if(f && f<=PLAN_FINISH){ title="🎉 計画内竣工"; body="完了は "+f+" 日目。計画（"+PLAN_FINISH+"日目）の中で収めた。崩れかけた工程を、立て直し続けた結果だ。"; }
+  else if(f && f<=DEADLINE){ title="🏁 工期内に竣工（バッファ消滅）"; body="完了は "+f+" 日目。契約工期（"+DEADLINE+"日目）は守ったが、計画の余裕は全部使った。"; }
+  else if(f){ title="😖 工期超過で竣工"; body="完了は "+f+" 日目。工期（"+DEADLINE+"日目）を "+(f-DEADLINE)+" 日超えた。遅れは一度入ると、最後までついてくる。"; }
+  else { title="⏰ 工程は崩れたまま終わった"; body="17日目を過ぎても完了しなかった。外部要因の連鎖を、立て直しきれなかった。"; }
+  log("—— "+title+"："+body);
+  log("最終結果：予算残 "+S.money+" ／ 是正の借り累計 "+S.debtTotal+"件 ／ 打設の予約変更 "+(S.pourMoved?"あり":"なし"));
+  render();
+  document.getElementById("game").innerHTML=`<div class="card"><h2>${title}</h2><p>${body}</p><p>最終結果：予算残 ${S.money} ／ 是正の借り累計 ${S.debtTotal}件 ／ 完了 ${f? f+"日目" : "未完"}</p><p class="small">もう一度遊ぶときは下の「はじめからやり直す」をどうぞ。外部要因の来方は同じでも、立て直し方で結末は変わります。</p></div>`;
+}
+resetGame();
+</script>
+</body>
+</html>
