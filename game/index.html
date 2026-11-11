@@ -4171,6 +4171,18 @@ function predDone(id){
     return S.finished[p] < S.day || (t.fast && S.finished[p] <= S.day);
   });
 }
+/* 完了日の整合性ガード：進捗が完了に届いているのに完了日 (S.finished) が
+   立っていないタスクは、どの経路で進んでも二度と後続が開始できない
+   （predDone が完了日で判定するため）。見つけ次第、完了日を補って
+   工程が止まらないようにする（aruProg 側でも立てるが、将来の経路への保険） */
+function repairFinished(finDay){
+  TASKS.forEach(function(t){
+    if(isDone(t.id) && S.finished[t.id] === undefined){
+      if(S.started[t.id] === undefined) S.started[t.id] = finDay;
+      S.finished[t.id] = finDay;
+    }
+  });
+}
 function pipeBlocking(id){ return id === 'F2C_fit' && S.changeAccepted && S.pipeIdx >= 0 && S.pipeIdx < 4; }
 function canStart(id){
   var t = T(id);
@@ -4364,7 +4376,19 @@ function morningShock(){
      その対応の意味（なぜそうするか）を1行添える（担当者のセリフにはしない。
      お知らせログにも同じ形式で残る）
    - 軽微なものは slot:'auto' で方針どおり自動処理され、お知らせに流れるだけ */
-function aruProg(tid, amt){ if(!tid || isDone(tid)) return; var t = T(tid); if(t) S.work[tid] = Math.min(t.dur, (S.work[tid] || 0) + amt); }
+function aruProg(tid, amt){
+  if(!tid || isDone(tid)) return;
+  var t = T(tid); if(!t) return;
+  S.work[tid] = Math.min(t.dur, (S.work[tid] || 0) + amt);
+  /* simulateDay の外で完了に届いた時も完了日を必ず立てる。完了日が無いまま
+     完了したタスクは simulateDay の冒頭で読み飛ばされ、二度と完了日が付かない。
+     後続タスクの predDone は完了日で判定するため、この状態になると後続が
+     永久に開始できず工程全体が止まる（柏で66日目に止まって見えた不具合の本体） */
+  if(isDone(tid)){
+    if(S.started[tid] === undefined) S.started[tid] = S.day;
+    if(S.finished[tid] === undefined) S.finished[tid] = S.day;
+  }
+}
 function aruFat(d){ S.fatigue = Math.max(0, S.fatigue + d); }
 function aruDue(days, msg, f){ S.aruDue = S.aruDue || []; S.aruDue.push({day:S.day + days, msg:msg || null, f:f || null}); }
 function aruCrewFat(k, d){ if(k && S.crewFatigue && S.crewFatigue[k] != null) S.crewFatigue[k] = Math.max(0, Math.min(5, S.crewFatigue[k] + d)); }
@@ -5670,6 +5694,7 @@ function causeReviewHTML(){
 function simulateDay(){
   var d = S.day;
   if(isClosedDay(d)) return; /* 閉所日は工事が進まない（安全側のガード） */
+  repairFinished(d); /* 作業前：完了日の無い完了タスクを補い、後続の開始条件を回復させる */
   levyDaily(); /* 継続的な手（人員追加／急かす／残業依頼）の維持費・疲労・安全と自然解消 */
   if(RAIN[d]) log('小雨 — 屋外は進みが落ちる');
   if(patrolDay(d)) log((patrolKind(d) === 'quality' ? '品質パトロール（監理者）' : '本社安全パトロール') + ' — 作業は通常どおり進み、巡回で指摘 ' + (S.patrolToday ? S.patrolToday.findings.length : 0) + '件');
@@ -6195,6 +6220,7 @@ function nextDay(){
     else S.pipeIdx += 1;
   }
   S.day++;
+  repairFinished(S.day - 1); /* 前日までに完了へ届いたタスクの完了日を補う（後続が翌日から動けるように） */
   /* 閉所日程：その日の閉所実績を確定し、連続作業日数を数える。
      閉所が少ないまま連続作業が続くと、監督の疲労が抜けずに蓄積する */
   S.closeHist[S.day] = closedByLv(S.closeLv, S.day);
@@ -6504,17 +6530,37 @@ function convDraw(ctx, W, H, now){
   drawList.forEach(function(cv){
     var ln = cv.lines[cv.li]; if(!ln) return;
     var isPhone = !!cv.phone;
-    var sp = isPhone && ln.who === 'phone' ? {x:W - 60, y:64} : (cv.pos[ln.who] || cv.pos.sup || {x:W / 2, y:H / 2});
-    if(!isPhone && typeof ZOOM !== 'undefined' && ZOOM === '3d' && typeof g3ProjectPt === 'function'){
-      /* 3D：話者の現在位置（G3.spkは毎フレーム更新）を投影して吹き出しを追随させる */
-      var anc3 = (typeof G3 !== 'undefined' && G3.spk && (G3.spk[ln.who] || G3.spk.sup)) || (cv.pos3 && (cv.pos3[ln.who] || cv.pos3.sup));
-      if(anc3){ var pr3 = g3ProjectPt(anc3, W, H); if(pr3) sp = pr3; }
+    var bs = 1; /* 吹き出しの倍率：発言キャラの画面上の大きさに連動させる */
+    var sp = null;
+    if(isPhone && ln.who === 'phone'){
+      sp = {x:W - 60, y:64}; /* 電話の相手は画面上の人物ではないので倍率は1のまま */
+    } else if(typeof ZOOM !== 'undefined' && ZOOM === '3d' && typeof g3ProjectPt === 'function'){
+      /* 3D：話者の現在位置（G3.spkは毎フレーム更新）を投影して吹き出しを追随させる。
+         G3.spk に居ない話者は、このフレームで3Dの人物として描かれていない＝吹き出しも出さない。
+         建物に隠れる位置の話者も、人物の描画可否（D-02）と判定を合わせて出さない */
+      var anc3 = (typeof G3 !== 'undefined' && G3.spk) ? (G3.spk[ln.who] || G3.spk.sup) : null;
+      if(!anc3) return;
+      if(typeof g3SpkHidden === 'function' && g3SpkHidden(anc3)) return;
+      var pr3 = g3ProjectPt(anc3, W, H); if(!pr3) return;
+      sp = pr3;
+      /* 倍率：人物の画面上の身長（頭頂アンカーから表示身長3.0mぶん下を投影した差）に
+         比例させる。アイソメのスプライト高さ33pxを1倍の基準とし、可読性が保てる
+         範囲で下限・上限を設ける（寄れば大きく、引けば小さく） */
+      var prB = g3ProjectPt({x:anc3.x, y:anc3.y - 3.0, z:anc3.z}, W, H);
+      if(prB) bs = Math.max(0.8, Math.min(2.2, Math.abs(pr3.y - prB.y) / 33));
+    } else {
+      /* アイソメ／平面図：今フレームで実際に描かれた話者（ISO_SPK：addCharが登録）の
+         位置だけを使う。描かれていない話者の吹き出しは出さない。
+         スプライトの高さは固定33pxなので、倍率は基準どおり1 */
+      var liveIso = (typeof ISO_SPK !== 'undefined') ? (ISO_SPK[ln.who] || ISO_SPK.sup) : null;
+      if(!liveIso) return;
+      sp = liveIso;
     }
     var label = ln.who === 'phone' ? '📞 ' + cv.phone : (CONV_NAMES[ln.who] || '');
-    ctx.font = '600 10.5px sans-serif';
+    ctx.font = '600 ' + (10.5 * bs) + 'px sans-serif';
     var fullW = ctx.measureText(ln.text).width;
-    var tw = Math.min(190, fullW);
-    var bw = tw + 18;
+    var tw = Math.min(190 * bs, fullW);
+    var bw = tw + 18 * bs;
     var line1 = ln.text, line2 = '';
     if(fullW > tw){
       var cut = Math.max(4, Math.floor(ln.text.length * tw / fullW));
@@ -6533,9 +6579,9 @@ function convDraw(ctx, W, H, now){
            ctx.measureText(dp1).width <= tw && ctx.measureText(dp2).width <= tw){ line1 = dp1; line2 = dp2; }
       }
     }
-    var bh = line2 ? 45 : 34;
-    /* 候補位置：頭上を基本に、上下・左右へずらして空きを探す */
-    var offs = [[0,-58],[0,-104],[-bw * .62,-50],[bw * .62,-50],[0,-150],[-bw * .62,-100],[bw * .62,-100],[0,-14]];
+    var bh = (line2 ? 45 : 34) * bs;
+    /* 候補位置：頭上を基本に、上下・左右へずらして空きを探す（ずらし量も倍率に合わせる） */
+    var offs = [[0,-58],[0,-104],[-bw * .62,-50],[bw * .62,-50],[0,-150],[-bw * .62,-100],[bw * .62,-100],[0,-14]].map(function(o){ return [o[0], o[1] * bs]; });
     var chosen = null;
     for(var oi = 0; oi < offs.length; oi++){
       var bx = sp.x + offs[oi][0] - bw / 2, by = sp.y + offs[oi][1];
@@ -6545,8 +6591,8 @@ function convDraw(ctx, W, H, now){
     }
     if(!chosen){
       /* 置けない：重ねて出さず💬に縮小し、この行のタイマーを止めて空き待ちにする */
-      ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('💬', sp.x, sp.y - 40);
+      ctx.font = (11 * bs) + 'px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('💬', sp.x, sp.y - 40 * bs);
       cv.t0 = now - cv.li * 2300;
       return;
     }
@@ -6554,10 +6600,10 @@ function convDraw(ctx, W, H, now){
     var bx2 = chosen[0], by2 = chosen[1];
     ctx.fillStyle = 'rgba(255,255,255,.96)'; ctx.strokeStyle = 'rgba(38,49,60,.45)'; ctx.lineWidth = 1;
     ctx.beginPath();
-    if(ctx.roundRect) ctx.roundRect(bx2, by2, bw, bh, 7); else ctx.rect(bx2, by2, bw, bh);
+    if(ctx.roundRect) ctx.roundRect(bx2, by2, bw, bh, 7 * bs); else ctx.rect(bx2, by2, bw, bh);
     ctx.fill(); ctx.stroke();
     /* 話者への引き出し線 */
-    ctx.beginPath(); ctx.moveTo(sp.x, sp.y - 30); ctx.lineTo(Math.max(bx2 + 8, Math.min(bx2 + bw - 8, sp.x)), by2 + bh); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sp.x, sp.y - 30 * bs); ctx.lineTo(Math.max(bx2 + 8 * bs, Math.min(bx2 + bw - 8 * bs, sp.x)), by2 + bh); ctx.stroke();
     if(isPhone && ln.who === 'phone'){
       ctx.fillStyle = '#2c4a7c'; ctx.beginPath();
       if(ctx.roundRect) ctx.roundRect(sp.x - 34, sp.y - 26, 68, 17, 8); else ctx.rect(sp.x - 34, sp.y - 26, 68, 17);
@@ -6565,11 +6611,11 @@ function convDraw(ctx, W, H, now){
       ctx.fillText('📞 ' + cv.phone, sp.x, sp.y - 14);
     }
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#7a6a45'; ctx.font = '700 8.5px sans-serif';
-    ctx.fillText(label, bx2 + 8, by2 + 11);
-    ctx.fillStyle = '#26313c'; ctx.font = '600 10.5px sans-serif';
-    ctx.fillText(line1, bx2 + 8, by2 + 24);
-    if(line2) ctx.fillText(line2, bx2 + 8, by2 + 35);
+    ctx.fillStyle = '#7a6a45'; ctx.font = '700 ' + (8.5 * bs) + 'px sans-serif';
+    ctx.fillText(label, bx2 + 8 * bs, by2 + 11 * bs);
+    ctx.fillStyle = '#26313c'; ctx.font = '600 ' + (10.5 * bs) + 'px sans-serif';
+    ctx.fillText(line1, bx2 + 8 * bs, by2 + 24 * bs);
+    if(line2) ctx.fillText(line2, bx2 + 8 * bs, by2 + 35 * bs);
   });
 }
 /* 仮設・置き場の計画モード（平面図上で操作する） */
@@ -9085,7 +9131,7 @@ function drawIsoMain(cv){
      助けでマストを継ぎ足して組み立て、建物の上昇に合わせてせり上げ、足場解体と
      美装の進行で逆手順に解体する（設置済みの姿でいきなりは出さない）。 */
 var G3 = {
-  gl:null, prog:null, loc:{}, cam:{az:-Math.PI/4, el:0.150, zoom:1, tx:0, tz:0, fit:true}, /* 既定カメラ：南西・全体フィット。el は「見かけの仰角が約20°」
+  gl:null, prog:null, loc:{}, cam:{az:-Math.PI/4, el:0.1115, zoom:1, tx:0, tz:0, fit:true}, /* 既定カメラ：南西・全体フィット。el は g3DefaultCam と同じ「見かけの仰角が約16°」
      （オブジェクトが約20°の傾きで寝て見える、ユーザ指定の初期構図：もっと浅く）から逆算した値：
      描画はY方向へ G3VS 倍の強調が入るため、画面上の実効仰角は atan(G3VS×tan(el))
      になり、生の el を 25°にしても見かけは約48°で「変わって見えない」状態だった。
@@ -9143,11 +9189,28 @@ var G3VS = 2.6; /* 高さ方向の描画倍率：実寸比率だとアイソメ�
    atan(G3VS × tan(el)) になる。カメラまわりの「角度」の判断はすべて
    この見かけ側で行う（生の el の数値だけ変えても見た目はほぼ動かない） */
 function g3AppEl(el){ return Math.atan(G3VS * Math.tan(el)); }
+/* 既定ズーム倍率：ズーム値の軸の読み替え倍率。ユーザ操作のズーム可動範囲
+   （setZoom の 0.26〜20）と「建物の中まで寄った」判定の閾値は、見た目の
+   寄り具合が従来と変わらないよう、この倍率ぶん同率でずらしてある。
+   ※初期表示の実倍率はこの定数では決まらない（下記 G3INIZ を参照） */
+var G3DEFZ = 1.5;
+/* 初期表示の実拡大率（目標）：従来の全体フィット（span = need）に対して、
+   初期視点（起動時・「全体／初期視点に戻る」・デバッグの初期表示）では建物が
+   実際に約1.5倍大きく見えるよう寄せる（ユーザ指定 ×1.5）。前回実装は
+   g3FitZoom の戻り値と描画側 span の両方へ G3DEFZ を掛けたため割り算で
+   相殺され、初期表示が全体フィットと同一だった。今回は描画側 span の換算
+   （base × G3DEFZ / zoom）は一切変えず、フィット目標の span だけを縮める。
+   ただし「敷地・建物が初期表示で見切れないこと」も条件のため、目標 span が
+   敷地境界（仮囲い）と建物全体を実投影で収める最小 span（g3NeedSpan）を
+   下回る物件・画面比では、収まる範囲で可能な最大拡大まで戻す（両立策）。
+   ズーム可動範囲・見かけの仰角（約16°）は前回のまま */
+var G3INIZ = 1.5;
 /* 既定カメラ（起動時・初期視点リセット・ダブルクリックで戻る先）：
-   el=0.139 は見かけの仰角が約20°になる逆算値（atan(tan20° / G3VS)、G3VS=2.6 時）。
-   以前の約30°からさらに浅くした（ユーザ指定：初期角度はもっと浅くてよい）。
-   G3VS を 2.4→2.6 に上げた際も見かけの初期角度が変わらないよう el を逆算し直した */
-function g3DefaultCam(){ return {az:-Math.PI/4, el:0.139, zoom:1, tx:0, tz:0, fit:true}; }
+   el=0.1115 は見かけの仰角が約16.2°になる逆算値。従来の見かけ20°から
+   高さ成分を約1/5下げた（tan(見かけ角) を ×0.8：atan(0.8×tan20°)≈16.2°、
+   el は atan(tan(16.2°)/G3VS)、G3VS=2.6 時）。
+   G3VS を変えたら見かけの初期角度が変わらないよう el を逆算し直すこと */
+function g3DefaultCam(){ return {az:-Math.PI/4, el:0.1115, zoom:1, tx:0, tz:0, fit:true}; }
 /* 「全体」ボタン一本化：初期視点に戻し、表示モードも階フォーカスも全体表示へ戻す。
    表示モードの「単独」「透かし」は撤去済み（G3.view は常に 'all'） */
 function g3ResetCam(){
@@ -9156,9 +9219,41 @@ function g3ResetCam(){
   if(typeof VF !== 'undefined' && typeof NF !== 'undefined' && VF !== NF){ VF = NF; if(typeof renderFloorTabs === 'function') renderFloorTabs(); }
   G3.sig = '';
 }
-/* 建物全体（敷地＋高さ強調ぶん）が画面にちょうど収まるズーム。
-   対地の対角と高さの投影寸法から必要な span を出し、横はアスペクトで割る：
-   縦長の電話画面では自動で引いた画角になる */
+/* 敷地境界（仮囲い）と建物全体が画面に収まる最小の span を、既定カメラ
+   （az・el・注視点）と描画側の高さ強調（G3VS）で実際に投影して求める。
+   対象は敷地矩形の四隅（地表面）と建物フットプリント四隅の地表・最上階。
+   従来の need 見積もり（対角＋60m・×1.05）より実形に近いぶん小さい */
+function g3NeedSpan(asp){
+  if(typeof ISOFOOT === 'undefined' || !ISOFOOT[1]) return 0;
+  var foot = ISOFOOT[1];
+  var az = G3.cam.az, el = G3.cam.el;
+  var zx = Math.cos(el) * Math.sin(az), zy = G3VS * Math.sin(el), zz = Math.cos(el) * Math.cos(az);
+  var zn = Math.sqrt(zx * zx + zy * zy + zz * zz); zx /= zn; zy /= zn; zz /= zn;
+  var xn = Math.sqrt(zz * zz + zx * zx); if(!xn) return 0;
+  var xx = zz / xn, xz = -zx / xn;                       /* 画面右方向（高さ強調込みの視点系） */
+  var yx = zy * xz, yy = zz * xx - zx * xz, yz = -zy * xx; /* 画面上方向 */
+  var ctrY = NF * G3FH * 0.30, tx = G3.cam.tx || 0, tz = G3.cam.tz || 0;
+  var hx = 0, top = -1e9, bot = 1e9;
+  function proj(x, y, z){
+    var dx = x - tx, dy = G3VS * (y - ctrY), dz = z - tz;
+    var sx = dx * xx + dz * xz, sy = dx * yx + dy * yy + dz * yz;
+    if(Math.abs(sx) > hx) hx = Math.abs(sx);
+    if(sy > top) top = sy; if(sy < bot) bot = sy;
+  }
+  var sx0 = foot.x0 - 26000, sx1 = foot.x1 + 26000, sy0 = foot.y0 - 22000, sy1 = foot.y1 + 30000;
+  [[sx0, sy0], [sx0, sy1], [sx1, sy0], [sx1, sy1]].forEach(function(c){ proj(g3X(c[0]), G3GY, g3Z(c[1])); });
+  [[foot.x0, foot.y0], [foot.x0, foot.y1], [foot.x1, foot.y0], [foot.x1, foot.y1]].forEach(function(c){
+    proj(g3X(c[0]), G3GY, g3Z(c[1])); proj(g3X(c[0]), NF * G3FH, g3Z(c[1]));
+  });
+  return Math.max(hx / Math.max(asp, 0.30), Math.max(top, -bot)) * 1.03;
+}
+/* 建物全体（敷地＋高さ強調ぶん）が画面にちょうど収まるズームを基準に、
+   初期表示では実拡大率 G3INIZ（×1.5）だけ寄せたズームを返す。ただし目標が
+   g3NeedSpan（敷地境界と建物が収まる最小 span）を下回る場合は、見切れない
+   範囲で可能な最大拡大（span = g3NeedSpan）まで戻す。
+   対地の対角と高さの投影寸法から必要な span（need）を出し、横はアスペクトで
+   割る：縦長の電話画面では自動で引いた画角になる。描画側の span は
+   base × G3DEFZ / zoom で従来どおり出すため、相殺は起きない */
 function g3FitZoom(asp){
   var Wm = GB_W / 1000 + 60, Dm = GB_H / 1000 + 60;
   var diag = 0.7071 * (Wm + Dm);
@@ -9167,7 +9262,8 @@ function g3FitZoom(asp){
   var projH = diag * Math.sin(appEl) + NF * G3FH * G3VS * Math.cos(appEl);
   var need = Math.max(projH / 2, (diag / 2) / Math.max(asp, 0.30)) * 1.05;
   var base = Math.max(GB_W, GB_H) / 1000 * 0.62;
-  return Math.max(0.26, Math.min(2.2, base / need));
+  var spanTgt = Math.max(need / G3INIZ, g3NeedSpan(asp));
+  return Math.max(0.26 * G3DEFZ, Math.min(2.2 * G3DEFZ * G3INIZ, base * G3DEFZ / spanTgt));
 }
 function g3SyncModeBtns(){
   var ctl = document.getElementById('g3Ctl'); if(!ctl) return;
@@ -11971,7 +12067,7 @@ function g3Init(cv){
   return true;
 }
 function g3Sig(){
-  var parts = [CUR_BLDG, S.day, S.phase, VF, G3.view, S.towerCrane ? 1 : 0, G3.epi ? 'EPI' : '-', G3.cam.zoom >= 4.5 ? 'IN' : 'OUT'];
+  var parts = [CUR_BLDG, S.day, S.phase, VF, G3.view, S.towerCrane ? 1 : 0, G3.epi ? 'EPI' : '-', G3.cam.zoom >= 4.5 * G3DEFZ ? 'IN' : 'OUT'];
   var ids = ['prepOff','prepFence','prepWel','earth1','earth2','foundR','foundP'];
   ZONES.forEach(function(zo){ ids.push(zo.zk + '_frame', zo.zk + '_hon', zo.zk + '_deck', zo.zk + '_rebar', zo.zk + '_pour', 'scupS','scupN','scupE','scupW'); });
   ids.forEach(function(id){ var t = T(id); if(t) parts.push(Math.floor(g3TL(id) * 60), g3Started(id) ? 1 : 0, (S.taskStop && S.taskStop[id]) ? 1 : 0, (S.senkou && S.senkou[id]) ? 1 : 0); });
@@ -12007,7 +12103,7 @@ function draw3D(){
   var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   gl.clearColor(dark ? 0.09 : 0.93, dark ? 0.10 : 0.90, dark ? 0.12 : 0.82, 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  G3.inside = !G3.epi && G3.cam.zoom >= 4.5; /* 建物の中まで寄ったか（静的側の階カット・天井透かしと連動） */
+  G3.inside = !G3.epi && G3.cam.zoom >= 4.5 * G3DEFZ; /* 建物の中まで寄ったか（静的側の階カット・天井透かしと連動）。閾値はズーム軸の倍率ぶんも同率でずらし、従来と同じ見た目の寄り具合で発動させる */
   /* 状態が変わった時だけ静的ジオメトリを再構築（手戻り・停止もそのまま反映）。
      署名と面数は「再構築が成功した時だけ」確定させる：先に署名を確定させると、
      構築が一度でも失敗した状態では二度と再試行されず、3Dがその時点の絵のまま
@@ -12021,11 +12117,11 @@ function draw3D(){
      注視点はパン（tx/tz）で動かせ、ズームは建物の中まで寄れる範囲を持つ。
      寄った時（inside）は注視点の高さをフォーカス階へ合わせる */
   var asp = W / H;
-  if(G3.cam.fit && !G3.epi) G3.cam.zoom = g3FitZoom(asp); /* 既定構図の間は全体が収まる距離を保つ（画面比が変わってもはみ出さない） */
+  if(G3.cam.fit && !G3.epi) G3.cam.zoom = g3FitZoom(asp); /* 既定構図の間は初期拡大率（×1.5）ぶん寄せた距離を保つ（画面比が変わっても同じ寄り具合になる） */
   var ctr = [G3.cam.tx || 0, G3.inside ? (VF - 1) * G3FH + G3FH * 0.45 : NF * G3FH * 0.30, G3.cam.tz || 0];
   var dist = 420;
   var camAz = G3.cam.az, camEl = G3.cam.el;
-  var span = Math.max(GB_W, GB_H) / 1000 * 0.62 / G3.cam.zoom;
+  var span = Math.max(GB_W, GB_H) / 1000 * 0.62 * G3DEFZ / G3.cam.zoom; /* G3DEFZ：ズーム軸の読み替え倍率（g3FitZoom と対） */
   if(G3.epi){
     /* エピローグのシネマティックカメラ：GL（地盤面）の高さから建物を見上げる
        構図で、建物を中心にゆっくり周回する。平行投影なので「見上げ」は
@@ -12069,6 +12165,42 @@ function g3ProjectPt(p, W, H){
   var nx = cx / cw, ny = cy / cw;
   if(nx < -1.2 || nx > 1.2 || ny < -1.2 || ny > 1.2) return null;
   return {x:(nx * 0.5 + 0.5) * W, y:(0.5 - ny * 0.5) * H};
+}
+/* 吹き出し用：3Dの話者が建物に隠れて「描かれていない」に相当するか。
+   人物の描画可否（D-02：建物の裏側の人物・外装が閉じた内側の人物は出さない）と
+   判定を一致させるための幾何判定で、姿が見えない人物の吹き出しだけが
+   浮いて出る状態を防ぐ。座標は高さ強調（G3VS）込みの描画空間でそろえる */
+function g3SpkHidden(p){
+  if(!p || typeof ISOFOOT === 'undefined' || !ISOFOOT[1] || !G3.eye) return false;
+  if(G3.inside) return false; /* 建物の中まで寄った表示では内側の人物も描画対象 */
+  var foot = ISOFOOT[1];
+  var bx0 = g3X(foot.x0), bx1 = g3X(foot.x1);
+  var za = g3Z(foot.y0), zb = g3Z(foot.y1), bz0 = Math.min(za, zb), bz1 = Math.max(za, zb);
+  var feetY = p.y - 3.4; /* G3.spk のアンカーは頭頂（足元＋3.4） */
+  var inXZ = p.x > bx0 + 0.5 && p.x < bx1 - 0.5 && p.z > bz0 + 0.5 && p.z < bz1 - 0.5;
+  if(inXZ && feetY > 0.3 && feetY < NF * G3FH - 0.3){
+    /* 建物の内側の人物：その階の外装が閉じていれば外からは見えない */
+    var fl = Math.max(1, Math.min(NF, Math.floor(feetY / G3FH) + 1));
+    if(typeof floorClosed === 'function' && floorClosed(fl)) return true;
+  }
+  /* 建物の裏側：視点→話者の線分が、建ち上がっている高さまでの建物ボックスを
+     横切るなら、その人物は建物に隠れている */
+  var topF = 0;
+  for(var f = 1; f <= NF; f++){
+    if(ZONES.some(function(z){ return z.f === f && S && S.started[z.zk + '_frame']; })) topF = f;
+  }
+  if(!topF) return false; /* まだ建物が建ち上がっていない */
+  var topY = topF * G3FH * G3VS;
+  var ex = G3.eye[0], ey = G3.eye[1] * G3VS, ez = G3.eye[2];
+  var px = p.x, py = p.y * G3VS, pz = p.z;
+  if(px > bx0 && px < bx1 && pz > bz0 && pz < bz1 && py < topY) return false; /* 話者自身がボックス内（内側判定は上で済み） */
+  var tmin = 0, tmax = 1, ok = true;
+  var mins = [bx0, 0, bz0], maxs = [bx1, topY, bz1], org = [ex, ey, ez], dir = [px - ex, py - ey, pz - ez];
+  for(var i = 0; i < 3; i++){
+    if(Math.abs(dir[i]) < 1e-9){ if(org[i] < mins[i] || org[i] > maxs[i]){ ok = false; break; } }
+    else { var t1 = (mins[i] - org[i]) / dir[i], t2 = (maxs[i] - org[i]) / dir[i]; if(t1 > t2){ var tt = t1; t1 = t2; t2 = tt; } tmin = Math.max(tmin, t1); tmax = Math.min(tmax, t2); if(tmin > tmax){ ok = false; break; } }
+  }
+  return ok && tmax > 0.03 && tmin < 0.97;
 }
 /* 3D上の会話吹き出し：WebGLの上に透明2Dレイヤーを重ね、アイソメ／平面図と
    同じ convDraw で描く。話者の位置は G3.spk（毎フレーム更新のワールド座標）を
@@ -12205,7 +12337,7 @@ function g3PickAt(cx, cy){
   /* パン（注視点の移動）：試作同様、右ドラッグ／Shift+ドラッグと2本指ドラッグで
      視点を動かす。地平面上の画面右方向・奥方向へ、現在のズームの解像度でずらす */
   function panBy(dx, dy){
-    var span = Math.max(GB_W, GB_H) / 1000 * 0.62 / G3.cam.zoom;
+    var span = Math.max(GB_W, GB_H) / 1000 * 0.62 * G3DEFZ / G3.cam.zoom; /* G3DEFZ：ズーム軸の読み替え倍率（描画側と対） */
     var wpp = 2 * span / Math.max(cv.clientHeight, 1);
     var az = G3.cam.az;
     var rx = Math.cos(az), rz = -Math.sin(az);
@@ -15416,8 +15548,8 @@ function resolveConsultOutcome(){
   var r = Math.random(), res;
   if(c.type === 'delivery'){
     res = r < 0.55 ? 'approve' : r < 0.85 ? 'partial' : 'reject';
-    if(res === 'approve' && !isDone('foundR')) S.work['foundR'] = Math.min(T('foundR').dur, S.work['foundR'] + 0.5);
-    if(res === 'partial' && !isDone('foundR')) S.work['foundR'] = Math.min(T('foundR').dur, S.work['foundR'] + 0.25);
+    if(res === 'approve') aruProg('foundR', 0.5); /* 進捗の加算は aruProg 経由（完了時の完了日立てを含む） */
+    if(res === 'partial') aruProg('foundR', 0.25);
   } else {
     if(S.money < 8) res = 'reject';
     else if(r < 0.7) res = 'approve';
@@ -18877,6 +19009,7 @@ function dbgEnter(){
   applyBuilding(DBG_SAVE.bldg);
   dbgBuildState();
   VIEW = 'site'; ZOOM = '3d';
+  if(typeof g3ResetCam === 'function') g3ResetCam(); /* デバッグの初期表示も通常プレイと同じ初期視点（既定ズーム・浅い仰角）に揃える */
   document.getElementById('dbgPanel').hidden = false;
   document.getElementById('dbgBadge').hidden = false;
   dbgApply();

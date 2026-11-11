@@ -375,5 +375,351 @@
    }
   ],
   "note": "数量×単価（材工共のゲーム用複合単価）。総額は calibrationTarget の帯で照合する"
+ },
+ "crewComposition": {
+  "note": "タスク単位の班編成（計画側で決定。ビュー側の既定表に代わる正）。人数は班あたり。出典があるものは basis に明記し、無いものはゲーム既定",
+  "trades": {
+   "土工": {
+    "headcount": 5,
+    "roles": [
+     {
+      "role": "世話役",
+      "count": 1
+     },
+     {
+      "role": "バックホウオペレーター",
+      "count": 1
+     },
+     {
+      "role": "ダンプ運転手",
+      "count": 2
+     },
+     {
+      "role": "普通作業員",
+      "count": 1
+     }
+    ],
+    "tag": "default"
+   },
+   "杭": {
+    "headcount": 6,
+    "roles": [
+     {
+      "role": "世話役",
+      "count": 1
+     },
+     {
+      "role": "掘削機オペレーター",
+      "count": 1
+     },
+     {
+      "role": "相番クレーンオペレーター",
+      "count": 1
+     },
+     {
+      "role": "鉄筋かご・ケーシング作業員",
+      "count": 2
+     },
+     {
+      "role": "普通作業員",
+      "count": 1
+     }
+    ],
+    "tag": "default",
+    "basis": "土木標準歩掛の杭打機編成表の考え方を商業規模に読み替え（クラスタA調査）"
+   },
+   "基礎": {
+    "headcount": 6,
+    "roles": [
+     {
+      "role": "世話役",
+      "count": 1
+     },
+     {
+      "role": "鉄筋工",
+      "count": 2
+     },
+     {
+      "role": "型枠工",
+      "count": 2
+     },
+     {
+      "role": "普通作業員",
+      "count": 1
+     }
+    ],
+    "tag": "default"
+   },
+   "鉄骨": {
+    "headcount": 6,
+    "roles": [
+     {
+      "role": "建方とび",
+      "count": 3
+     },
+     {
+      "role": "玉掛け",
+      "count": 1
+     },
+     {
+      "role": "合図者",
+      "count": 1
+     },
+     {
+      "role": "溶接工",
+      "count": 1
+     }
+    ],
+    "tag": "default",
+    "basis": "揚重作業は玉掛け・合図者を必須配置とする（安全規則）"
+   },
+   "コンクリート": {
+    "headcount": 6,
+    "roles": [
+     {
+      "role": "ポンプオペレーター",
+      "count": 1
+     },
+     {
+      "role": "ホース先端・筒先",
+      "count": 1
+     },
+     {
+      "role": "バイブレーター",
+      "count": 2
+     },
+     {
+      "role": "均し・左官",
+      "count": 2
+     }
+    ],
+    "tag": "default"
+   },
+   "鳶": {
+    "headcount": 5,
+    "roles": [
+     {
+      "role": "世話役",
+      "count": 1
+     },
+     {
+      "role": "足場とび",
+      "count": 4
+     }
+    ],
+    "tag": "default"
+   },
+   "外装": {
+    "headcount": 5,
+    "roles": [
+     {
+      "role": "パネル建込み",
+      "count": 3
+     },
+     {
+      "role": "玉掛け",
+      "count": 1
+     },
+     {
+      "role": "合図者",
+      "count": 1
+     }
+    ],
+    "tag": "default"
+   },
+   "電気": {
+    "headcount": 4,
+    "roles": [
+     {
+      "role": "電気工",
+      "count": 4
+     }
+    ],
+    "tag": "default"
+   },
+   "衛生": {
+    "headcount": 4,
+    "roles": [
+     {
+      "role": "配管工",
+      "count": 4
+     }
+    ],
+    "tag": "default"
+   },
+   "空調": {
+    "headcount": 4,
+    "roles": [
+     {
+      "role": "ダクト工・配管工",
+      "count": 4
+     }
+    ],
+    "tag": "default"
+   },
+   "墨出し": {
+    "headcount": 2,
+    "roles": [
+     {
+      "role": "墨出し工",
+      "count": 2
+     }
+    ],
+    "tag": "default",
+    "basis": "2人1組が実務標準（クラスタD調査）"
+   },
+   "舗装": {
+    "headcount": 13,
+    "roles": [
+     {
+      "role": "世話役",
+      "count": 1
+     },
+     {
+      "role": "特殊運転手（フィニッシャー・タイヤローラ・マカダムローラ）",
+      "count": 3
+     },
+     {
+      "role": "特殊作業員（スクリードマン・レーキ）",
+      "count": 3
+     },
+     {
+      "role": "普通作業員（スコップ・誘導員・コテ・ビブロ）",
+      "count": 6
+     }
+    ],
+    "tag": "rule",
+    "basis": "国交省 アスファルト舗装工事施工体制研究会の13名編成（クラスタD調査・出典付き）"
+   },
+   "揚重": {
+    "headcount": 3,
+    "roles": [
+     {
+      "role": "クレーンオペレーター",
+      "count": 1
+     },
+     {
+      "role": "玉掛け",
+      "count": 1
+     },
+     {
+      "role": "合図者",
+      "count": 1
+     }
+    ],
+    "tag": "default"
+   }
+  },
+  "defaultCrew": {
+   "headcount": 4,
+   "roles": [],
+   "tag": "default"
+  }
+ },
+ "assumptionValues": {
+  "note": "公表資料が無く調査でも未確認だった項目の仮定値。ビュー側・ゲーム側はこの値を正として使い、実測で置き換える場合はここを直す",
+  "items": [
+   {
+    "id": "AS-01",
+    "item": "軽鉄（LGS）の出来高",
+    "value": 40,
+    "unit": "㎡/人日",
+    "tag": "default",
+    "assumption": true,
+    "source": "未確認（市場単価扱いで公式歩掛なし・クラスタD）"
+   },
+   {
+    "id": "AS-02",
+    "item": "ボードの出来高",
+    "value": 35,
+    "unit": "㎡/人日",
+    "tag": "default",
+    "assumption": true,
+    "source": "未確認（同上）"
+   },
+   {
+    "id": "AS-03",
+    "item": "床仕上げの出来高",
+    "value": 45,
+    "unit": "㎡/人日",
+    "tag": "default",
+    "assumption": true,
+    "source": "未確認（同上）。なおクロスは公式値 壁40㎡/人日がある"
+   },
+   {
+    "id": "AS-04",
+    "item": "検査の指摘発生モデル",
+    "value": {
+     "軽微": "1回あたり3〜8件",
+     "通常": "1〜3件",
+     "重大": "0〜1件"
+    },
+    "unit": "件/検査",
+    "tag": "default",
+    "assumption": true,
+    "source": "未確認（指摘件数の統計的目安は公表なし・クラスタD）"
+   },
+   {
+    "id": "AS-05",
+    "item": "指摘の是正所要日数",
+    "value": {
+     "軽微": 1,
+     "通常": 3,
+     "重大": 7
+    },
+    "unit": "日",
+    "tag": "default",
+    "assumption": true,
+    "source": "未確認（クラスタD）"
+   },
+   {
+    "id": "AS-06",
+    "item": "足場の組立・解体速度",
+    "value": {
+     "組立": 3,
+     "解体": 2
+    },
+    "unit": "日/面",
+    "tag": "default",
+    "assumption": true,
+    "source": "未確認（建築外部足場の面数/日は公表なし・クラスタA）。現行WBSの値と一致"
+   },
+   {
+    "id": "AS-07",
+    "item": "EV 1基あたり所要（レール→調整試運転）",
+    "value": 12,
+    "unit": "日/基",
+    "tag": "default",
+    "assumption": true,
+    "source": "未確認（クラスタC）。基ごとに並行班が付く前提の換算値"
+   },
+   {
+    "id": "AS-08",
+    "item": "美装の総人日（中間＋最終）",
+    "value": 0.012,
+    "unit": "人日/㎡",
+    "tag": "default",
+    "assumption": true,
+    "source": "未確認（6万㎡級の総人日は公表なし・クラスタD）"
+   },
+   {
+    "id": "AS-09",
+    "item": "水圧試験の保持時間",
+    "value": 60,
+    "unit": "分",
+    "tag": "default",
+    "assumption": true,
+    "source": "参考値：住宅系は30分以上、プラント系仕様では60分の例（クラスタC）。案件仕様で決まるもの"
+   },
+   {
+    "id": "AS-10",
+    "item": "冷媒気密試験の保持",
+    "value": 24,
+    "unit": "時間",
+    "tag": "rule",
+    "assumption": false,
+    "source": "メーカー要領・実務資料（クラスタC）：段階加圧＋設計圧力で24時間放置"
+   }
+  ]
  }
 }

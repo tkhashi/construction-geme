@@ -85,10 +85,25 @@ def main():
     # 配分比は大型商業のゲーム既定とし、延長は空間・数量の参考値として別に持つ
     DEFAULT_SHARES = {"電気": 0.30, "衛生": 0.22, "空調": 0.48}
     shares = dict(DEFAULT_SHARES)
+    lv_count = len(levels)
+    system_trees = {
+        "電気": {"root": "受電（キュービクル）", "tag": "inferred",
+                 "tree": ["受電（キュービクル）", "電気室・EPS（PS兼用と推論）", f"縦ラック（PS {len(ps_shafts)}系統）",
+                          f"階別分電盤（{lv_count}階）", "各室コンセント・照明器具"],
+                 "note": "系統ツリーの雛形。位置はシャフト配置から、末端の器具台帳は建物モデル側の分担"},
+        "衛生": {"root": "受水槽", "tag": "inferred",
+                 "tree": ["受水槽（計画タスク tank-1〜6）", f"PS立管（{len(ps_shafts)}本）", "階別横引き", "WC・給排水器具"],
+                 "note": "給水の背骨。水圧試験は系統ごとに検査チェーンで実施"},
+        "空調": {"root": "室外機（屋上）", "tag": "inferred",
+                 "tree": ["室外機（計画タスク rf-1〜7）", "冷媒ラック・立下り", f"DSダクト立管（{len(ds_shafts)}本）",
+                          "室内機（天井内・吊りボルトで躯体から吊る）", "吹出口"],
+                 "note": "ダクトは天井内で最大の占有物として先に位置が決まる（WORK_STRUCTURE_V2）"},
+    }
     out = {
         "meta": {"generator": "equipment_infer.py v0.1", "building": model["building"]["name"],
                  "buildingFile": model_path.name, "tag": "inferred",
                  "note": "モデル側 EquipmentRun の正式生成までの推論代替。経路はシャフト配置と部屋重心からのマンハッタン距離で近似"},
+        "systemTrees": system_trees,
         "runs": runs,
         "totals": {"pipeAndCableLengthM": {k: round(v, 1) for k, v in totals.items()},
                    "ductAreaM2": round(totals["空調"] * DUCT_AREA_PER_M, 1)},

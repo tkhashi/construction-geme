@@ -135,6 +135,15 @@ def main():
         {"item": "足場", "choice": "枠組足場（面別に組立・解体）", "tag": "default", "alternatives": ["次世代足場"], "reason": "外装レーンと同期"},
         {"item": "鉄骨建方", "choice": "節建方（2節・地組併用）", "tag": "inferred", "alternatives": ["階別建方"],
          "reason": "モデル structure.constructionDerived の frameCycle に従う"},
+        {"item": "杭工法", "choice": "場所打ちコンクリート杭（アースドリル工法）", "tag": "default", "assumption": True,
+         "alternatives": ["既製コンクリート杭（プレボーリング等の埋込み工法）"],
+         "reason": "地盤・支持層がモデル側 gap のため仮定として決定（タイムラプス側申し送り 2026-11-11 の最優先決定事項）。"
+                   "地盤調査で支持層と工法を確定したら差し替える。サブステップはアースドリルの施工順序（クラスタA調査）に従う"},
+        {"item": "屋根防水工法", "choice": "シート防水（塩ビ系・機械的固定工法）＋保護コンクリート", "tag": "inferred",
+         "alternatives": ["ウレタン塗膜防水", "アスファルト防水（熱工法）"],
+         "reason": "建物モデルの屋根種別（陸屋根・シート防水）からの決定（タイムラプス側申し送り 2026-11-11）",
+         "layers": ["下地調整・乾燥確認", "プライマー", "シート敷設（機械的固定）", "接合部 熱風溶着・継ぎ目シール",
+                    "立上り敷設・端部押え金物", "保護コンクリート打設", "通水確認"]},
     ]
     temporary_works = [
         {"item": "仮囲い", "spec": "鋼板塀 H3.0m、ゲートは南側2箇所（モデル site.gates）", "period": "全期間", "tag": "default"},
@@ -278,6 +287,21 @@ def main():
     # 受電チェーン（屋外電気→キュービクル→受電）
     add("elec-0a", "屋外引込・受変電基礎", "mepInterior", 6, "電気", frame_end, "fixed")
     add("elec-0b", "キュービクル据付・幹線立上げ", "mepInterior", 8, "電気", ["elec-0a"], "rate", cost_item="mep", weight=0.5)
+    # 屋上室外機チェーン（申し送り P1-1：従来は gap 登録のみで未生成だった）
+    add("rf-1", "室外機 防振架台・基礎", "mepInterior", 3, "空調", ["roof-2"], "fixed", cost_item="mep", weight=0.4)
+    add("rf-2", "室外機 搬入・揚重（クレーン）", "mepInterior", 2, "揚重", ["rf-1"], "fixed")
+    add("rf-3", "室外機 据付", "mepInterior", 4, "空調", ["rf-2"], "rate", cost_item="mep", weight=0.8)
+    add("rf-4", "室外機 冷媒配管（ラック集約・立下り接続）", "mepInterior", 5, "空調", ["rf-3"], "rate", cost_item="mep", weight=0.8)
+    add("rf-5", "室外機系 冷媒気密試験", "mepInterior", 2, "空調", ["rf-4"], "fixed")
+    add("rf-6", "室外機系 真空引き・保温・冷媒充填", "mepInterior", 3, "空調", ["rf-5"], "fixed")
+    add("rf-7", "室外機 試運転調整（TAB）", "mepInterior", 3, "空調", ["rf-6", "elec-0b"], "fixed")
+    # 受水槽チェーン（申し送り P1-1：FRPパネルタンク想定。給水開始が通水・試運転の前提）
+    add("tank-1", "受水槽 基礎", "mepInterior", 3, "衛生", frame_end, "fixed")
+    add("tank-2", "受水槽 パネル搬入・組立・据付", "mepInterior", 5, "衛生", ["tank-1"], "rate", cost_item="mep", weight=0.5)
+    add("tank-3", "受水槽 引込接続・配管", "mepInterior", 3, "衛生", ["tank-2"], "rate", cost_item="mep", weight=0.4)
+    add("tank-4", "受水槽 水張り・漏水確認", "mepInterior", 2, "衛生", ["tank-3"], "fixed")
+    add("tank-5", "受水槽 清掃・消毒（2回）", "mepInterior", 2, "衛生", ["tank-4"], "fixed")
+    add("tank-6", "受水槽 水質検査・給水開始", "mepInterior", 3, "衛生", ["tank-5"], "fixed")
     # 高所作業車（階別搬入・搬出：ユーザー確定ルール）
     mep_start_deps = frame_end + ["roof-2"]  # 躯体完了＋屋根雨仕舞い後に内装開始
     for lv in levels_sorted:
@@ -292,9 +316,11 @@ def main():
         ("ps", "PS縦管立上げ", 3, "衛生", 2), ("hanger", "吊りボルト・支持材", 2, "設備支持", 2),
         ("hvac1", "空調ダクト・冷媒配管（隠蔽）", 5, "空調", 2), ("plmb1", "衛生配管（隠蔽）", 4, "衛生", 2),
         ("elec1", "電気配管・配線（隠蔽）", 4, "電気", 2), ("board", "天井下地・ボード", 6, "ボード", 2),
+        ("door1", "建具枠取付（先付け）", 1.5, "建具", 2),
         ("mep2", "設備2次（器具前配管・配線）", 3, "設備2次", 2), ("finish", "パテ・仕上げ（塗装・クロス）", 7, "仕上げ", 2),
-        ("floor", "床仕上げ", 4, "床", 2), ("door", "建具・金物", 3, "建具", 2),
-        ("mep3", "器具付け（照明・水栓・吹出口）", 3, "器具付け", 2), ("clean", "美装・引渡し確認", 2, "美装", 2),
+        ("clean1", "中間美装・養生剥がし", 1, "美装", 2),
+        ("floor", "床仕上げ", 4, "床", 2), ("door2", "建具 扉吊込み・金物", 1.5, "建具", 2),
+        ("mep3", "器具付け（照明・水栓・吹出口）", 3, "器具付け", 2), ("clean2", "最終美装・引渡し確認", 1.5, "美装", 2),
     ]
     trade_history = defaultdict(list)
     zone_chain_end = {}
@@ -308,7 +334,7 @@ def main():
                 deps = deps + [f"lift-in-{z['level']}"]
             if key == "mep3":
                 deps = deps + ["elec-0b"]  # 受電が器具付け・試運転の前提（チェーン側で受電検査ゲートを後付け）
-            ci = "mep" if key in ("hvac1", "plmb1", "elec1", "mep2", "mep3") else ("interiorFinish" if key in ("lgs", "board", "finish", "floor", "door", "clean", "sumi") else None)
+            ci = "mep" if key in ("hvac1", "plmb1", "elec1", "mep2", "mep3") else ("interiorFinish" if key in ("lgs", "board", "finish", "floor", "door1", "door2", "clean1", "clean2", "sumi") else None)
             add(tid, f"{zid} {label}", "mepInterior", days, trade, deps, "rate", zone=zid, cost_item=ci, weight=z["area"])
             hist = trade_history[trade]
             if len(hist) >= crews:
@@ -328,7 +354,7 @@ def main():
     add("ext-3", "外構 舗装", "exteriorWorks", 8, "外構", ["ext-2"], "rate", cost_item="exteriorWorks", weight=0.25)
     add("ext-4", "外構 植栽・ライン・美装", "exteriorWorks", 3, "外構", ["ext-3"], "fixed", cost_item="exteriorWorks", weight=0.1)
     # 締め（試運転→検査群 自→監→施→法→引渡し）
-    all_work_end = list(zone_chain_end.values()) + ["ev-4", "ext-4"] + [f"lift-out-{lv}" for lv in levels_sorted]
+    all_work_end = list(zone_chain_end.values()) + ["ev-4", "ext-4", "rf-7", "tank-6"] + [f"lift-out-{lv}" for lv in levels_sorted]
     add("close-1", "総合試運転調整", "closing", 8, "設備", all_work_end, "fixed")
     add("close-2", "社内自主検査・是正", "closing", 4, "監督", ["close-1"], "fixed")
     add("close-3", "監理者検査・是正", "closing", 4, "監督", ["close-2"], "fixed")
@@ -346,7 +372,11 @@ def main():
         if gated_successor:
             tasks[gated_successor]["deps"].append({"to": act, "type": "gate"})
         inspections.append({"id": iid, "name": name, "kind": kind, "chain": [doc, app, act],
-                            "gateFor": gated_successor, "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"})
+                            "gateFor": gated_successor, "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+                            "loop": {"structure": "実施→指摘→是正→再確認（合格まで反復）",
+                                     "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+                                     "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+                                     "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"}})
     for z in fz:
         inspection(f"insp-fnd-{z['id']}", f"{z['id']} 基礎配筋検査", [f"fnd-{z['id']}-1"], 2, f"fnd-{z['id']}-2", "監理者立会い")
     inspection("insp-steel-prod", "鉄骨製品検査", ["prep-1"], 3, "frm-s1-1", "工場検査")
@@ -364,6 +394,80 @@ def main():
     inspection("insp-ev", "EV落成検査", ["ev-3"], 2, "ev-4", "法定")
     inspection("insp-fire", "消防検査", ["close-1"], 3, "close-5", "法定")
     inspection("insp-final", "完了検査", ["close-4"], 3, "close-6", "法定")
+
+    # ---------- サブステップ列・班編成の付与（申し送り P2） ----------
+    def W(name, share=0.25, kind="work", wait_h=None):
+        s = {"name": name, "kind": kind}
+        if wait_h is not None:
+            s["waitH"] = wait_h
+        else:
+            s["share"] = share
+        return s
+    wp_layers = next((m.get("layers") for m in methods if m["item"] == "屋根防水工法"), [])
+    for t in tasks.values():
+        tid = t["id"]
+        if tid == "pile-2":
+            t["subSteps"] = [W("掘削（安定液・ケーシング）", 0.35), W("支持層確認・根入れ掘削", 0.15, "test"),
+                             W("鉄筋かご建込み", 0.2), W("トレミー管・コンクリート打設", 0.2), W("ケーシング引抜・空掘り埋戻し", 0.1)]
+        elif tid.startswith("fnd-") and tid.endswith("-1"):
+            t["subSteps"] = [W("配筋", 0.55), W("型枠", 0.3), W("アンカーボルト設置・精度確認", 0.15, "test")]
+        elif tid.startswith("fnd-") and tid.endswith("-2"):
+            t["subSteps"] = [W("打設", 0.4), W("養生", 0.45, "wait"), W("強度確認", 0.15, "test")]
+        elif tid.startswith("fnd-") and tid.endswith("-3"):
+            t["subSteps"] = [W("型枠解体", 0.5), W("埋戻し・転圧（1層20cm）", 0.5)]
+        elif tid.startswith("frm-") and tid.endswith("-d"):
+            t["subSteps"] = [W("デッキ敷き", 0.4), W("スリーブ・インサート割付け", 0.3),
+                             W("合番確認（設備業者立会い）", 0.15, "test"), W("打設前最終確認", 0.15, "gate")]
+        elif tid.startswith("frm-") and tid.endswith("-c"):
+            t["subSteps"] = [W("床配筋", 0.4), W("打設", 0.25), W("養生", 0.35, "wait")]
+        elif tid.startswith("frm-") and tid.endswith("-1"):
+            t["subSteps"] = [W("地組・仮ボルト", 0.25), W("建方（揚重・横引き）", 0.5), W("建入れ直し", 0.25)]
+        elif tid.startswith("frm-") and tid.endswith("-2"):
+            t["subSteps"] = [W("本締め", 0.6), W("建入れ・精度確認", 0.4, "test")]
+        elif tid == "elec-0b":
+            t["subSteps"] = [W("基礎・アンカー確認", 0.1, "test"), W("搬入（レッカー）", 0.15), W("据付・水平調整", 0.25),
+                             W("接地工事", 0.15), W("内部結線・端末処理", 0.25), W("竣工試験", 0.1, "test")]
+            t["note"] = "受電は検査チェーン insp-power（申請→電力会社立会い）がゲート"
+        elif tid.endswith("-hvac1"):
+            t["subSteps"] = [W("支持・吊りボルト確認", 0.15), W("ダクト吊込み", 0.3), W("冷媒配管・ろう付け（窒素ブロー）", 0.25),
+                             W("気密試験・24時間放置", 0.1, "wait", 24), W("真空引き・真空放置", 0.1, "wait", 2), W("保温", 0.1)]
+        elif tid.endswith("-plmb1"):
+            t["subSteps"] = [W("PS接続・横引き配管", 0.8), W("水圧試験（検査チェーン insp-wp-*、保持60分は AS-09）", 0.2, "test")]
+        elif tid.endswith("-mep3"):
+            t["subSteps"] = [W("器具取付", 0.45), W("結線・絶縁測定", 0.2, "test"), W("通電・点灯確認", 0.15, "test"),
+                             W("冷媒充填（空調）・通水試験（衛生）", 0.2, "test")]
+        elif tid.endswith("-finish"):
+            t["subSteps"] = [W("パテ1回目", 0.25), W("乾燥", 0.1, "wait", 12), W("パテ2回目（塗装仕上げは3回目まで）", 0.25),
+                             W("乾燥", 0.1, "wait", 12), W("仕上げ（クロス・塗装）", 0.3)]
+        elif tid.endswith("-floor"):
+            t["subSteps"] = [W("割付・貼り施工", 0.7), W("養生", 0.2, "wait", 24), W("開放（歩行可→重量物は養生後）", 0.1, "gate")]
+        elif tid.startswith("face-") and tid.endswith("-4"):
+            t["subSteps"] = [W("プライマー", 0.3), W("シーリング充填", 0.4), W("硬化養生（季節係数あり）", 0.3, "wait", 24)]
+        elif tid == "roof-1":
+            t["subSteps"] = [W(n, round(1 / max(len(wp_layers), 1), 2)) for n in wp_layers]
+        elif tid == "rf-5":
+            t["subSteps"] = [W("段階加圧（0.5→1.5MPa→設計圧力）", 0.3, "test"), W("24時間放置", 0.4, "wait", 24), W("判定・記録", 0.3, "test")]
+        elif tid == "rf-6":
+            t["subSteps"] = [W("真空引き", 0.3), W("真空放置", 0.2, "wait", 2), W("保温", 0.25), W("冷媒充填", 0.25)]
+        elif tid == "tank-4":
+            t["subSteps"] = [W("水張り", 0.5), W("満水保持・漏水確認", 0.5, "test")]
+        elif tid == "tank-5":
+            t["subSteps"] = [W("高圧洗浄", 0.4), W("消毒1回目・30分放置", 0.3, "wait", 0.5), W("消毒2回目・30分放置", 0.3, "wait", 0.5)]
+        elif tid == "tank-6":
+            t["subSteps"] = [W("水質検査（外部機関・結果待ち）", 0.7, "wait"), W("給水開始", 0.3, "gate")]
+        elif tid == "ext-3":
+            t["subSteps"] = [W("合材搬入・温度記録", 0.15), W("敷均し（フィニッシャー）", 0.4), W("転圧（マカダム→タイヤローラ）", 0.3),
+                             W("表面温度50℃以下で交通開放", 0.15, "wait", 6)]
+        elif tid.endswith("-act") and tid.startswith("insp-"):
+            t["subSteps"] = [W("実施・立会い", 0.4), W("指摘記録", 0.2), W("是正（AS-05の日数）", 0.25), W("再確認", 0.15, "test")]
+    if "ev-1" in tasks:
+        tasks["ev-1"]["perUnit"] = {"count": Q["elevatorCount"], "daysPerUnit": "AS-07（仮定値 12日/基、並行班前提）",
+                                    "steps": ["レール据付（反復）", "かご組立", "主索・巻上機", "配線", "調整・試運転", "荷重試験", "落成検査（チェーン insp-ev）"]}
+    crew_table = tables.get("crewComposition", {})
+    for t in tasks.values():
+        c = crew_table.get("trades", {}).get(t["trade"]) or crew_table.get("defaultCrew") or {"headcount": 4, "roles": [], "tag": "default"}
+        t["crew"] = {"headcount": c["headcount"], "roles": c.get("roles", []), "tag": c.get("tag", "default"),
+                     **({"basis": c["basis"]} if c.get("basis") else {})}
 
     # ---------- CP-6 日数（揺れ抽選）・原価配分 ----------
     import random
@@ -434,6 +538,80 @@ def main():
         cum += monthly[m]
         scurve.append({"month": m, "amount": round(monthly[m]), "cumulative": round(cum)})
 
+    # ---------- 重機配置計画・搬入イベント（申し送り P1-3／P1-4） ----------
+    def period_of(ids):
+        ids = [i for i in ids if i in tasks]
+        if not ids:
+            return {}
+        return {"from": min(tasks[i]["startDate"] for i in ids), "to": max(tasks[i]["endDate"] for i in ids),
+                "taskIds": ids}
+    machinery_plan = [
+        {"machine": "バックホウ 0.7㎥級", "count": 2, "trade": "土工", "placement": "掘削帯（工区を移動）",
+         "period": period_of(["earth-1", "earth-2", "earth-3"]), "tag": "default"},
+        {"machine": "ダンプトラック 10t（残土）", "count": 4, "trade": "土工", "placement": "掘削帯⇔南ゲート⇔処分地（往復サイクル）",
+         "period": period_of(["earth-2"]), "tag": "default"},
+        {"machine": "アースドリル掘削機", "count": 2, "trade": "杭", "placement": "杭芯位置（中心→外側へ移動）",
+         "period": period_of(["pile-1", "pile-2"]), "tag": "default"},
+        {"machine": "移動式クレーン（相番・かご建込み）", "count": 1, "trade": "杭", "placement": "掘削機の相番位置",
+         "period": period_of(["pile-2"]), "tag": "default"},
+        {"machine": "ラフタークレーン 50t級", "count": 2, "trade": "鉄骨", "placement": "建物外周（節ごとに盛替え）",
+         "period": period_of([k for k in tasks if k.startswith("frm-")]), "tag": "rule",
+         "note": "揚重計画の正：ラフター＋横引き。タワークレーンは使わない（CP-4決定）"},
+        {"machine": "コンクリートポンプ車", "count": 1, "trade": "コンクリート", "placement": "打設区画の近傍（打設日ごとに位置換え）",
+         "period": period_of([k for k in tasks if k.endswith("-2") and k.startswith("fnd-")] +
+                             [k for k in tasks if k.startswith("frm-") and k.endswith("-c")]), "tag": "default",
+         "note": "在場は打設日のみ（期間は打設タスクの範囲）"},
+        {"machine": "ラフタークレーン（荷揚げ・搬入）", "count": 1, "trade": "揚重", "placement": "ゲート脇→各揚重位置",
+         "period": period_of([k for k in tasks if k.startswith("lift-")] + ["rf-2", "elec-0b"]), "tag": "default"},
+        {"machine": "高所作業車", "count": len(levels_sorted), "trade": "設備・内装", "placement": "階別（搬入後は当該階内を移動）",
+         "period": period_of([k for k in tasks if k.startswith("lift-")]), "tag": "rule",
+         "note": "階別搬入・搬出タスクと連動（ユーザー確定ルール）"},
+        {"machine": "アスファルトフィニッシャー＋ローラ（マカダム・タイヤ）", "count": 3, "trade": "外構",
+         "placement": "舗装ゾーン", "period": period_of(["ext-3"]), "tag": "rule",
+         "note": "舗装班13名編成（cost_tables.crewComposition）と対"},
+        {"machine": "ダンプトラック（合材供給）", "count": 3, "trade": "外構", "placement": "プラント⇔ゲート⇔フィニッシャー",
+         "period": period_of(["ext-3"]), "tag": "default"},
+    ]
+    deliveries = []
+    def pour_events(prefix_match, volume_total, label):
+        ids = [k for k in tasks if prefix_match(k)]
+        if not ids:
+            return
+        per = volume_total / sum(tasks[k]["days"] for k in ids)
+        for k in ids:
+            v = per * tasks[k]["days"]
+            deliveries.append({"material": label, "task": k, "from": tasks[k]["startDate"], "to": tasks[k]["endDate"],
+                               "quantityM3": round(v), "trucksPerDay": max(1, round(per / 4.5)),
+                               "totalTrucks": round(v / 4.5), "tag": "inferred",
+                               "note": "生コン車 4.5㎥/台換算。台数/日はタスク期間の平均ペースで、実際の打設日は区画ごとに集中する。"
+                                       "練混ぜから打込み終了までの時間制限（120分／25℃超90分）が到着間隔の制約"})
+    pour_events(lambda k: k.startswith("fnd-") and k.endswith("-2"), Q["foundationConcreteM3"], "生コンクリート（基礎）")
+    slab_conc = Q["concreteTotalM3"] - Q["foundationConcreteM3"]
+    pour_events(lambda k: k.startswith("frm-") and k.endswith("-c"), slab_conc, "生コンクリート（床）")
+    for k in tasks:
+        if k.startswith("frm-") and k.endswith("-1"):
+            share = tasks[k]["days"] / max(1e-9, sum(tasks[x]["days"] for x in tasks if x.startswith("frm-") and x.endswith("-1")))
+            ton = Q["steelTonnes"] * share
+            deliveries.append({"material": "鉄骨部材", "task": k, "from": tasks[k]["startDate"], "to": tasks[k]["endDate"],
+                               "quantityT": round(ton), "totalTrucks": round(ton / 10), "tag": "inferred",
+                               "note": "10t車換算。到着は建方の前日までに場内仮置き（検尺対象）"})
+        if k.startswith("face-") and k.endswith("-2"):
+            deliveries.append({"material": "外壁パネル・サッシ", "task": k, "from": tasks[k]["startDate"], "to": tasks[k]["endDate"],
+                               "quantityM2": round(faces[k.split("-")[1]] * floor_h), "tag": "inferred",
+                               "note": "面ごとに荷揚げ単位で搬入"})
+        if k.startswith("fnd-") and k.endswith("-1"):
+            deliveries.append({"material": "鉄筋（結束束）", "task": k, "from": tasks[k]["startDate"], "to": tasks[k]["startDate"],
+                               "tag": "inferred", "note": "配筋開始前に搬入し場内仮置き"})
+    for k, label in (("pile-2", "生コンクリート（杭・トレミー）"), ("elec-0b", "キュービクル"), ("ev-1", "エレベーター機器"),
+                     ("rf-2", "室外機"), ("tank-2", "受水槽パネル")):
+        if k in tasks:
+            deliveries.append({"material": label, "task": k, "from": tasks[k]["startDate"], "to": tasks[k]["startDate"],
+                               "tag": "inferred", "note": "据付タスクの開始日に搬入"})
+    deliveries.append({"material": "残土搬出", "task": "earth-2", "from": tasks["earth-2"]["startDate"], "to": tasks["earth-2"]["endDate"],
+                       "quantityM3": round(Q["excavationM3"]), "totalTrucks": round(Q["excavationM3"] / 5.5), "tag": "inferred",
+                       "note": "10tダンプ 5.5㎥/台（ほぐし）換算"})
+    opening_count = sum(len(w.get("openings", [])) for w in model["walls"])
+
     # ---------- CP-8 調達 ----------
     def es_of(tid):
         return tasks[tid]["es"]
@@ -476,7 +654,9 @@ def main():
                  "completionLevel": "L2（実施可能完了）。L3はゲームではスキップ（DP-4訂正）"},
         "overview": {"name": model["building"]["name"], "use": model["building"].get("use"),
                      "structure": model["building"].get("structure"), "grossAreaM2": Q["grossAreaM2"],
-                     "floors": n_levels, "zones": len(zones), "faces": face_ids},
+                     "floors": n_levels, "zones": len(zones), "faces": face_ids,
+                     "openingsCount": opening_count,
+                     "openingsNote": "開口の総数（建物モデルの壁開口から集計）。開口台帳そのもの（面×階×寸法）は建物モデル側の分担"},
         "premises": {"quantities": Q, "cp0Duration": cp0["duration"], "cost": {k: cp0["cost"][k] for k in
                      ("directCost", "totalPrice", "unitPricePerM2", "executionBudget")}, "draws": draws,
                      "mepSystems": ({"totals": equip["totals"], "costShares": equip["mepCostShares"],
@@ -489,6 +669,8 @@ def main():
                       "milestones": [{"task": t, "date": tasks[t]["endDate"]} for t in
                                      ("pile-2", "frm-s1-1", "elec-0b", "ev-4", "close-6") if t in tasks]},
         "resources": {"tradePeak": trade_peak, "notes": resource_notes},
+        "machineryPlan": machinery_plan, "deliveryEvents": deliveries,
+        "assumptionValues": tables.get("assumptionValues"),
         "procurement": procurement, "inspections": inspections,
         "qcdsePlans": qcdse, "risks": risks, "undecided": [],
     }

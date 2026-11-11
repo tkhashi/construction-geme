@@ -71,6 +71,7 @@
   - 関連実装（2026-11-10）：DP-2 の歩掛・単価・原単位テーブル `model/cost_tables.json`（説明と検証記録は `model/COST_TABLES.md`）と CP-0 試作 `model/plan_cp0.py`。CP-0 は3物件（ゲーム物件・蘇我・亀有）で数量→工期3点推定→金額まで計算済み（㎡単価 262〜278千円で較正目標帯内、柱本数は SPAN_STANDARD の記録値と一致）。DP-3 は同日にユーザー訂正：難易度はユーザーが 簡単／普通／難しい を選ぶだけ、実値はシード抽選。DP-4 も訂正：L3 はゲームではスキップ（形式化文書は v1.1）。
   - 続いて CP-1〜CP-10 の生成パイプライン `model/plan_generate.py` を実装（記録は `model/PLAN_PIPELINE.md`）：3物件で ConstructionPlan 全12ブロックを生成し PL-01〜PL-12 全件 PASS（タスク217〜286件、検査チェーン22〜29件、実働 362／481／539日でいずれも CP-0 の3点推定範囲内）。検証で落ちた際は生成側の入力（班の分割と資源リンク、面の立面集約、面積スケール）を直して解消した経緯も同文書に記録。
   - 統合手前まで完了（2026-11-10）：設備推論 `model/equipment_infer.py`（シャフト配置から系統経路を推論生成し F-02 を inferred 化）、後処理 `model/plan_postprocess.py`（フロート計算・山崩し提案・3ヶ月／1ヶ月工程のローリング詳細化）、統合手前パッケージ `model/integration/PLAN_TO_GAME.md`＋変換器 `model/plan_to_game.py`（DP-1 換算 scale=7 でゲーム物件が全52ゲーム日、変換検証 PASS）。全手順はスキル `construction_plan_generation`（~/workspace/custom-skills/construction_plan_generation/）に明文化。残りは本編統合のみ（メイン側の判断事項）。
+  - タイムラプス側の解像度申し送りに対応（2026-11-11、記録は `model/PLAN_PIPELINE.md`）：室外機・受水槽チェーンの新設、杭（場所打ち・アースドリル）と防水（シート＋保護コン、層構成）の明示決定、計画ブロック machineryPlan と deliveryEvents の新設、サブステップ列（待ち・試験つき）と班編成（crewComposition、舗装は国交省13名編成）の全タスク付与、建具二相・美装2段・検査ループの構造化、未確認項目の仮定値 AS-01〜AS-10（assumptionValues）。タスク 286→317件、PL 12/12 PASS 維持。P3の台帳類は建物モデル側の分担として残置。
   - 正の所在：工事計画の生成仕様はここが正（工程構造の実体は WORK_STRUCTURE_V2、建物データ定義は BUILDING_MODEL_SCHEMA が正）。
   - 更新タイミング：計画生成の実装に着手・検証したとき、ユーザーの実務訂正があったとき。
 - `model/SCENE3D_PIPELINE.md`

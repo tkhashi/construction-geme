@@ -57,6 +57,23 @@
    "budgetAssessmentRate": 0.0208,
    "bufferRate": 0.071,
    "productivitySwing": 0.082
+  },
+  "mepSystems": {
+   "totals": {
+    "pipeAndCableLengthM": {
+     "電気": 231.4,
+     "衛生": 360.5,
+     "空調": 3657.5
+    },
+    "ductAreaM2": 6583.6
+   },
+   "costShares": {
+    "電気": 0.3,
+    "衛生": 0.22,
+    "空調": 0.48
+   },
+   "runsFile": "generated_equipment_commercial_seeded2.json",
+   "tag": "inferred"
   }
  },
  "tasks": [
@@ -1104,6 +1121,261 @@
    ]
   },
   {
+   "id": "rf-1",
+   "name": "室外機 防振架台・基礎",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "空調",
+   "gameStart": 47,
+   "gameEnd": 47,
+   "realWorkingDays": 3,
+   "cost": 6560,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "roof-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "rf-2",
+   "name": "室外機 搬入・揚重（クレーン）",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "揚重",
+   "gameStart": 47,
+   "gameEnd": 48,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "rf-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "rf-3",
+   "name": "室外機 据付",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "空調",
+   "gameStart": 48,
+   "gameEnd": 48,
+   "realWorkingDays": 4.1,
+   "cost": 13120,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "rf-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "rf-4",
+   "name": "室外機 冷媒配管（ラック集約・立下り接続）",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "空調",
+   "gameStart": 48,
+   "gameEnd": 49,
+   "realWorkingDays": 4.9,
+   "cost": 13120,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "rf-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "rf-5",
+   "name": "室外機系 冷媒気密試験",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "空調",
+   "gameStart": 49,
+   "gameEnd": 49,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "rf-4",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "rf-6",
+   "name": "室外機系 真空引き・保温・冷媒充填",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "空調",
+   "gameStart": 49,
+   "gameEnd": 50,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "rf-5",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "rf-7",
+   "name": "室外機 試運転調整（TAB）",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "空調",
+   "gameStart": 50,
+   "gameEnd": 50,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "rf-6",
+     "type": "finish-start"
+    },
+    {
+     "to": "elec-0b",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "tank-1",
+   "name": "受水槽 基礎",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "衛生",
+   "gameStart": 44,
+   "gameEnd": 45,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "frm-s1-L1-c",
+     "type": "finish-start"
+    },
+    {
+     "to": "frm-s1-L2-c",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "tank-2",
+   "name": "受水槽 パネル搬入・組立・据付",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "衛生",
+   "gameStart": 45,
+   "gameEnd": 45,
+   "realWorkingDays": 4.7,
+   "cost": 8200,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "tank-1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "tank-3",
+   "name": "受水槽 引込接続・配管",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "衛生",
+   "gameStart": 45,
+   "gameEnd": 46,
+   "realWorkingDays": 2.9,
+   "cost": 6560,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "tank-2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "tank-4",
+   "name": "受水槽 水張り・漏水確認",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "衛生",
+   "gameStart": 46,
+   "gameEnd": 46,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "tank-3",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "tank-5",
+   "name": "受水槽 清掃・消毒（2回）",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "衛生",
+   "gameStart": 46,
+   "gameEnd": 46,
+   "realWorkingDays": 2,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "tank-4",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "tank-6",
+   "name": "受水槽 水質検査・給水開始",
+   "phase": "mepInterior",
+   "zone": null,
+   "trade": "衛生",
+   "gameStart": 46,
+   "gameEnd": 47,
+   "realWorkingDays": 3,
+   "cost": 0,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "tank-5",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
    "id": "lift-in-L1",
    "name": "L1 高所作業車 搬入（クレーン揚重・開口部から）",
    "phase": "mepInterior",
@@ -1157,8 +1429,8 @@
    "trade": "墨出し",
    "gameStart": 47,
    "gameEnd": 47,
-   "realWorkingDays": 3.1,
-   "cost": 99216000,
+   "realWorkingDays": 3.2,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1184,8 +1456,8 @@
    "trade": "軽鉄",
    "gameStart": 47,
    "gameEnd": 49,
-   "realWorkingDays": 8.7,
-   "cost": 99216000,
+   "realWorkingDays": 9.6,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1203,7 +1475,7 @@
    "trade": "衛生",
    "gameStart": 49,
    "gameEnd": 49,
-   "realWorkingDays": 4.3,
+   "realWorkingDays": 4.7,
    "cost": 0,
    "gate": false,
    "inspectionId": null,
@@ -1222,7 +1494,7 @@
    "trade": "設備支持",
    "gameStart": 49,
    "gameEnd": 50,
-   "realWorkingDays": 2.9,
+   "realWorkingDays": 3.2,
    "cost": 0,
    "gate": false,
    "inspectionId": null,
@@ -1241,8 +1513,8 @@
    "trade": "空調",
    "gameStart": 50,
    "gameEnd": 51,
-   "realWorkingDays": 7.9,
-   "cost": 158194132,
+   "realWorkingDays": 7.8,
+   "cost": 158192579,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1264,8 +1536,8 @@
    "trade": "衛生",
    "gameStart": 51,
    "gameEnd": 52,
-   "realWorkingDays": 6.3,
-   "cost": 158194132,
+   "realWorkingDays": 6.2,
+   "cost": 158192579,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1282,9 +1554,9 @@
    "zone": "1F-C",
    "trade": "電気",
    "gameStart": 52,
-   "gameEnd": 52,
-   "realWorkingDays": 6.2,
-   "cost": 158194132,
+   "gameEnd": 53,
+   "realWorkingDays": 5.8,
+   "cost": 158192579,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1302,8 +1574,8 @@
    "trade": "墨出し",
    "gameStart": 47,
    "gameEnd": 47,
-   "realWorkingDays": 2.5,
-   "cost": 83304000,
+   "realWorkingDays": 2.6,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1329,8 +1601,8 @@
    "trade": "軽鉄",
    "gameStart": 47,
    "gameEnd": 48,
-   "realWorkingDays": 7.3,
-   "cost": 83304000,
+   "realWorkingDays": 7.1,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1348,7 +1620,7 @@
    "trade": "衛生",
    "gameStart": 49,
    "gameEnd": 50,
-   "realWorkingDays": 3.6,
+   "realWorkingDays": 3.8,
    "cost": 0,
    "gate": false,
    "inspectionId": null,
@@ -1371,7 +1643,7 @@
    "trade": "設備支持",
    "gameStart": 50,
    "gameEnd": 50,
-   "realWorkingDays": 2.4,
+   "realWorkingDays": 2.3,
    "cost": 0,
    "gate": false,
    "inspectionId": null,
@@ -1390,8 +1662,8 @@
    "trade": "空調",
    "gameStart": 50,
    "gameEnd": 51,
-   "realWorkingDays": 6.2,
-   "cost": 132823375,
+   "realWorkingDays": 6.6,
+   "cost": 132822071,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1412,9 +1684,9 @@
    "zone": "1F-E",
    "trade": "衛生",
    "gameStart": 52,
-   "gameEnd": 52,
-   "realWorkingDays": 5.1,
-   "cost": 132823375,
+   "gameEnd": 53,
+   "realWorkingDays": 4.9,
+   "cost": 132822071,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1434,10 +1706,10 @@
    "phase": "mepInterior",
    "zone": "1F-E",
    "trade": "電気",
-   "gameStart": 52,
+   "gameStart": 53,
    "gameEnd": 53,
    "realWorkingDays": 5.1,
-   "cost": 132823375,
+   "cost": 132822071,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1455,8 +1727,8 @@
    "trade": "墨出し",
    "gameStart": 47,
    "gameEnd": 48,
-   "realWorkingDays": 3.8,
-   "cost": 121212000,
+   "realWorkingDays": 3.4,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1486,8 +1758,8 @@
    "trade": "軽鉄",
    "gameStart": 49,
    "gameEnd": 50,
-   "realWorkingDays": 11.4,
-   "cost": 121212000,
+   "realWorkingDays": 11.6,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1531,8 +1803,8 @@
    "zone": "1F-W",
    "trade": "設備支持",
    "gameStart": 51,
-   "gameEnd": 51,
-   "realWorkingDays": 3.7,
+   "gameEnd": 52,
+   "realWorkingDays": 3.8,
    "cost": 0,
    "gate": false,
    "inspectionId": null,
@@ -1553,10 +1825,10 @@
    "phase": "mepInterior",
    "zone": "1F-W",
    "trade": "空調",
-   "gameStart": 51,
+   "gameStart": 52,
    "gameEnd": 53,
-   "realWorkingDays": 9.8,
-   "cost": 193265473,
+   "realWorkingDays": 8.8,
+   "cost": 193263575,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1582,8 +1854,8 @@
    "trade": "衛生",
    "gameStart": 53,
    "gameEnd": 54,
-   "realWorkingDays": 7.2,
-   "cost": 193265473,
+   "realWorkingDays": 7.5,
+   "cost": 193263575,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1605,8 +1877,8 @@
    "trade": "電気",
    "gameStart": 54,
    "gameEnd": 55,
-   "realWorkingDays": 7.5,
-   "cost": 193265473,
+   "realWorkingDays": 7.4,
+   "cost": 193263575,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1628,8 +1900,8 @@
    "trade": "墨出し",
    "gameStart": 47,
    "gameEnd": 48,
-   "realWorkingDays": 3.0,
-   "cost": 99216000,
+   "realWorkingDays": 3.2,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1659,8 +1931,8 @@
    "trade": "軽鉄",
    "gameStart": 48,
    "gameEnd": 50,
-   "realWorkingDays": 9.0,
-   "cost": 99216000,
+   "realWorkingDays": 9.5,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1682,7 +1954,7 @@
    "trade": "衛生",
    "gameStart": 51,
    "gameEnd": 52,
-   "realWorkingDays": 4.3,
+   "realWorkingDays": 4.7,
    "cost": 0,
    "gate": false,
    "inspectionId": null,
@@ -1705,7 +1977,7 @@
    "trade": "設備支持",
    "gameStart": 52,
    "gameEnd": 52,
-   "realWorkingDays": 3.2,
+   "realWorkingDays": 2.8,
    "cost": 0,
    "gate": false,
    "inspectionId": null,
@@ -1728,8 +2000,8 @@
    "trade": "空調",
    "gameStart": 52,
    "gameEnd": 53,
-   "realWorkingDays": 7.9,
-   "cost": 158194132,
+   "realWorkingDays": 7.1,
+   "cost": 158192579,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1755,8 +2027,8 @@
    "trade": "衛生",
    "gameStart": 54,
    "gameEnd": 55,
-   "realWorkingDays": 5.8,
-   "cost": 158194132,
+   "realWorkingDays": 5.9,
+   "cost": 158192579,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1778,8 +2050,8 @@
    "trade": "電気",
    "gameStart": 55,
    "gameEnd": 56,
-   "realWorkingDays": 5.6,
-   "cost": 158194132,
+   "realWorkingDays": 5.7,
+   "cost": 158192579,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1801,8 +2073,8 @@
    "trade": "墨出し",
    "gameStart": 48,
    "gameEnd": 48,
-   "realWorkingDays": 2.4,
-   "cost": 83304000,
+   "realWorkingDays": 2.6,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1832,8 +2104,8 @@
    "trade": "軽鉄",
    "gameStart": 50,
    "gameEnd": 51,
-   "realWorkingDays": 7.5,
-   "cost": 83304000,
+   "realWorkingDays": 7.7,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1855,7 +2127,7 @@
    "trade": "衛生",
    "gameStart": 52,
    "gameEnd": 52,
-   "realWorkingDays": 3.6,
+   "realWorkingDays": 3.5,
    "cost": 0,
    "gate": false,
    "inspectionId": null,
@@ -1877,7 +2149,7 @@
    "zone": "2F-E",
    "trade": "設備支持",
    "gameStart": 52,
-   "gameEnd": 52,
+   "gameEnd": 53,
    "realWorkingDays": 2.6,
    "cost": 0,
    "gate": false,
@@ -1901,8 +2173,8 @@
    "trade": "空調",
    "gameStart": 53,
    "gameEnd": 54,
-   "realWorkingDays": 5.9,
-   "cost": 132823375,
+   "realWorkingDays": 6.4,
+   "cost": 132822071,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1927,9 +2199,9 @@
    "zone": "2F-E",
    "trade": "衛生",
    "gameStart": 55,
-   "gameEnd": 55,
-   "realWorkingDays": 5.2,
-   "cost": 132823375,
+   "gameEnd": 56,
+   "realWorkingDays": 4.7,
+   "cost": 132822071,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1949,10 +2221,10 @@
    "phase": "mepInterior",
    "zone": "2F-E",
    "trade": "電気",
-   "gameStart": 55,
+   "gameStart": 56,
    "gameEnd": 56,
-   "realWorkingDays": 5.1,
-   "cost": 132823375,
+   "realWorkingDays": 5.2,
+   "cost": 132822071,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -1974,8 +2246,8 @@
    "trade": "墨出し",
    "gameStart": 48,
    "gameEnd": 48,
-   "realWorkingDays": 3.4,
-   "cost": 121212000,
+   "realWorkingDays": 3.5,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -2005,8 +2277,8 @@
    "trade": "軽鉄",
    "gameStart": 50,
    "gameEnd": 51,
-   "realWorkingDays": 11.5,
-   "cost": 121212000,
+   "realWorkingDays": 10.2,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -2028,7 +2300,7 @@
    "trade": "衛生",
    "gameStart": 52,
    "gameEnd": 53,
-   "realWorkingDays": 5.6,
+   "realWorkingDays": 5.4,
    "cost": 0,
    "gate": false,
    "inspectionId": null,
@@ -2050,8 +2322,8 @@
    "zone": "2F-W",
    "trade": "設備支持",
    "gameStart": 53,
-   "gameEnd": 53,
-   "realWorkingDays": 3.4,
+   "gameEnd": 54,
+   "realWorkingDays": 3.3,
    "cost": 0,
    "gate": false,
    "inspectionId": null,
@@ -2072,10 +2344,10 @@
    "phase": "mepInterior",
    "zone": "2F-W",
    "trade": "空調",
-   "gameStart": 53,
+   "gameStart": 54,
    "gameEnd": 55,
-   "realWorkingDays": 9.4,
-   "cost": 193265473,
+   "realWorkingDays": 9.5,
+   "cost": 193263575,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -2099,10 +2371,10 @@
    "phase": "mepInterior",
    "zone": "2F-W",
    "trade": "衛生",
-   "gameStart": 55,
+   "gameStart": 56,
    "gameEnd": 56,
-   "realWorkingDays": 6.8,
-   "cost": 193265473,
+   "realWorkingDays": 6.9,
+   "cost": 193263575,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -2122,10 +2394,10 @@
    "phase": "mepInterior",
    "zone": "2F-W",
    "trade": "電気",
-   "gameStart": 56,
-   "gameEnd": 57,
-   "realWorkingDays": 6.9,
-   "cost": 193265473,
+   "gameStart": 57,
+   "gameEnd": 58,
+   "realWorkingDays": 7.3,
+   "cost": 193263575,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -2147,7 +2419,7 @@
    "trade": "EV",
    "gameStart": 44,
    "gameEnd": 47,
-   "realWorkingDays": 17.6,
+   "realWorkingDays": 17.0,
    "cost": 93600000,
    "gate": false,
    "inspectionId": null,
@@ -2170,7 +2442,7 @@
    "trade": "EV",
    "gameStart": 47,
    "gameEnd": 49,
-   "realWorkingDays": 14.1,
+   "realWorkingDays": 14.3,
    "cost": 81900000,
    "gate": false,
    "inspectionId": null,
@@ -2189,7 +2461,7 @@
    "trade": "EV",
    "gameStart": 49,
    "gameEnd": 51,
-   "realWorkingDays": 11.9,
+   "realWorkingDays": 12.8,
    "cost": 58500000,
    "gate": false,
    "inspectionId": null,
@@ -2466,8 +2738,8 @@
    "phase": "inspection",
    "zone": null,
    "trade": "監督",
-   "gameStart": 52,
-   "gameEnd": 52,
+   "gameStart": 53,
+   "gameEnd": 53,
    "realWorkingDays": 1,
    "cost": 0,
    "gate": false,
@@ -2485,7 +2757,7 @@
    "phase": "inspection",
    "zone": null,
    "trade": "監督",
-   "gameStart": 52,
+   "gameStart": 53,
    "gameEnd": 53,
    "realWorkingDays": 1,
    "cost": 0,
@@ -2528,7 +2800,7 @@
    "zone": null,
    "trade": "監督",
    "gameStart": 53,
-   "gameEnd": 53,
+   "gameEnd": 54,
    "realWorkingDays": 2,
    "cost": 0,
    "gate": false,
@@ -2554,8 +2826,8 @@
    "phase": "inspection",
    "zone": null,
    "trade": "監督",
-   "gameStart": 53,
-   "gameEnd": 53,
+   "gameStart": 54,
+   "gameEnd": 54,
    "realWorkingDays": 1,
    "cost": 0,
    "gate": false,
@@ -2880,7 +3152,7 @@
    "phase": "inspection",
    "zone": null,
    "trade": "監督",
-   "gameStart": 55,
+   "gameStart": 56,
    "gameEnd": 56,
    "realWorkingDays": 1,
    "cost": 0,
@@ -2942,7 +3214,7 @@
    "zone": null,
    "trade": "監督",
    "gameStart": 56,
-   "gameEnd": 56,
+   "gameEnd": 57,
    "realWorkingDays": 2,
    "cost": 0,
    "gate": false,
@@ -3018,7 +3290,7 @@
    "phase": "inspection",
    "zone": null,
    "trade": "監督",
-   "gameStart": 56,
+   "gameStart": 57,
    "gameEnd": 57,
    "realWorkingDays": 1,
    "cost": 0,
@@ -3079,7 +3351,7 @@
    "phase": "inspection",
    "zone": null,
    "trade": "監督",
-   "gameStart": 57,
+   "gameStart": 58,
    "gameEnd": 58,
    "realWorkingDays": 2,
    "cost": 0,
@@ -3462,9 +3734,9 @@
    "zone": "1F-C",
    "trade": "ボード",
    "gameStart": 53,
-   "gameEnd": 54,
-   "realWorkingDays": 9.5,
-   "cost": 99216000,
+   "gameEnd": 55,
+   "realWorkingDays": 9.4,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -3487,15 +3759,15 @@
    ]
   },
   {
-   "id": "z-1F-C-mep2",
-   "name": "1F-C 設備2次（器具前配管・配線）",
+   "id": "z-1F-C-door1",
+   "name": "1F-C 建具枠取付（先付け）",
    "phase": "mepInterior",
    "zone": "1F-C",
-   "trade": "設備2次",
-   "gameStart": 54,
+   "trade": "建具",
+   "gameStart": 55,
    "gameEnd": 55,
-   "realWorkingDays": 4.7,
-   "cost": 158194132,
+   "realWorkingDays": 2.3,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -3506,20 +3778,58 @@
    ]
   },
   {
+   "id": "z-1F-C-mep2",
+   "name": "1F-C 設備2次（器具前配管・配線）",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "設備2次",
+   "gameStart": 55,
+   "gameEnd": 56,
+   "realWorkingDays": 4.5,
+   "cost": 158192579,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-door1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
    "id": "z-1F-C-finish",
    "name": "1F-C パテ・仕上げ（塗装・クロス）",
    "phase": "mepInterior",
    "zone": "1F-C",
    "trade": "仕上げ",
-   "gameStart": 55,
+   "gameStart": 56,
    "gameEnd": 57,
-   "realWorkingDays": 10.8,
-   "cost": 99216000,
+   "realWorkingDays": 10.3,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
      "to": "z-1F-C-mep2",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-C-clean1",
+   "name": "1F-C 中間美装・養生剥がし",
+   "phase": "mepInterior",
+   "zone": "1F-C",
+   "trade": "美装",
+   "gameStart": 57,
+   "gameEnd": 57,
+   "realWorkingDays": 1.5,
+   "cost": 77168000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-C-finish",
      "type": "finish-start"
     }
    ]
@@ -3531,28 +3841,28 @@
    "zone": "1F-C",
    "trade": "床",
    "gameStart": 57,
-   "gameEnd": 57,
-   "realWorkingDays": 5.8,
-   "cost": 99216000,
+   "gameEnd": 58,
+   "realWorkingDays": 5.7,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
-     "to": "z-1F-C-finish",
+     "to": "z-1F-C-clean1",
      "type": "finish-start"
     }
    ]
   },
   {
-   "id": "z-1F-C-door",
-   "name": "1F-C 建具・金物",
+   "id": "z-1F-C-door2",
+   "name": "1F-C 建具 扉吊込み・金物",
    "phase": "mepInterior",
    "zone": "1F-C",
    "trade": "建具",
-   "gameStart": 57,
+   "gameStart": 58,
    "gameEnd": 58,
-   "realWorkingDays": 4.8,
-   "cost": 99216000,
+   "realWorkingDays": 2.2,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -3570,13 +3880,13 @@
    "trade": "器具付け",
    "gameStart": 58,
    "gameEnd": 59,
-   "realWorkingDays": 4.8,
-   "cost": 158194132,
+   "realWorkingDays": 4.5,
+   "cost": 158192579,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
-     "to": "z-1F-C-door",
+     "to": "z-1F-C-door2",
      "type": "finish-start"
     },
     {
@@ -3590,15 +3900,15 @@
    ]
   },
   {
-   "id": "z-1F-C-clean",
-   "name": "1F-C 美装・引渡し確認",
+   "id": "z-1F-C-clean2",
+   "name": "1F-C 最終美装・引渡し確認",
    "phase": "mepInterior",
    "zone": "1F-C",
    "trade": "美装",
    "gameStart": 59,
    "gameEnd": 59,
-   "realWorkingDays": 3.0,
-   "cost": 99216000,
+   "realWorkingDays": 2.2,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -3617,7 +3927,7 @@
    "gameStart": 54,
    "gameEnd": 55,
    "realWorkingDays": 7.1,
-   "cost": 83304000,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -3640,20 +3950,43 @@
    ]
   },
   {
+   "id": "z-1F-E-door1",
+   "name": "1F-E 建具枠取付（先付け）",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "建具",
+   "gameStart": 55,
+   "gameEnd": 55,
+   "realWorkingDays": 2.0,
+   "cost": 64792000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-door1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
    "id": "z-1F-E-mep2",
    "name": "1F-E 設備2次（器具前配管・配線）",
    "phase": "mepInterior",
    "zone": "1F-E",
    "trade": "設備2次",
    "gameStart": 55,
-   "gameEnd": 55,
-   "realWorkingDays": 3.8,
-   "cost": 132823375,
+   "gameEnd": 56,
+   "realWorkingDays": 3.9,
+   "cost": 132822071,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
-     "to": "z-1F-E-board",
+     "to": "z-1F-E-door1",
      "type": "finish-start"
     }
    ]
@@ -3664,10 +3997,10 @@
    "phase": "mepInterior",
    "zone": "1F-E",
    "trade": "仕上げ",
-   "gameStart": 55,
-   "gameEnd": 56,
-   "realWorkingDays": 8.2,
-   "cost": 83304000,
+   "gameStart": 56,
+   "gameEnd": 57,
+   "realWorkingDays": 8.7,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -3678,40 +4011,67 @@
    ]
   },
   {
-   "id": "z-1F-E-floor",
-   "name": "1F-E 床仕上げ",
+   "id": "z-1F-E-clean1",
+   "name": "1F-E 中間美装・養生剥がし",
    "phase": "mepInterior",
    "zone": "1F-E",
-   "trade": "床",
-   "gameStart": 56,
+   "trade": "美装",
+   "gameStart": 57,
    "gameEnd": 57,
-   "realWorkingDays": 5.3,
-   "cost": 83304000,
+   "realWorkingDays": 1.2,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
      "to": "z-1F-E-finish",
      "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-clean1",
+     "type": "resource"
     }
    ]
   },
   {
-   "id": "z-1F-E-door",
-   "name": "1F-E 建具・金物",
+   "id": "z-1F-E-floor",
+   "name": "1F-E 床仕上げ",
+   "phase": "mepInterior",
+   "zone": "1F-E",
+   "trade": "床",
+   "gameStart": 57,
+   "gameEnd": 58,
+   "realWorkingDays": 5.4,
+   "cost": 64792000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-E-clean1",
+     "type": "finish-start"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-E-door2",
+   "name": "1F-E 建具 扉吊込み・金物",
    "phase": "mepInterior",
    "zone": "1F-E",
    "trade": "建具",
-   "gameStart": 57,
-   "gameEnd": 58,
-   "realWorkingDays": 3.6,
-   "cost": 83304000,
+   "gameStart": 58,
+   "gameEnd": 59,
+   "realWorkingDays": 1.9,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
      "to": "z-1F-E-floor",
      "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-door2",
+     "type": "resource"
     }
    ]
   },
@@ -3721,15 +4081,15 @@
    "phase": "mepInterior",
    "zone": "1F-E",
    "trade": "器具付け",
-   "gameStart": 58,
-   "gameEnd": 58,
+   "gameStart": 59,
+   "gameEnd": 59,
    "realWorkingDays": 3.8,
-   "cost": 132823375,
+   "cost": 132822071,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
-     "to": "z-1F-E-door",
+     "to": "z-1F-E-door2",
      "type": "finish-start"
     },
     {
@@ -3739,21 +4099,25 @@
    ]
   },
   {
-   "id": "z-1F-E-clean",
-   "name": "1F-E 美装・引渡し確認",
+   "id": "z-1F-E-clean2",
+   "name": "1F-E 最終美装・引渡し確認",
    "phase": "mepInterior",
    "zone": "1F-E",
    "trade": "美装",
-   "gameStart": 58,
-   "gameEnd": 59,
-   "realWorkingDays": 2.4,
-   "cost": 83304000,
+   "gameStart": 59,
+   "gameEnd": 60,
+   "realWorkingDays": 1.7,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
      "to": "z-1F-E-mep3",
      "type": "finish-start"
+    },
+    {
+     "to": "z-1F-C-clean2",
+     "type": "resource"
     }
    ]
   },
@@ -3765,8 +4129,8 @@
    "trade": "ボード",
    "gameStart": 56,
    "gameEnd": 57,
-   "realWorkingDays": 10.0,
-   "cost": 121212000,
+   "realWorkingDays": 11.0,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -3793,20 +4157,43 @@
    ]
   },
   {
-   "id": "z-1F-W-mep2",
-   "name": "1F-W 設備2次（器具前配管・配線）",
+   "id": "z-1F-W-door1",
+   "name": "1F-W 建具枠取付（先付け）",
    "phase": "mepInterior",
    "zone": "1F-W",
-   "trade": "設備2次",
+   "trade": "建具",
    "gameStart": 57,
    "gameEnd": 58,
-   "realWorkingDays": 5.1,
-   "cost": 193265473,
+   "realWorkingDays": 2.6,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
      "to": "z-1F-W-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-door1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-mep2",
+   "name": "1F-W 設備2次（器具前配管・配線）",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "設備2次",
+   "gameStart": 58,
+   "gameEnd": 58,
+   "realWorkingDays": 5.7,
+   "cost": 193263575,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-door1",
      "type": "finish-start"
     },
     {
@@ -3823,8 +4210,8 @@
    "trade": "仕上げ",
    "gameStart": 58,
    "gameEnd": 60,
-   "realWorkingDays": 13.5,
-   "cost": 121212000,
+   "realWorkingDays": 13.6,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -3839,20 +4226,43 @@
    ]
   },
   {
-   "id": "z-1F-W-floor",
-   "name": "1F-W 床仕上げ",
+   "id": "z-1F-W-clean1",
+   "name": "1F-W 中間美装・養生剥がし",
    "phase": "mepInterior",
    "zone": "1F-W",
-   "trade": "床",
+   "trade": "美装",
    "gameStart": 60,
    "gameEnd": 61,
-   "realWorkingDays": 7.2,
-   "cost": 121212000,
+   "realWorkingDays": 1.8,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
      "to": "z-1F-W-finish",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-E-clean1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-1F-W-floor",
+   "name": "1F-W 床仕上げ",
+   "phase": "mepInterior",
+   "zone": "1F-W",
+   "trade": "床",
+   "gameStart": 61,
+   "gameEnd": 62,
+   "realWorkingDays": 7.0,
+   "cost": 94276000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-1F-W-clean1",
      "type": "finish-start"
     },
     {
@@ -3862,15 +4272,15 @@
    ]
   },
   {
-   "id": "z-1F-W-door",
-   "name": "1F-W 建具・金物",
+   "id": "z-1F-W-door2",
+   "name": "1F-W 建具 扉吊込み・金物",
    "phase": "mepInterior",
    "zone": "1F-W",
    "trade": "建具",
-   "gameStart": 61,
-   "gameEnd": 61,
-   "realWorkingDays": 5.7,
-   "cost": 121212000,
+   "gameStart": 62,
+   "gameEnd": 62,
+   "realWorkingDays": 2.5,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -3879,7 +4289,7 @@
      "type": "finish-start"
     },
     {
-     "to": "z-1F-C-door",
+     "to": "z-1F-E-door2",
      "type": "resource"
     }
    ]
@@ -3890,15 +4300,15 @@
    "phase": "mepInterior",
    "zone": "1F-W",
    "trade": "器具付け",
-   "gameStart": 61,
-   "gameEnd": 62,
-   "realWorkingDays": 5.2,
-   "cost": 193265473,
+   "gameStart": 62,
+   "gameEnd": 63,
+   "realWorkingDays": 5.3,
+   "cost": 193263575,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
-     "to": "z-1F-W-door",
+     "to": "z-1F-W-door2",
      "type": "finish-start"
     },
     {
@@ -3912,15 +4322,15 @@
    ]
   },
   {
-   "id": "z-1F-W-clean",
-   "name": "1F-W 美装・引渡し確認",
+   "id": "z-1F-W-clean2",
+   "name": "1F-W 最終美装・引渡し確認",
    "phase": "mepInterior",
    "zone": "1F-W",
    "trade": "美装",
-   "gameStart": 62,
+   "gameStart": 63,
    "gameEnd": 63,
-   "realWorkingDays": 3.7,
-   "cost": 121212000,
+   "realWorkingDays": 2.7,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -3929,7 +4339,7 @@
      "type": "finish-start"
     },
     {
-     "to": "z-1F-C-clean",
+     "to": "z-1F-E-clean2",
      "type": "resource"
     }
    ]
@@ -3941,9 +4351,9 @@
    "zone": "2F-C",
    "trade": "ボード",
    "gameStart": 56,
-   "gameEnd": 57,
-   "realWorkingDays": 8.2,
-   "cost": 99216000,
+   "gameEnd": 58,
+   "realWorkingDays": 9.1,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -3970,20 +4380,43 @@
    ]
   },
   {
-   "id": "z-2F-C-mep2",
-   "name": "2F-C 設備2次（器具前配管・配線）",
+   "id": "z-2F-C-door1",
+   "name": "2F-C 建具枠取付（先付け）",
    "phase": "mepInterior",
    "zone": "2F-C",
-   "trade": "設備2次",
-   "gameStart": 57,
+   "trade": "建具",
+   "gameStart": 58,
    "gameEnd": 58,
-   "realWorkingDays": 4.4,
-   "cost": 158194132,
+   "realWorkingDays": 2.1,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
      "to": "z-2F-C-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-door1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-mep2",
+   "name": "2F-C 設備2次（器具前配管・配線）",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "設備2次",
+   "gameStart": 58,
+   "gameEnd": 59,
+   "realWorkingDays": 4.7,
+   "cost": 158192579,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-door1",
      "type": "finish-start"
     },
     {
@@ -3998,10 +4431,10 @@
    "phase": "mepInterior",
    "zone": "2F-C",
    "trade": "仕上げ",
-   "gameStart": 58,
-   "gameEnd": 59,
-   "realWorkingDays": 10.2,
-   "cost": 99216000,
+   "gameStart": 59,
+   "gameEnd": 60,
+   "realWorkingDays": 10.5,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -4016,20 +4449,43 @@
    ]
   },
   {
-   "id": "z-2F-C-floor",
-   "name": "2F-C 床仕上げ",
+   "id": "z-2F-C-clean1",
+   "name": "2F-C 中間美装・養生剥がし",
    "phase": "mepInterior",
    "zone": "2F-C",
-   "trade": "床",
-   "gameStart": 59,
-   "gameEnd": 60,
-   "realWorkingDays": 6.3,
-   "cost": 99216000,
+   "trade": "美装",
+   "gameStart": 61,
+   "gameEnd": 61,
+   "realWorkingDays": 1.5,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
      "to": "z-2F-C-finish",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-1F-W-clean1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-C-floor",
+   "name": "2F-C 床仕上げ",
+   "phase": "mepInterior",
+   "zone": "2F-C",
+   "trade": "床",
+   "gameStart": 61,
+   "gameEnd": 62,
+   "realWorkingDays": 5.7,
+   "cost": 77168000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-C-clean1",
      "type": "finish-start"
     },
     {
@@ -4039,15 +4495,15 @@
    ]
   },
   {
-   "id": "z-2F-C-door",
-   "name": "2F-C 建具・金物",
+   "id": "z-2F-C-door2",
+   "name": "2F-C 建具 扉吊込み・金物",
    "phase": "mepInterior",
    "zone": "2F-C",
    "trade": "建具",
-   "gameStart": 60,
-   "gameEnd": 61,
-   "realWorkingDays": 4.8,
-   "cost": 99216000,
+   "gameStart": 62,
+   "gameEnd": 62,
+   "realWorkingDays": 2.2,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -4056,7 +4512,7 @@
      "type": "finish-start"
     },
     {
-     "to": "z-1F-E-door",
+     "to": "z-1F-W-door2",
      "type": "resource"
     }
    ]
@@ -4067,15 +4523,15 @@
    "phase": "mepInterior",
    "zone": "2F-C",
    "trade": "器具付け",
-   "gameStart": 61,
-   "gameEnd": 62,
-   "realWorkingDays": 4.7,
-   "cost": 158194132,
+   "gameStart": 62,
+   "gameEnd": 63,
+   "realWorkingDays": 4.3,
+   "cost": 158192579,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
-     "to": "z-2F-C-door",
+     "to": "z-2F-C-door2",
      "type": "finish-start"
     },
     {
@@ -4089,15 +4545,15 @@
    ]
   },
   {
-   "id": "z-2F-C-clean",
-   "name": "2F-C 美装・引渡し確認",
+   "id": "z-2F-C-clean2",
+   "name": "2F-C 最終美装・引渡し確認",
    "phase": "mepInterior",
    "zone": "2F-C",
    "trade": "美装",
-   "gameStart": 62,
-   "gameEnd": 62,
-   "realWorkingDays": 2.8,
-   "cost": 99216000,
+   "gameStart": 63,
+   "gameEnd": 63,
+   "realWorkingDays": 2.0,
+   "cost": 77168000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -4106,7 +4562,7 @@
      "type": "finish-start"
     },
     {
-     "to": "z-1F-E-clean",
+     "to": "z-1F-W-clean2",
      "type": "resource"
     }
    ]
@@ -4119,8 +4575,8 @@
    "trade": "ボード",
    "gameStart": 57,
    "gameEnd": 58,
-   "realWorkingDays": 7.7,
-   "cost": 83304000,
+   "realWorkingDays": 7.0,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -4147,6 +4603,29 @@
    ]
   },
   {
+   "id": "z-2F-E-door1",
+   "name": "2F-E 建具枠取付（先付け）",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "建具",
+   "gameStart": 58,
+   "gameEnd": 58,
+   "realWorkingDays": 1.8,
+   "cost": 64792000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-door1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
    "id": "z-2F-E-mep2",
    "name": "2F-E 設備2次（器具前配管・配線）",
    "phase": "mepInterior",
@@ -4154,13 +4633,13 @@
    "trade": "設備2次",
    "gameStart": 58,
    "gameEnd": 59,
-   "realWorkingDays": 3.6,
-   "cost": 132823375,
+   "realWorkingDays": 4.0,
+   "cost": 132822071,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
-     "to": "z-2F-E-board",
+     "to": "z-2F-E-door1",
      "type": "finish-start"
     },
     {
@@ -4176,9 +4655,9 @@
    "zone": "2F-E",
    "trade": "仕上げ",
    "gameStart": 60,
-   "gameEnd": 61,
-   "realWorkingDays": 8.9,
-   "cost": 83304000,
+   "gameEnd": 62,
+   "realWorkingDays": 9.1,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -4193,20 +4672,43 @@
    ]
   },
   {
-   "id": "z-2F-E-floor",
-   "name": "2F-E 床仕上げ",
+   "id": "z-2F-E-clean1",
+   "name": "2F-E 中間美装・養生剥がし",
    "phase": "mepInterior",
    "zone": "2F-E",
-   "trade": "床",
-   "gameStart": 61,
+   "trade": "美装",
+   "gameStart": 62,
    "gameEnd": 62,
-   "realWorkingDays": 4.8,
-   "cost": 83304000,
+   "realWorkingDays": 1.2,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
      "to": "z-2F-E-finish",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-C-clean1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-E-floor",
+   "name": "2F-E 床仕上げ",
+   "phase": "mepInterior",
+   "zone": "2F-E",
+   "trade": "床",
+   "gameStart": 62,
+   "gameEnd": 62,
+   "realWorkingDays": 4.6,
+   "cost": 64792000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-E-clean1",
      "type": "finish-start"
     },
     {
@@ -4216,15 +4718,15 @@
    ]
   },
   {
-   "id": "z-2F-E-door",
-   "name": "2F-E 建具・金物",
+   "id": "z-2F-E-door2",
+   "name": "2F-E 建具 扉吊込み・金物",
    "phase": "mepInterior",
    "zone": "2F-E",
    "trade": "建具",
    "gameStart": 62,
-   "gameEnd": 62,
-   "realWorkingDays": 3.4,
-   "cost": 83304000,
+   "gameEnd": 63,
+   "realWorkingDays": 1.8,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -4233,7 +4735,7 @@
      "type": "finish-start"
     },
     {
-     "to": "z-1F-W-door",
+     "to": "z-2F-C-door2",
      "type": "resource"
     }
    ]
@@ -4244,15 +4746,15 @@
    "phase": "mepInterior",
    "zone": "2F-E",
    "trade": "器具付け",
-   "gameStart": 62,
+   "gameStart": 63,
    "gameEnd": 63,
-   "realWorkingDays": 3.8,
-   "cost": 132823375,
+   "realWorkingDays": 4.0,
+   "cost": 132822071,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
-     "to": "z-2F-E-door",
+     "to": "z-2F-E-door2",
      "type": "finish-start"
     },
     {
@@ -4266,15 +4768,15 @@
    ]
   },
   {
-   "id": "z-2F-E-clean",
-   "name": "2F-E 美装・引渡し確認",
+   "id": "z-2F-E-clean2",
+   "name": "2F-E 最終美装・引渡し確認",
    "phase": "mepInterior",
    "zone": "2F-E",
    "trade": "美装",
    "gameStart": 63,
-   "gameEnd": 63,
-   "realWorkingDays": 2.6,
-   "cost": 83304000,
+   "gameEnd": 64,
+   "realWorkingDays": 1.9,
+   "cost": 64792000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -4283,7 +4785,7 @@
      "type": "finish-start"
     },
     {
-     "to": "z-1F-W-clean",
+     "to": "z-2F-C-clean2",
      "type": "resource"
     }
    ]
@@ -4296,8 +4798,8 @@
    "trade": "ボード",
    "gameStart": 58,
    "gameEnd": 60,
-   "realWorkingDays": 11.8,
-   "cost": 121212000,
+   "realWorkingDays": 11.6,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -4324,20 +4826,43 @@
    ]
   },
   {
+   "id": "z-2F-W-door1",
+   "name": "2F-W 建具枠取付（先付け）",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "建具",
+   "gameStart": 60,
+   "gameEnd": 60,
+   "realWorkingDays": 2.5,
+   "cost": 94276000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-board",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-door1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
    "id": "z-2F-W-mep2",
    "name": "2F-W 設備2次（器具前配管・配線）",
    "phase": "mepInterior",
    "zone": "2F-W",
    "trade": "設備2次",
    "gameStart": 60,
-   "gameEnd": 60,
-   "realWorkingDays": 5.6,
-   "cost": 193265473,
+   "gameEnd": 61,
+   "realWorkingDays": 5.2,
+   "cost": 193263575,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
-     "to": "z-2F-W-board",
+     "to": "z-2F-W-door1",
      "type": "finish-start"
     },
     {
@@ -4353,9 +4878,9 @@
    "zone": "2F-W",
    "trade": "仕上げ",
    "gameStart": 61,
-   "gameEnd": 62,
-   "realWorkingDays": 12.7,
-   "cost": 121212000,
+   "gameEnd": 63,
+   "realWorkingDays": 12.3,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -4370,20 +4895,43 @@
    ]
   },
   {
-   "id": "z-2F-W-floor",
-   "name": "2F-W 床仕上げ",
+   "id": "z-2F-W-clean1",
+   "name": "2F-W 中間美装・養生剥がし",
    "phase": "mepInterior",
    "zone": "2F-W",
-   "trade": "床",
-   "gameStart": 62,
+   "trade": "美装",
+   "gameStart": 63,
    "gameEnd": 63,
-   "realWorkingDays": 6.7,
-   "cost": 121212000,
+   "realWorkingDays": 1.8,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
      "to": "z-2F-W-finish",
+     "type": "finish-start"
+    },
+    {
+     "to": "z-2F-E-clean1",
+     "type": "resource"
+    }
+   ]
+  },
+  {
+   "id": "z-2F-W-floor",
+   "name": "2F-W 床仕上げ",
+   "phase": "mepInterior",
+   "zone": "2F-W",
+   "trade": "床",
+   "gameStart": 63,
+   "gameEnd": 64,
+   "realWorkingDays": 7.7,
+   "cost": 94276000,
+   "gate": false,
+   "inspectionId": null,
+   "deps": [
+    {
+     "to": "z-2F-W-clean1",
      "type": "finish-start"
     },
     {
@@ -4393,15 +4941,15 @@
    ]
   },
   {
-   "id": "z-2F-W-door",
-   "name": "2F-W 建具・金物",
+   "id": "z-2F-W-door2",
+   "name": "2F-W 建具 扉吊込み・金物",
    "phase": "mepInterior",
    "zone": "2F-W",
    "trade": "建具",
-   "gameStart": 63,
+   "gameStart": 64,
    "gameEnd": 64,
-   "realWorkingDays": 5.1,
-   "cost": 121212000,
+   "realWorkingDays": 2.9,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -4410,7 +4958,7 @@
      "type": "finish-start"
     },
     {
-     "to": "z-2F-C-door",
+     "to": "z-2F-E-door2",
      "type": "resource"
     }
    ]
@@ -4424,12 +4972,12 @@
    "gameStart": 64,
    "gameEnd": 65,
    "realWorkingDays": 5.8,
-   "cost": 193265473,
+   "cost": 193263575,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
-     "to": "z-2F-W-door",
+     "to": "z-2F-W-door2",
      "type": "finish-start"
     },
     {
@@ -4443,15 +4991,15 @@
    ]
   },
   {
-   "id": "z-2F-W-clean",
-   "name": "2F-W 美装・引渡し確認",
+   "id": "z-2F-W-clean2",
+   "name": "2F-W 最終美装・引渡し確認",
    "phase": "mepInterior",
    "zone": "2F-W",
    "trade": "美装",
    "gameStart": 65,
-   "gameEnd": 65,
-   "realWorkingDays": 3.7,
-   "cost": 121212000,
+   "gameEnd": 66,
+   "realWorkingDays": 2.5,
+   "cost": 94276000,
    "gate": false,
    "inspectionId": null,
    "deps": [
@@ -4460,7 +5008,7 @@
      "type": "finish-start"
     },
     {
-     "to": "z-2F-C-clean",
+     "to": "z-2F-E-clean2",
      "type": "resource"
     }
    ]
@@ -4496,7 +5044,7 @@
    "trade": "外構",
    "gameStart": 54,
    "gameEnd": 55,
-   "realWorkingDays": 7.4,
+   "realWorkingDays": 7.8,
    "cost": 101447413,
    "gate": false,
    "inspectionId": null,
@@ -4527,7 +5075,7 @@
    "trade": "外構",
    "gameStart": 55,
    "gameEnd": 56,
-   "realWorkingDays": 7.3,
+   "realWorkingDays": 7.0,
    "cost": 86954925,
    "gate": false,
    "inspectionId": null,
@@ -4546,7 +5094,7 @@
    "trade": "外構",
    "gameStart": 56,
    "gameEnd": 57,
-   "realWorkingDays": 7.5,
+   "realWorkingDays": 8.4,
    "cost": 72462438,
    "gate": false,
    "inspectionId": null,
@@ -4636,35 +5184,35 @@
    "phase": "closing",
    "zone": null,
    "trade": "設備",
-   "gameStart": 65,
-   "gameEnd": 66,
+   "gameStart": 66,
+   "gameEnd": 67,
    "realWorkingDays": 8,
    "cost": 0,
    "gate": false,
    "inspectionId": null,
    "deps": [
     {
-     "to": "z-1F-C-clean",
+     "to": "z-1F-C-clean2",
      "type": "finish-start"
     },
     {
-     "to": "z-1F-E-clean",
+     "to": "z-1F-E-clean2",
      "type": "finish-start"
     },
     {
-     "to": "z-1F-W-clean",
+     "to": "z-1F-W-clean2",
      "type": "finish-start"
     },
     {
-     "to": "z-2F-C-clean",
+     "to": "z-2F-C-clean2",
      "type": "finish-start"
     },
     {
-     "to": "z-2F-E-clean",
+     "to": "z-2F-E-clean2",
      "type": "finish-start"
     },
     {
-     "to": "z-2F-W-clean",
+     "to": "z-2F-W-clean2",
      "type": "finish-start"
     },
     {
@@ -4673,6 +5221,14 @@
     },
     {
      "to": "ext-4",
+     "type": "finish-start"
+    },
+    {
+     "to": "rf-7",
+     "type": "finish-start"
+    },
+    {
+     "to": "tank-6",
      "type": "finish-start"
     },
     {
@@ -4922,7 +5478,13 @@
     "insp-fnd-1F-C-act"
    ],
    "gateFor": "fnd-1F-C-2",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-fnd-1F-E",
@@ -4934,7 +5496,13 @@
     "insp-fnd-1F-E-act"
    ],
    "gateFor": "fnd-1F-E-2",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-fnd-1F-W",
@@ -4946,7 +5514,13 @@
     "insp-fnd-1F-W-act"
    ],
    "gateFor": "fnd-1F-W-2",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-steel-prod",
@@ -4958,7 +5532,13 @@
     "insp-steel-prod-act"
    ],
    "gateFor": "frm-s1-1",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-steel-s1",
@@ -4970,7 +5550,13 @@
     "insp-steel-s1-act"
    ],
    "gateFor": null,
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-mid",
@@ -4982,7 +5568,13 @@
     "insp-mid-act"
    ],
    "gateFor": "face-南面-2",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-wp-1F-C",
@@ -4994,7 +5586,13 @@
     "insp-wp-1F-C-act"
    ],
    "gateFor": "z-1F-C-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-conc-1F-C",
@@ -5006,7 +5604,13 @@
     "insp-conc-1F-C-act"
    ],
    "gateFor": "z-1F-C-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-wp-1F-E",
@@ -5018,7 +5622,13 @@
     "insp-wp-1F-E-act"
    ],
    "gateFor": "z-1F-E-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-conc-1F-E",
@@ -5030,7 +5640,13 @@
     "insp-conc-1F-E-act"
    ],
    "gateFor": "z-1F-E-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-wp-1F-W",
@@ -5042,7 +5658,13 @@
     "insp-wp-1F-W-act"
    ],
    "gateFor": "z-1F-W-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-conc-1F-W",
@@ -5054,7 +5676,13 @@
     "insp-conc-1F-W-act"
    ],
    "gateFor": "z-1F-W-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-wp-2F-C",
@@ -5066,7 +5694,13 @@
     "insp-wp-2F-C-act"
    ],
    "gateFor": "z-2F-C-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-conc-2F-C",
@@ -5078,7 +5712,13 @@
     "insp-conc-2F-C-act"
    ],
    "gateFor": "z-2F-C-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-wp-2F-E",
@@ -5090,7 +5730,13 @@
     "insp-wp-2F-E-act"
    ],
    "gateFor": "z-2F-E-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-conc-2F-E",
@@ -5102,7 +5748,13 @@
     "insp-conc-2F-E-act"
    ],
    "gateFor": "z-2F-E-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-wp-2F-W",
@@ -5114,7 +5766,13 @@
     "insp-wp-2F-W-act"
    ],
    "gateFor": "z-2F-W-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-conc-2F-W",
@@ -5126,7 +5784,13 @@
     "insp-conc-2F-W-act"
    ],
    "gateFor": "z-2F-W-board",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-power",
@@ -5138,7 +5802,13 @@
     "insp-power-act"
    ],
    "gateFor": "z-1F-C-mep3",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-ev",
@@ -5150,7 +5820,13 @@
     "insp-ev-act"
    ],
    "gateFor": "ev-4",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-fire",
@@ -5162,7 +5838,13 @@
     "insp-fire-act"
    ],
    "gateFor": "close-5",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   },
   {
    "id": "insp-final",
@@ -5174,7 +5856,13 @@
     "insp-final-act"
    ],
    "gateFor": "close-6",
-   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提"
+   "leadRule": "予約は実施の10〜14日前、書類は証拠が揃うことが前提",
+   "loop": {
+    "structure": "実施→指摘→是正→再確認（合格まで反復）",
+    "findingModel": "cost_tables.assumptionValues AS-04（仮定値：軽微3〜8件/通常1〜3件/重大0〜1件）",
+    "correctionDays": "AS-05（軽微1日/通常3日/重大7日）",
+    "note": "指摘が重大の場合は是正がゲート後工程を止める。是正・再確認は実施タスクの後段イベントとして扱う"
+   }
   }
  ],
  "milestones": [
