@@ -10158,8 +10158,18 @@ function g3BuildStatic(){
     /* 遅延工区の赤表示：以前は床面すれすれに薄い箱を埋めていたため、スラブや
        仕上げに隠れて「フロアの一部だけ赤い」中途半端な出方をしていた。
        工区の四辺を一周する赤い枠（高さ1.0m）に変え、どの角度からでも
-       工区全体の遅れとして一貫して読める形にする */
-    if(proj && zoneTasks.some(function(id){ var t = T(id); return t && !g3Done(id) && proj[id] && PLAN[id] && proj[id][1] > PLAN[id][1]; })){
+       工区全体の遅れとして一貫して読める形にする。
+       点灯条件は工程表（barGeom）の lateNow と物差しを統一する。見込み完了日
+       （proj）が計画を過ぎているかでは判定しない：見込みは依存チェーンで
+       遅れを後工程へ伝播させるため、着工直後（土工事中）でも内装・検査など
+       将来作業まで「遅れ」扱いになり、躯体の無い階まで含めて全工区に枠が
+       出てしまう。以前の赤い板オーバーレイも形こそ違えど点灯条件はこの
+       波及見込みで、同じ系統の出方だった。枠を出すのは、その工区の作業
+       自体が「いま遅れている」時だけ：進行中＝自分の残量からの完了見込みが
+       計画超過／未着手＝計画の着手日が来た（過ぎた）のにまだ着手できていない。
+       波及見込みだけで滑っている将来作業には出さない */
+    if(proj && zoneTasks.some(function(id){ var t = T(id); if(!t || g3Done(id) || !proj[id] || !PLAN[id]) return false;
+      return S.started[id] ? proj[id][1] > PLAN[id][1] : (PLAN[id][0] <= S.day && proj[id][0] > PLAN[id][0]); })){
       var rx0 = g3X(Z.x0), rx1 = g3X(Z.x1), rz0 = g3Z(Z.y1), rz1 = g3Z(Z.y0), rb = 0.22;
       g3Box(a, rx0, z0 + 0.05, rz0, rx1, z0 + 1.05, rz0 + rb, G3C.red);
       g3Box(a, rx0, z0 + 0.05, rz1 - rb, rx1, z0 + 1.05, rz1, G3C.red);
