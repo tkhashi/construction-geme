@@ -2393,7 +2393,12 @@ def gen_seeded2(conv_path, ann_path):
     def site_val(k):
         v = site_ann.get(k, {})
         return v.get("value") if isinstance(v, dict) else v
-    b["site"] = {"polygon": [[-15000, -12000], [380000, -12000], [380000, 140000], [-15000, 140000]],
+    # 敷地ポリゴン：シード注釈 site.polygon があればそれを採用する（亀有は平面を包む
+    # 実効敷地として注釈側で作り直し済み）。無い場合は従来の生成器仮置き矩形。
+    _poly = site_val("polygon") or [[-15000, -12000], [380000, -12000], [380000, 140000], [-15000, 140000]]
+    _poly_w = (max(p[0] for p in _poly) - min(p[0] for p in _poly)) / 1000.0
+    _poly_h = (max(p[1] for p in _poly) - min(p[1] for p in _poly)) / 1000.0
+    b["site"] = {"polygon": _poly,
                  "buildingPlacement": {"origin": [0, 0], "rotationDeg": round(conv.get("main_axis_deg", 0), 1)},
                  "roads": site_val("roads") or [],
                  "gates": [{"edge": g["edge"], "atMm": round(g["frac"] * total_w),
@@ -2457,8 +2462,12 @@ def gen_seeded2(conv_path, ann_path):
         _asm("siteNeighbors", "シード値あり" if site_val("neighbors") else "未シード（空）",
              "seed" if site_val("neighbors") else "gap",
              site_ann.get("neighbors", {}).get("basis", ""), "シード注釈 site.neighbors"),
-        _asm("sitePolygon", "仮置き矩形（380m×140m）", "default",
-             site_ann.get("polygon", {}).get("basis", "敷地形状は未取得"), "生成器既定（実敷地形状ではない）"),
+        _asm("sitePolygon",
+             (f"実効敷地・仮置き矩形（{_poly_w:.0f}m×{_poly_h:.0f}m、建物平面を全周で包み離隔を持つ）"
+              if site_val("polygon") else "仮置き矩形（380m×140m）"), "default",
+             site_ann.get("polygon", {}).get("basis", "敷地形状は未取得"),
+             "シード注釈 site.polygon（実敷地形状は未取得のため仮置き）" if site_val("polygon")
+             else "生成器既定（実敷地形状ではない）"),
         _asm("equipmentRuns", "未生成", "gap", "シード生成では EquipmentRun（設備横引きルート）を生成していない",
              "既知の不足（パラメトリック生成には1本のみ）"),
     ]

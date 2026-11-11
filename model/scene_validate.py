@@ -251,6 +251,18 @@ def rect_overhang(rect, x0, y0, x1, y1):
     return max(rx0 - x0, ry0 - y0, x1 - rx1, y1 - ry1, 0.0)
 
 
+def box_hits_rows(rows, x0, y0, x1, y1, eps=1e-6):
+    """ボックス平面が領域（行マージ済み区間）と面積を持って重なるか。
+    SV-01 の仮囲い・ゲート用ハードゲート（フットプリント交差判定）に使う。"""
+    for (ry0, ry1, ivs) in rows.values():
+        if ry1 <= y0 + eps or ry0 >= y1 - eps:
+            continue
+        for (ix0, ix1) in ivs:
+            if ix1 > x0 + eps and ix0 < x1 - eps:
+                return True
+    return False
+
+
 # ---------------------------------------------------------------- 種別分類
 # kind -> (region種別, 許容キー)。region: solid/floor/roof/site/shaft:*/core/foundation
 REGION_OF_KIND = {}
@@ -312,6 +324,8 @@ def sv01(geo, scene, tol):
     worst = (0.0, None)
     col_positions = {(round(x, 3), round(y, 3)) for (x, y) in geo.columns_l1()}
     rows_cache = {}
+    l1_rows = geo.rows(geo.levels["L1"]["solid"])
+    fence_gate_checked = 0
     for m in scene["members"]:
         kind = m["kind"]
         if kind not in REGION_OF_KIND:
@@ -321,7 +335,16 @@ def sv01(geo, scene, tol):
         box = m["box"]
         x0, y0 = box["x"], box["y"]
         x1, y1 = x0 + box["dx"], y0 + box["dy"]
-        if region == "site":
+        if kind in ("tempFence", "tempGate"):
+            # ハードゲート（2026-11-11）: 仮囲い・ゲートに限って実効敷地（ポリゴン∪平面）
+            # の回避をやめる。実ポリゴン bbox での内包判定に加え、建物フットプリント
+            # （L1セル群）と交差したら FAIL とする（亀有の仮囲い干渉の再発防止）。
+            fence_gate_checked += 1
+            over = rect_overhang(geo.site_bbox, x0, y0, x1, y1)
+            if box_hits_rows(l1_rows, x0, y0, x1, y1):
+                fails.append(f"{kind} {m['id']}: 建物フットプリント（L1）と交差している (task {m['task']})")
+                continue
+        elif region == "site":
             over = rect_overhang(geo.eff_site_bbox, x0, y0, x1, y1)
         elif region == "foundation":
             over = rect_overhang(geo.eff_site_bbox, x0, y0, x1, y1)
@@ -353,7 +376,8 @@ def sv01(geo, scene, tol):
         if over > t + 1e-9:
             if len(fails) < 15:
                 fails.append(f"{kind} {m['id']}: はみ出し {over:.2f}m > 許容 {t}m (task {m['task']})")
-    return (not fails), fails, f"最大はみ出し {worst[0]:.2f}m（{worst[1]}）"
+    return (not fails), fails, (f"最大はみ出し {worst[0]:.2f}m（{worst[1]}）"
+                                f" / 仮囲い・ゲート {fence_gate_checked} 件は実ポリゴン＋フットプリント交差で判定")
 
 
 def sv02(geo, scene, plan):
