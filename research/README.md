@@ -11,4 +11,4 @@
 | [terminology/](terminology/) | 現場用語・熟語の調査 |
 | [site-research/](site-research/) | その他の現場調査（外構、図面チェック、労働災害事例など） |
 
-![本編スクリーンショット](images/game-screenshot.png)
+![本編スクリーンショット（モラージュ柏・竣工直前の3D全景）](images/game-screenshot.png)

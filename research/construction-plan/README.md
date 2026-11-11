@@ -2,7 +2,7 @@
 
 建物モデルから工事計画（工程・工期・原価）を「入力ではなく導出」で生成するロジックの調査と実装記録。正は `model/CONSTRUCTION_PLAN_GENERATION.md`、実装は `model/plan_generate.py` ほか、記録は `model/PLAN_PIPELINE.md`。
 
-![タイムラプスで見る計画進行](images/timelapse-screenshot.png)
+![タイムラプスで見る計画進行（実働290日目・外装ほぼ完成、工程バーとタスク一覧つき）](images/timelapse-screenshot.png)
 
 ## 主な結論
 

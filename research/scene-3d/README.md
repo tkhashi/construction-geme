@@ -2,7 +2,7 @@
 
 建物モデル＋工事計画から、部材の出現・撤去イベント列（ScenePlan）を生成するパイプラインの調査と仕様。正は `model/SCENE3D_PIPELINE.md`、規則は `model/scene_rules.json`、生成・検証は `model/scene_expand.py` / `model/scene_validate.py`。
 
-![3D試作での描画](images/trial3d-screenshot.png)
+![3D試作での描画（ガーデンモール完成形・Scene3D生成物の描画結果）](images/trial3d-screenshot.png)
 ![3D試作（全画面）](images/trial3d-screenshot-full.png)
 
 ## 主な結論

@@ -4,7 +4,7 @@
 
 **プレイ（GitHub Pages）**: https://tkhashi.github.io/construction-geme/ — `docs/` を GitHub Pages（ブランチ方式）で公開。本編を更新したら `game/index.html` と `docs/index.html` の両方へ反映する。
 
-![本編スクリーンショット](research/images/game-screenshot.png)
+![本編スクリーンショット（モラージュ柏・竣工直前の3D全景）](research/images/game-screenshot.png)
 
 ## 構成
 

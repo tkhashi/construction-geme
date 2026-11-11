@@ -2,7 +2,7 @@
 
 建物を「データ」として生成するロジック（平面形状・グリッド・柱・室・コア等）の調査と検証結果。正は本編プロジェクトの `model/BUILDING_MODEL_SCHEMA.md`（v0.7）と `model/INTERIOR_MODEL_V2.md`、生成コードは `model/` 配下。
 
-![平面図の例](images/plan-screenshot.png)
+![平面図の例（モラージュ柏の実測フットプリントがそのまま平面図に）](images/plan-screenshot.png)
 
 ## 主な結論
 
