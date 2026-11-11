@@ -3884,18 +3884,21 @@ function findingTargetTask(f){
   if(f.trade){ var tr2 = TASKS.find(function(t){ return foremanOf(t) === f.trade && !isDone(t.id); }); if(tr2) return tr2; }
   return null;
 }
+/* 小数1桁刻みの値（信頼など）専用の丸め。2.3 - 1 = 1.2999999999999998 のような
+   浮動小数誤差が、値そのもの・差分・表示に残らないよう計算の合流点で必ず通す */
+function r1(v){ return Math.round(v * 10) / 10; }
 function syncTrust(){
   if(!S.foremen) return;
   var ks = Object.keys(S.foremen);
   var avg = ks.reduce(function(sum, k){ return sum + S.foremen[k].trust; }, 0) / ks.length;
-  S.trust = Math.round(avg * 10) / 10;
+  S.trust = r1(avg);
 }
 function addTrust(key, delta){
   if(!key || !S.foremen || !S.foremen[key]) return;
   var f = S.foremen[key];
   /* 信頼の上がりやすさは協調性に連動（聞かない職長ほど積みにくい） */
   if(delta > 0 && f.coop <= 2 && Math.random() < 0.4) delta = 0;
-  f.trust = Math.max(0, Math.min(5, f.trust + delta));
+  f.trust = r1(Math.max(0, Math.min(5, f.trust + delta)));
   syncTrust();
 }
 function foremanTag(f){
@@ -13597,7 +13600,7 @@ function doKeii(tid){
   S.keii[tid] = true;
   var kc = catOfTask(T(tid));
   if(kc){ S.photoShots = S.photoShots || {}; S.photoShots[kc] = Math.min(catReq(kc), catShots(kc) + shotGain(T(tid))); }
-  S.money -= 3; addTrust(foremanOf(T(tid)), -1); if(!foremanOf(T(tid))) S.trust = Math.max(0, S.trust - 1);
+  S.money -= 3; addTrust(foremanOf(T(tid)), -1); if(!foremanOf(T(tid))) S.trust = r1(Math.max(0, S.trust - 1));
   S.photoMiss = Math.max(0, S.photoMiss - 1);
   S.slowDay = S.day + 1;
   setTicker('alert', '経緯書を作成 — 記録なしの経緯を残した（予算 −3／信頼 −1／明日は対応で進み半分）');
@@ -13841,7 +13844,7 @@ function renderBadges(){
     '<button type="button" class="pitem' + (siteStrength() <= 1 ? ' badp' : siteStrength() <= 2 ? ' warnp' : '') + '" data-param="strength">' +
       '<span class="prow">' + icon('wrench', 15) + '<span class="plab">地力</span><span class="pval">Lv' + siteStrength() + '／5</span></span></button>' +
     '<button type="button" class="pitem' + (S.trust <= 1 ? ' badp' : '') + '" data-param="trust">' +
-      '<span class="prow">' + icon('users', 15) + '<span class="plab">信頼</span><span class="pval">' + S.trust + '</span></span></button>' +
+      '<span class="prow">' + icon('users', 15) + '<span class="plab">信頼</span><span class="pval">' + r1(S.trust) + '</span></span></button>' +
     '<button type="button" class="pitem' + (S.hiyari >= 2 ? ' warnp' : '') + '" data-param="safety">' +
       '<span class="prow">' + icon('alert', 15) + '<span class="plab">安全</span><span class="pval">ヒヤリ・ハット' + S.hiyari + '件</span></span></button>' +
     '<button type="button" class="pitem' + (S.kachoBusy >= 4 ? ' badp' : S.kachoBusy >= 3 ? ' warnp' : '') + '" data-param="kacho">' +
@@ -13854,9 +13857,9 @@ function renderBadges(){
   if(PREV){
     var keys = Object.keys(cur);
     for(var i = 0; i < keys.length; i++){
-      var k = keys[i], d = cur[k] - PREV[k];
+      var k = keys[i], d = r1(cur[k] - PREV[k]);
       if(!d) continue;
-      DAYD[k] = (DAYD[k] || 0) + d;
+      DAYD[k] = r1((DAYD[k] || 0) + d);
       var el = document.querySelector('.pitem[data-param="' + k + '"]');
       if(el){
         el.classList.add('flash');
@@ -13880,7 +13883,7 @@ function dayStripHTML(){
   ];
   var chips = '';
   rows.forEach(function(r){
-    var d = DAYD[r.k] || 0;
+    var d = r1(DAYD[r.k] || 0);
     if(!d) return;
     var good = (d > 0) === (r.good > 0);
     chips += '<span class="dschip">' + icon(r.icon, 12) + r.label + ' <span class="' + (good ? 'up' : 'down') + '">' + (d > 0 ? '↑+' + d : '↓' + d) + '</span></span>';
@@ -13941,7 +13944,7 @@ function showPop(key){
       var f = S.foremen[k];
       return '<tr><td>' + TRADES[k].name + '</td><td>信頼 ' + f.trust + '／動員 ' + f.mob + '／協調 ' + f.coop + '</td><td class="num">応援 ×' + (1.15 + 0.07 * f.trust + 0.08 * f.mob).toFixed(1) + '</td></tr>';
     }).join('');
-    h = '<h3>' + icon('users', 16) + '職長ごとの信頼（平均 ' + S.trust + '）</h3><table>' + trows + '</table>' +
+    h = '<h3>' + icon('users', 16) + '職長ごとの信頼（平均 ' + r1(S.trust) + '）</h3><table>' + trows + '</table>' +
       '<p class="pnote2">信頼は職長ごと。上がりやすさは協調性に連動（聞かない職長ほど積みにくい）。応援の効き＝動員力×信頼。</p>';
   } else if(key === 'kacho'){
     var krows = S.kachoWhy.map(function(w){ return '<tr><td>' + w + '</td><td class="num">繁忙 +1</td></tr>'; }).join('');
