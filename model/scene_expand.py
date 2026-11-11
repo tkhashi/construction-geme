@@ -188,6 +188,10 @@ class Ctx:
         self.fp_bbox = (min(fxs), min(fys), max(fxs), max(fys))
         self.centroid = ((self.fp_bbox[0] + self.fp_bbox[2]) / 2,
                          (self.fp_bbox[1] + self.fp_bbox[3]) / 2)
+        # 敷地ポリゴン（m）と L1 フットプリント矩形群。仮囲い・ゲート・仮設配置の
+        # ポリゴン判定（2026-11-11 実境界化）に使う
+        self.site_poly = [(p[0] / 1000.0, p[1] / 1000.0) for p in poly]
+        self.fp_rects = [self.cell_rect(c) for c in fp]
         # 入力観察: 敷地ポリゴン（placeholder 矩形）が建物平面を包まない場合は gap に記録
         sx0, sy0, sx1, sy1 = self.site_bbox
         fx0, fy0, fx1, fy1 = self.fp_bbox
@@ -267,6 +271,17 @@ class Ctx:
 
     def nearest_station(self, x, y):
         return min(self.stations, key=lambda p: ((p[0] - x) ** 2 + (p[1] - y) ** 2, p))
+
+    def clamp_site_y(self, x, y, inset):
+        """敷地南側に置くイベント・部材位置の y をポリゴン内へ寄せる。
+        (x, y) が敷地ポリゴン内ならそのまま（矩形敷地では従来位置と一致）。
+        外なら、その x における敷地最南境界 + inset を返す。"""
+        if _point_in_poly(x, y, self.site_poly):
+            return y
+        hit = _cast_boundary(self.site_poly, "south", x)
+        if hit is None:
+            return y
+        return hit[1] + inset
 
     def _build_tasks(self):
         self.tasks = {t["id"]: t for t in self.plan["tasks"]}
@@ -371,6 +386,159 @@ def spread_u(k, n, u0, u1):
     return u0 + (k + 0.5) / n * (u1 - u0) if n else u0
 
 
+# ---------------------------------------------------------------- 敷地ポリゴン幾何
+# 2026-11-11: 敷地ポリゴン実境界化（蘇我=道路街区由来、亀有=OSM landuse 由来の
+# 非矩形ポリゴン）に対応するための純 stdlib 幾何。矩形ポリゴンでは従来の
+# bbox 基準配置と一致する結果を返すこと（回帰条件）。
+
+def _point_in_poly(x, y, poly):
+    """レイキャスティング。辺上の点は内側扱い。"""
+    n = len(poly)
+    for i in range(n):
+        x0, y0 = poly[i]
+        x1, y1 = poly[(i + 1) % n]
+        # 辺上判定（線分までの距離がほぼ 0）
+        dx, dy = x1 - x0, y1 - y0
+        L2 = dx * dx + dy * dy
+        if L2 > 0:
+            t = max(0.0, min(1.0, ((x - x0) * dx + (y - y0) * dy) / L2))
+            if math.hypot(x - (x0 + dx * t), y - (y0 + dy * t)) < 1e-9:
+                return True
+    inside = False
+    for i in range(n):
+        x0, y0 = poly[i]
+        x1, y1 = poly[(i + 1) % n]
+        if (y0 > y) != (y1 > y):
+            xin = x0 + (y - y0) * (x1 - x0) / (y1 - y0)
+            if x < xin:
+                inside = not inside
+    return inside
+
+
+def _seg_intersect(a, b, c, d):
+    def cr(o, p, q):
+        return (p[0] - o[0]) * (q[1] - o[1]) - (p[1] - o[1]) * (q[0] - o[0])
+    d1, d2 = cr(c, d, a), cr(c, d, b)
+    d3, d4 = cr(a, b, c), cr(a, b, d)
+    return ((d1 > 0) != (d2 > 0)) and ((d3 > 0) != (d4 > 0))
+
+
+def _rect_in_poly(rx0, ry0, rx1, ry1, poly):
+    pts = [(rx0, ry0), (rx1, ry0), (rx1, ry1), (rx0, ry1),
+           ((rx0 + rx1) / 2, (ry0 + ry1) / 2), ((rx0 + rx1) / 2, ry0),
+           ((rx0 + rx1) / 2, ry1), (rx0, (ry0 + ry1) / 2), (rx1, (ry0 + ry1) / 2)]
+    if not all(_point_in_poly(x, y, poly) for x, y in pts):
+        return False
+    rect_edges = [((rx0, ry0), (rx1, ry0)), ((rx1, ry0), (rx1, ry1)),
+                  ((rx1, ry1), (rx0, ry1)), ((rx0, ry1), (rx0, ry0))]
+    n = len(poly)
+    for i in range(n):
+        e = (poly[i], poly[(i + 1) % n])
+        for re_ in rect_edges:
+            if _seg_intersect(e[0], e[1], re_[0], re_[1]):
+                return False
+    return True
+
+
+def _box_hits_rects(box, rects):
+    """box=(x0,y0,x1,y1) が矩形群のいずれかと面積を持って重なるか（SV-01 ハードゲートと同じ基準）。"""
+    bx0, by0, bx1, by1 = box
+    for (rx0, ry0, rx1, ry1) in rects:
+        if bx1 > rx0 + 1e-6 and bx0 < rx1 - 1e-6 and by1 > ry0 + 1e-6 and by0 < ry1 - 1e-6:
+            return True
+    return False
+
+
+def _rect_dist(box, rects):
+    """box と矩形群の最小距離（重なれば 0）。"""
+    bx0, by0, bx1, by1 = box
+    best = None
+    for (rx0, ry0, rx1, ry1) in rects:
+        dx = max(rx0 - bx1, bx0 - rx1, 0.0)
+        dy = max(ry0 - by1, by0 - ry1, 0.0)
+        d = math.hypot(dx, dy)
+        if best is None or d < best:
+            best = d
+    return best if best is not None else 0.0
+
+
+def _cast_boundary(poly, side, at):
+    """side 方向の境界キャスト。south/north は鉛直線 x=at との交点の最南/最北、
+    west/east は水平線 y=at との交点の最西/最東を返す。
+    戻り値 (x, y, edge_idx, t) または None（交わらない）。同点が複数辺にある場合は
+    side と平行な辺（南・北なら水平辺、西・東なら垂直辺）を優先する。"""
+    hits = []
+    n = len(poly)
+    for i in range(n):
+        x0, y0 = poly[i]
+        x1, y1 = poly[(i + 1) % n]
+        if side in ("south", "north"):
+            if abs(x1 - x0) < 1e-12:
+                if abs(x0 - at) < 1e-9:
+                    hits += [(x0, y0, i, 0.0), (x1, y1, i, 1.0)]
+            elif min(x0, x1) - 1e-9 <= at <= max(x0, x1) + 1e-9:
+                t = (at - x0) / (x1 - x0)
+                hits.append((at, y0 + t * (y1 - y0), i, t))
+        else:
+            if abs(y1 - y0) < 1e-12:
+                if abs(y0 - at) < 1e-9:
+                    hits += [(x0, y0, i, 0.0), (x1, y1, i, 1.0)]
+            elif min(y0, y1) - 1e-9 <= at <= max(y0, y1) + 1e-9:
+                t = (at - y0) / (y1 - y0)
+                hits.append((x0 + t * (x1 - x0), at, i, t))
+    if not hits:
+        return None
+    if side == "south":
+        ext = min(h[1] for h in hits)
+        cand = [h for h in hits if abs(h[1] - ext) < 1e-9]
+    elif side == "north":
+        ext = max(h[1] for h in hits)
+        cand = [h for h in hits if abs(h[1] - ext) < 1e-9]
+    elif side == "west":
+        ext = min(h[0] for h in hits)
+        cand = [h for h in hits if abs(h[0] - ext) < 1e-9]
+    else:
+        ext = max(h[0] for h in hits)
+        cand = [h for h in hits if abs(h[0] - ext) < 1e-9]
+    if len(cand) > 1:
+        def par(h):
+            x0, y0 = poly[h[2]]
+            x1, y1 = poly[(h[2] + 1) % n]
+            L = math.hypot(x1 - x0, y1 - y0) or 1.0
+            return abs((x1 - x0) / L) if side in ("south", "north") else abs((y1 - y0) / L)
+        cand.sort(key=lambda h: (-par(h), h[2]))
+    return cand[0]
+
+
+def _ring_walk(edges, edge_i, t, offset):
+    """ポリゴン周上を (edge_i, t) から arc-length offset（符号付き、頂点順方向が正）へ移動。
+    edges は (x0, y0, x1, y1, L, ux, uy) の列。戻り値 (x, y, edge_j, t_j)。"""
+    n = len(edges)
+    i = edge_i
+    s = t * edges[i][4]
+    rem = offset
+    while rem > 0:
+        avail = edges[i][4] - s
+        if rem <= avail:
+            s += rem
+            rem = 0.0
+        else:
+            rem -= avail
+            i = (i + 1) % n
+            s = 0.0
+    while rem < 0:
+        if -rem <= s:
+            s += rem
+            rem = 0.0
+        else:
+            rem += s
+            i = (i - 1) % n
+            s = edges[i][4]
+    x0, y0, x1, y1, L, ux, uy = edges[i]
+    tt = s / L if L > 0 else 0.0
+    return (x0 + (x1 - x0) * tt, y0 + (y1 - y0) * tt, i, tt)
+
+
 # ---------------------------------------------------------------- 生成器
 def gen_action_only(ctx: Ctx, task, rule):
     pos = ctx.reg.get("officePos") or (ctx.site_bbox[0] + 8, ctx.site_bbox[1] + 4, 0)
@@ -380,74 +548,128 @@ def gen_action_only(ctx: Ctx, task, rule):
 
 
 def gen_site_setup(ctx: Ctx, task, rule):
-    b = ctx.building
-    poly = [(p[0] / 1000.0, p[1] / 1000.0) for p in b["site"]["polygon"]]
+    # 2026-11-11 実境界化: 仮囲い・ゲートは敷地ポリゴン（非矩形あり）の辺上に置く。
+    # ゲート位置は atMm のキャスト（南・北は x=atMm の最南/最北交点、西・東は
+    # y=atMm の最西/最東交点）で決める。矩形ポリゴンでは従来の bbox 配置と一致する。
+    # ゲートボックスが建物フットプリントと重なる場合は、重ならない位置まで
+    # 境界を沿って決定的にずらす（ずらせなければ gap）。仮囲いピースも同様に、
+    # フットプリントと重なるピースだけを局所的に分割して辺上に収める。
+    poly = ctx.site_poly
     tid = task["id"]
-    fence_ids = []
-    # ゲート: edge -> [(at, width)]
-    gates_by_edge = {}
-    for g in ctx.gates:
-        gates_by_edge.setdefault(g["edge"], []).append((g["atMm"] / 1000.0, g["width"] / 1000.0, g["name"]))
-    edge_names = []
     n = len(poly)
+    edges = []
     for k in range(n):
         x0, y0 = poly[k]
         x1, y1 = poly[(k + 1) % n]
-        if abs(y1 - y0) < 1e-9:
-            edge = "south" if y0 == min(p[1] for p in poly) else "north"
-        elif abs(x1 - x0) < 1e-9:
-            edge = "west" if x0 == min(p[0] for p in poly) else "east"
-        else:
-            edge = f"edge{k}"
-        edge_names.append(edge)
-    for k in range(n):
-        x0, y0 = poly[k]
-        x1, y1 = poly[(k + 1) % n]
-        length = math.hypot(x1 - x0, y1 - y0)
-        ux, uy = (x1 - x0) / length, (y1 - y0) / length
-        seg = 6.0
-        cnt = max(1, int(length // seg))
-        edge = edge_names[k]
-        for s in range(cnt):
-            d0 = length * s / cnt
-            d1 = length * (s + 1) / cnt
-            mid = (d0 + d1) / 2
-            # ゲート範囲はフェンスを置かない（決定的に間引く）。
-            # ゲートの atMm は辺に沿った絶対座標（南・北辺はX、西・東辺はY）。
-            coord = (x0 + ux * mid) if abs(ux) > 0 else (y0 + uy * mid)
-            skip = any(abs(coord - at) < w / 2 for at, w, _name in gates_by_edge.get(edge, []))
-            if skip:
-                continue
-            cx, cy = x0 + ux * mid, y0 + uy * mid
-            L = d1 - d0
-            box = (cx - (abs(ux) * L + abs(uy) * 0.1) / 2, cy - (abs(uy) * L + abs(ux) * 0.1) / 2, 0.0,
-                   abs(ux) * L + abs(uy) * 0.1, abs(uy) * L + abs(ux) * 0.1, 3.0)
-            fence_ids.append(ctx.add_member("tempFence", tid, box, basis="default"))
-    # ゲート部材（辺ごとに位置を復元）
-    gate_ids = []
+        length = math.hypot(x1 - x0, y1 - y0) or 1e-9
+        edges.append((x0, y0, x1, y1, length, (x1 - x0) / length, (y1 - y0) / length))
     sx0, sy0, sx1, sy1 = ctx.site_bbox
-    for g in ctx.gates:
+
+    def gate_box_at(x, y, ei, w):
+        ux, uy = edges[ei][5], edges[ei][6]
+        dx = abs(ux) * w + abs(uy) * 0.3
+        dy = abs(uy) * w + abs(ux) * 0.3
+        return (x - dx / 2, y - dy / 2, dx, dy)
+
+    # --- ゲート配置（キャスト＋必要なら境界沿いの移動）
+    placed = {}       # gate index -> (x, y, edge_idx)
+    gate_skips = {}   # edge_idx -> [(along, width)]
+    for gi, g in enumerate(ctx.gates):
         at = g["atMm"] / 1000.0
         w = g["width"] / 1000.0
-        # atMm が辺の範囲外のゲートは入力側の不整合として gap に記録し、発明して置かない
-        span = (sx0, sx1) if g["edge"] in ("south", "north") else (sy0, sy1)
-        if not (span[0] - 0.01 <= at <= span[1] + 0.01):
+        hit = _cast_boundary(poly, g["edge"], at)
+        if hit is None:
+            # atMm のキャスト線が敷地ポリゴンと交わらないゲートは発明して置かない
             ctx.gaps.append({"kind": "siteGate", "status": "gap",
-                             "note": f"ゲート「{g['name']}」({g['edge']}) の atMm={g['atMm']} が敷地範囲 "
-                                     f"[{span[0] * 1000:.0f}, {span[1] * 1000:.0f}]mm の外。建物モデル側の要確認事項として配置しない"})
+                             "note": f"ゲート「{g['name']}」({g['edge']}) の atMm={g['atMm']} のキャスト線が"
+                                     f"敷地ポリゴンと交わらない。建物モデル側の要確認事項として配置しない"})
             continue
-        if g["edge"] == "south":
-            box = (at - w / 2, sy0 - 0.15, 0.0, w, 0.3, 3.0)
-        elif g["edge"] == "north":
-            box = (at - w / 2, sy1 - 0.15, 0.0, w, 0.3, 3.0)
-        elif g["edge"] == "west":
-            box = (sx0 - 0.15, at - w / 2, 0.0, 0.3, w, 3.0)
-        else:
-            box = (sx1 - 0.15, at - w / 2, 0.0, 0.3, w, 3.0)
-        gate_ids.append(ctx.add_member("tempGate", tid, box, basis="default"))
-    # 仮設事務所クラスタ（南西の空地）
+        x, y, ei, t = hit
+        bx = gate_box_at(x, y, ei, w)
+        if _box_hits_rects((bx[0], bx[1], bx[0] + bx[2], bx[1] + bx[3]), ctx.fp_rects):
+            found = None
+            for k in range(1, 81):
+                for sgn in (1, -1):
+                    wx, wy, wi, wt = _ring_walk(edges, ei, t, sgn * k * 0.5)
+                    wb = gate_box_at(wx, wy, wi, w)
+                    if not _box_hits_rects((wb[0], wb[1], wb[0] + wb[2], wb[1] + wb[3]), ctx.fp_rects):
+                        found = (wx, wy, wi, wt)
+                        break
+                if found:
+                    break
+            if not found:
+                ctx.gaps.append({"kind": "siteGate", "status": "gap",
+                                 "note": f"ゲート「{g['name']}」({g['edge']}) は境界沿いに建物フットプリントと"
+                                         f"重ならない配置位置が無い。建物モデル側の要確認事項として配置しない"})
+                continue
+            x, y, ei, t = found
+        placed[gi] = (x, y, ei)
+        # フェンス間引き登録: 配置点のある辺（頂点上なら隣接辺にも）へ along 位置を記録
+        regs = [(ei, t * edges[ei][4])]
+        if t < 1e-6:
+            regs.append(((ei - 1) % n, edges[(ei - 1) % n][4]))
+        if t > 1 - 1e-6:
+            regs.append(((ei + 1) % n, 0.0))
+        for (ej, along) in regs:
+            gate_skips.setdefault(ej, []).append((along, w))
+    # 配置済みゲート位置を他生成器（引込位置の目安）へ共有
+    ctx.reg["gatePlaced"] = {gi: (placed[gi][0], placed[gi][1]) for gi in placed}
+
+    # --- 仮囲い（辺ごと。ゲート範囲は間引き、フットプリントと重なるピースは局所分割）
+    fence_ids = []
+    for k in range(n):
+        x0, y0, x1, y1, length, ux, uy = edges[k]
+        cnt = max(1, int(length // 6.0))
+        for s in range(cnt):
+            seg_ids = []
+            stack = [(length * s / cnt, length * (s + 1) / cnt)]
+            while stack:
+                d0, d1 = stack.pop()
+                mid = (d0 + d1) / 2
+                if any(abs(mid - along) < w / 2 for along, w in gate_skips.get(k, [])):
+                    continue
+                cx, cy = x0 + ux * mid, y0 + uy * mid
+                L = d1 - d0
+                dx = abs(ux) * L + abs(uy) * 0.1
+                dy = abs(uy) * L + abs(ux) * 0.1
+                if L > 0.75 and _box_hits_rects((cx - dx / 2, cy - dy / 2, cx + dx / 2, cy + dy / 2), ctx.fp_rects):
+                    stack.append((d0, mid))
+                    stack.append((mid, d1))
+                    continue
+                seg_ids.append(ctx.add_member("tempFence", tid,
+                                              (cx - dx / 2, cy - dy / 2, 0.0, dx, dy, 3.0), basis="default"))
+            fence_ids.extend(reversed(seg_ids))
+    # --- ゲート部材
+    gate_ids = []
+    for gi, g in enumerate(ctx.gates):
+        if gi not in placed:
+            continue
+        x, y, ei = placed[gi]
+        w = g["width"] / 1000.0
+        bx = gate_box_at(x, y, ei, w)
+        gate_ids.append(ctx.add_member("tempGate", tid, (bx[0], bx[1], 0.0, bx[2], bx[3], 3.0), basis="default"))
+    # --- 仮設事務所クラスタ（南西の空地。実境界では bbox 左下が区画外になり得るため、
+    # 従来位置がポリゴン外・建物近接なら、ポリゴン内の空地を決定的に探す）
     office_ids = []
     ox, oy = sx0 + 3.0, sy0 + 2.0
+    cluster = (ox, oy, ox + 31.0, oy + 4.0)
+    if not (_rect_in_poly(*cluster, poly) and not _box_hits_rects(cluster, ctx.fp_rects)):
+        found = None
+        for ddx in range(0, 301):
+            for ddy in range(0, 121):
+                cx0, cy0 = sx0 + 3.0 + ddx, sy0 + 2.0 + ddy
+                c = (cx0, cy0, cx0 + 31.0, cy0 + 4.0)
+                if _rect_in_poly(*c, poly) and _rect_dist(c, ctx.fp_rects) >= 3.0:
+                    found = (cx0, cy0)
+                    break
+            if found:
+                break
+        if found:
+            ox, oy = found
+        else:
+            ctx.gaps.append({"kind": "siteOffice", "status": "gap",
+                             "note": "仮設事務所クラスタ（31m×4m）の配置可能な空地が敷地ポリゴン内に"
+                                     "見つからない。従来位置（bbox 左下）に仮置きする"})
     office_ids.append(ctx.add_member("tempOffice", tid, (ox, oy, 0.0, 10.0, 4.0, 3.0), basis="default"))
     office_ids.append(ctx.add_member("tempOffice", tid, (ox + 12.0, oy, 0.0, 8.0, 4.0, 3.0), basis="default"))
     office_ids.append(ctx.add_member("tempToilet", tid, (ox + 22.0, oy, 0.0, 4.0, 3.0, 2.6), basis="default"))
@@ -456,7 +678,7 @@ def gen_site_setup(ctx: Ctx, task, rule):
     ctx.reg["tempMembers"] += fence_ids + gate_ids + office_ids
     order = fence_ids + gate_ids + office_ids
     ctx.place_spread(tid, order, 0.05, 0.9)
-    ctx.work_event(task, "仮設", (ctx.centroid[0], ctx.site_bbox[1] + 6))
+    ctx.work_event(task, "仮設", (ctx.centroid[0], ctx.clamp_site_y(ctx.centroid[0], ctx.site_bbox[1] + 6, 6.0)))
 
 
 def gen_survey(ctx: Ctx, task, rule):
@@ -472,7 +694,7 @@ def gen_survey(ctx: Ctx, task, rule):
 def gen_temp_utility(ctx: Ctx, task, rule):
     south_gates = [g for g in ctx.gates if g["edge"] == "south"]
     gx = (south_gates[0]["atMm"] / 1000.0) if south_gates else ctx.centroid[0]
-    gy = ctx.fp_bbox[1] - 3.0
+    gy = ctx.clamp_site_y(gx, ctx.fp_bbox[1] - 3.0, 3.0)
     pole = ctx.add_member("tempPole", task["id"], (gx, gy, 0.0, 0.3, 0.3, 7.0), basis="default")
     panel = ctx.add_member("tempPanel", task["id"], (gx + 1.2, gy, 0.0, 1.2, 0.4, 1.8), basis="default")
     ctx.reg["tempMembers"] += [pole, panel]
@@ -602,8 +824,9 @@ def gen_excavation(ctx: Ctx, task, rule):
         c = cells[int(frac * (len(cells) - 1))]
         x0, y0, x1, y1 = ctx.cell_rect(c)
         ctx.add_event("move", task["id"], frac, actor=ex, at=((x0 + x1) / 2, (y0 + y1) / 2, -ctx.depth))
+        ev_x = ctx.gates[0]["atMm"] / 1000.0 if ctx.gates else (x0 + x1) / 2
         ctx.add_event("move", task["id"], min(frac + 0.05, 0.99), actor=du,
-                      at=(ctx.gates[0]["atMm"] / 1000.0 if ctx.gates else (x0 + x1) / 2, ctx.site_bbox[1] + 2, 0.0))
+                      at=(ev_x, ctx.clamp_site_y(ev_x, ctx.site_bbox[1] + 2, 2.0), 0.0))
     ctx.work_event(task, "土工", ctx.centroid)
 
 
@@ -1392,9 +1615,10 @@ def gen_elec_service(ctx: Ctx, task, rule):
     tid = task["id"]
     south_gates = [g for g in ctx.gates if g["edge"] == "south"]
     gx = (south_gates[0]["atMm"] / 1000.0) if south_gates else ctx.centroid[0]
-    pole = ctx.add_member("servicePole", tid, (gx, ctx.site_bbox[1] + 1.0, 0.0, 0.35, 0.35, 8.0), basis="default")
+    base_y = ctx.clamp_site_y(gx, ctx.site_bbox[1] + 1.0, 1.0)
+    pole = ctx.add_member("servicePole", tid, (gx, base_y, 0.0, 0.35, 0.35, 8.0), basis="default")
     trench = ctx.add_member("buriedCable", tid,
-                            (gx - 0.3, ctx.site_bbox[1] + 1.0, -0.75, 0.6, max(1.0, ctx.fp_bbox[1] - ctx.site_bbox[1] - 1.0), 0.15),
+                            (gx - 0.3, base_y, -0.75, 0.6, max(1.0, ctx.fp_bbox[1] - base_y), 0.15),
                             basis="inferred")
     ctx.place_spread(tid, [pole, trench], 0.1, 0.5)
     # キュービクル基礎（屋上、DSを持つ最小コアの直上）
@@ -1423,7 +1647,7 @@ def gen_elec_cubicle(ctx: Ctx, task, rule):
                                 basis="rule", level=ctx.roof_level_id)
         ctx.reg["cubicle"] = cub_id
         gx = ctx.gates[0]["atMm"] / 1000.0 if ctx.gates else pad[0]
-        ctx.add_event("stock", tid, 0.1, member=cub_id, at=(gx, ctx.site_bbox[1] + 3, 0.0), note="搬入")
+        ctx.add_event("stock", tid, 0.1, member=cub_id, at=(gx, ctx.clamp_site_y(gx, ctx.site_bbox[1] + 3, 3.0), 0.0), note="搬入")
         ctx.add_event("lift", tid, 0.45, member=cub_id, at=(pad[0], pad[1], pad[2]), note="クレーン揚重")
         ctx.add_event("place", tid, 0.6, member=cub_id, at=(pad[0], pad[1], pad[2]))
     # 幹線立管（EPS兼用シャフト内）
@@ -1508,7 +1732,7 @@ def gen_lift_in(ctx: Ctx, task, rule):
     for k in range(n):
         aid = ctx.add_actor(f"awp:{lid}-{k + 1}", "awp", boxes=6, label=f"高所作業車 {lid}-{k + 1}")
         ids.append(aid)
-        ctx.add_event("stock", tid, 0.05 + 0.1 * k, actor=aid, at=(gx + k * 4, ctx.site_bbox[1] + 3, 0.0), note="搬入（ゲート）")
+        ctx.add_event("stock", tid, 0.05 + 0.1 * k, actor=aid, at=(gx + k * 4, ctx.clamp_site_y(gx + k * 4, ctx.site_bbox[1] + 3, 3.0), 0.0), note="搬入（ゲート）")
         ctx.add_event("lift", tid, 0.35 + 0.15 * k, actor=aid, at=landing, note="クレーン揚重で階へ搬入")
         ctx.add_event("move", tid, 0.7 + 0.1 * k, actor=aid, at=(zx + k * 6, zy, lv["elev"]), note="階内へ自走")
     ctx.reg["awps"][lid] = ids
@@ -1522,7 +1746,7 @@ def gen_lift_out(ctx: Ctx, task, rule):
     landing = (ctx.centroid[0], ctx.fp_bbox[1] + 0.5, lv["elev"])
     for k, aid in enumerate(ctx.reg["awps"].get(lid, [])):
         ctx.add_event("move", tid, 0.2 + 0.1 * k, actor=aid, at=landing, note="搬出位置へ自走")
-        ctx.add_event("lift", tid, 0.5 + 0.1 * k, actor=aid, at=(landing[0], ctx.site_bbox[1] + 3, 0.0), note="クレーンで吊り下ろし")
+        ctx.add_event("lift", tid, 0.5 + 0.1 * k, actor=aid, at=(landing[0], ctx.clamp_site_y(landing[0], ctx.site_bbox[1] + 3, 3.0), 0.0), note="クレーンで吊り下ろし")
         ctx.add_event("remove", tid, 0.85, actor=aid, note="搬出完了")
     ctx.work_event(task, "揚重", landing)
 
@@ -1884,14 +2108,33 @@ def _sectors(ctx: Ctx):
             ("東荷捌き場", (fx1, fy0, sx1, fy1)), ("西緑地", (sx0, fy0, fx0, fy1))]
 
 
-def _sector_tiles(rect, pitch=12.0):
+def _sector_tiles(ctx: Ctx, rect, pitch=12.0):
+    # 2026-11-11 実境界化: セクタ矩形（bbox 基準）のうち敷地ポリゴンの内側だけを敷く。
+    # ポリゴン内に収まるタイルはそのまま、境界を跨ぐタイルは 3m に細分して内側のみ残す
+    # （矩形敷地では細分は発生せず従来と一致する）。
     x0, y0, x1, y1 = rect
+    poly = ctx.site_poly
     tiles = []
     x = x0
     while x < x1 - 0.01:
         y = y0
         while y < y1 - 0.01:
-            tiles.append((x, y, min(pitch, x1 - x), min(pitch, y1 - y)))
+            w, d = min(pitch, x1 - x), min(pitch, y1 - y)
+            corners_in = all(_point_in_poly(px, py, poly)
+                             for px, py in ((x, y), (x + w, y), (x + w, y + d), (x, y + d)))
+            if corners_in:
+                tiles.append((x, y, w, d))
+            elif _point_in_poly(x + w / 2, y + d / 2, poly):
+                sub = 3.0
+                sx = x
+                while sx < x + w - 0.01:
+                    sy = y
+                    while sy < y + d - 0.01:
+                        sw, sd = min(sub, x + w - sx), min(sub, y + d - sy)
+                        if _point_in_poly(sx + sw / 2, sy + sd / 2, poly):
+                            tiles.append((sx, sy, sw, sd))
+                        sy += sub
+                    sx += sub
             y += pitch
         x += pitch
     return tiles
@@ -1906,27 +2149,32 @@ def gen_ext_buried(ctx: Ctx, task, rule):
             continue
         for frac in (0.33, 0.66):
             if (x1 - x0) >= (y1 - y0):
+                if not _point_in_poly((x0 + x1) / 2, y0 + (y1 - y0) * frac, ctx.site_poly):
+                    continue
                 ids.append(ctx.add_member("buriedPipe", tid,
                                           (x0 + 0.5, y0 + (y1 - y0) * frac - 0.15, -0.85, x1 - x0 - 1.0, 0.3, 0.2),
                                           basis="inferred"))
             else:
+                if not _point_in_poly(x0 + (x1 - x0) * frac, (y0 + y1) / 2, ctx.site_poly):
+                    continue
                 ids.append(ctx.add_member("buriedPipe", tid,
                                           (x0 + (x1 - x0) * frac - 0.15, y0 + 0.5, -0.85, 0.3, y1 - y0 - 1.0, 0.2),
                                           basis="inferred"))
     ctx.place_spread(tid, ids, 0.05, 0.9)
     ex = ctx.add_actor("machine:excavator-2", "excavator", boxes=10, label="ユンボ（外構）")
-    ctx.add_event("move", tid, 0.3, actor=ex, at=(ctx.centroid[0], ctx.site_bbox[1] + 6, 0.0))
-    ctx.work_event(task, "外構", (ctx.centroid[0], ctx.site_bbox[1] + 6))
+    ev_y = ctx.clamp_site_y(ctx.centroid[0], ctx.site_bbox[1] + 6, 6.0)
+    ctx.add_event("move", tid, 0.3, actor=ex, at=(ctx.centroid[0], ev_y, 0.0))
+    ctx.work_event(task, "外構", (ctx.centroid[0], ev_y))
 
 
 def gen_ext_base(ctx: Ctx, task, rule):
     tid = task["id"]
     ids = []
     for name, rect in _sectors(ctx):
-        for (x, y, w, d) in _sector_tiles(rect):
+        for (x, y, w, d) in _sector_tiles(ctx, rect):
             ids.append(ctx.add_member("extBase", tid, (x, y, 0.0, w, d, 0.1), basis="rule"))
     ctx.place_spread(tid, ids, 0.03, 0.95)
-    ctx.work_event(task, "外構", (ctx.centroid[0], ctx.site_bbox[1] + 6))
+    ctx.work_event(task, "外構", (ctx.centroid[0], ctx.clamp_site_y(ctx.centroid[0], ctx.site_bbox[1] + 6, 6.0)))
 
 
 def gen_ext_pave(ctx: Ctx, task, rule):
@@ -1935,14 +2183,14 @@ def gen_ext_pave(ctx: Ctx, task, rule):
     for name, rect in _sectors(ctx):
         if name == "西緑地":
             continue  # 緑地は舗装しない
-        for (x, y, w, d) in _sector_tiles(rect):
+        for (x, y, w, d) in _sector_tiles(ctx, rect):
             ids.append(ctx.add_member("extPave", tid, (x, y, 0.1, w, d, 0.06), basis="rule"))
     ctx.place_spread(tid, ids, 0.03, 0.95)
     fin = ctx.add_actor("machine:finisher", "finisher", boxes=9, label="アスファルトフィニッシャー")
     rol = ctx.add_actor("machine:roller", "roller", boxes=8, label="ロードローラー")
-    ctx.add_event("move", tid, 0.2, actor=fin, at=(ctx.fp_bbox[0] + 10, ctx.site_bbox[1] + 6, 0.0))
-    ctx.add_event("move", tid, 0.25, actor=rol, at=(ctx.fp_bbox[0] + 16, ctx.site_bbox[1] + 6, 0.0))
-    ctx.work_event(task, "外構", (ctx.centroid[0], ctx.site_bbox[1] + 6))
+    ctx.add_event("move", tid, 0.2, actor=fin, at=(ctx.fp_bbox[0] + 10, ctx.clamp_site_y(ctx.fp_bbox[0] + 10, ctx.site_bbox[1] + 6, 6.0), 0.0))
+    ctx.add_event("move", tid, 0.25, actor=rol, at=(ctx.fp_bbox[0] + 16, ctx.clamp_site_y(ctx.fp_bbox[0] + 16, ctx.site_bbox[1] + 6, 6.0), 0.0))
+    ctx.work_event(task, "外構", (ctx.centroid[0], ctx.clamp_site_y(ctx.centroid[0], ctx.site_bbox[1] + 6, 6.0)))
 
 
 def gen_ext_finish(ctx: Ctx, task, rule):
@@ -1954,25 +2202,34 @@ def gen_ext_finish(ctx: Ctx, task, rule):
             x = x0 + 3.0
             while x < x1 - 5.0:
                 for frac in (0.3, 0.7):
+                    # 区画線は 5m のボックス全体が敷地ポリゴンに収まる場所にだけ引く
+                    if not _rect_in_poly(x, y0 + (y1 - y0) * frac - 2.5, x + 0.15, y0 + (y1 - y0) * frac + 2.5, ctx.site_poly):
+                        continue
                     ids.append(ctx.add_member("lineMarking", tid,
                                               (x, y0 + (y1 - y0) * frac - 2.5, 0.17, 0.15, 5.0, 0.01),
                                               faces=2, basis="default"))
                 x += 2.5
             for frac in (0.25, 0.75):
+                if not _rect_in_poly(x0 + (x1 - x0) * frac - 0.15, (y0 + y1) / 2 - 0.15,
+                                      x0 + (x1 - x0) * frac + 0.15, (y0 + y1) / 2 + 0.15, ctx.site_poly):
+                    continue
                 ids.append(ctx.add_member("lightPole", tid,
                                           (x0 + (x1 - x0) * frac - 0.15, (y0 + y1) / 2 - 0.15, 0.0, 0.3, 0.3, 6.0),
                                           basis="default"))
         if name == "西緑地":
             y = y0 + 4.0
             while y < y1 - 2.0:
-                ids.append(ctx.add_member("tree", tid, (x0 + (x1 - x0) / 2 - 0.8, y, 0.0, 1.6, 1.6, 3.2),
-                                          faces=12, basis="default"))
+                if _rect_in_poly(x0 + (x1 - x0) / 2 - 0.8, y, x0 + (x1 - x0) / 2 + 0.8, y + 1.6, ctx.site_poly):
+                    ids.append(ctx.add_member("tree", tid, (x0 + (x1 - x0) / 2 - 0.8, y, 0.0, 1.6, 1.6, 3.2),
+                                              faces=12, basis="default"))
                 y += 12.0
         if name == "東荷捌き場":
-            ids.append(ctx.add_member("lightPole", tid,
-                                      ((x0 + x1) / 2 - 0.15, (y0 + y1) / 2 - 0.15, 0.0, 0.3, 0.3, 6.0), basis="default"))
+            if _rect_in_poly((x0 + x1) / 2 - 0.15, (y0 + y1) / 2 - 0.15,
+                             (x0 + x1) / 2 + 0.15, (y0 + y1) / 2 + 0.15, ctx.site_poly):
+                ids.append(ctx.add_member("lightPole", tid,
+                                          ((x0 + x1) / 2 - 0.15, (y0 + y1) / 2 - 0.15, 0.0, 0.3, 0.3, 6.0), basis="default"))
     ctx.place_spread(tid, ids, 0.05, 0.95)
-    ctx.work_event(task, "外構", (ctx.centroid[0], ctx.site_bbox[1] + 6))
+    ctx.work_event(task, "外構", (ctx.centroid[0], ctx.clamp_site_y(ctx.centroid[0], ctx.site_bbox[1] + 6, 6.0)))
 
 
 # ---------------------------------------------------------------- 引渡し

@@ -1134,7 +1134,7 @@
   .dlglog-body:focus{outline:2px solid var(--accent);outline-offset:-2px}
   .ll-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed color-mix(in srgb,var(--line) 65%,transparent);font-size:13px;line-height:1.55}
   .ll-row:last-child{border-bottom:none}
-  .ll-name{flex:none;font-weight:800;color:var(--accent);max-width:38%}
+  .ll-name{flex:0 1 auto;min-width:0;font-weight:800;color:var(--accent);max-width:42%;overflow-wrap:anywhere;line-height:1.45}
   .ll-row.me .ll-name{color:var(--cta)}
   .ll-row.pick .ll-name{color:var(--ink)}
   .ll-row.pick .ll-text{font-weight:700}
@@ -1151,7 +1151,7 @@
   .dlg-window{
     position:relative;margin:0 8px 8px;background:var(--card);
     border:3px solid var(--card-border);border-radius:10px;
-    padding:16px 14px 10px;min-height:118px;cursor:pointer;
+    padding:12px 14px 10px;min-height:118px;cursor:pointer;
     box-shadow:0 4px 0 rgba(0,0,0,.25);
     pointer-events:auto;
     /* セリフ・選択肢が最大まで大きい状態でも、窓の上端がステージ左上の
@@ -1167,10 +1167,17 @@
   #dlgOverlay.sev-danger .dlg-window{border-color:#d92c2c;box-shadow:0 4px 0 rgba(0,0,0,.25),0 0 0 4px rgba(217,44,44,.35),0 0 34px rgba(217,44,44,.60);animation:dlgDangerBlink 1.05s ease-in-out infinite}
   @keyframes dlgDangerBlink{0%,100%{box-shadow:0 4px 0 rgba(0,0,0,.25),0 0 0 4px rgba(217,44,44,.35),0 0 34px rgba(217,44,44,.60)}50%{box-shadow:0 4px 0 rgba(0,0,0,.25),0 0 0 4px rgba(217,44,44,.12),0 0 12px rgba(217,44,44,.25)}}
   @media (prefers-reduced-motion: reduce){ #dlgOverlay.sev-danger .dlg-window{animation:none} }
+  /* 名前ラベルは窓の外へはみ出す絶対配置にしない：.dlg-window は
+     overflow-y:auto のため、上へ突き出したラベルは上下に切り取られ、
+     nowrap＋ellipsis＋max-width:75% で長い名前（職長名＋業者名など）は
+     横も省略されていた。窓の中に置き、幅いっぱいまで使って折り返す
+     ことで「あなた（担当者）」も長い役職付きの名前も全文が読める */
   .dlg-name{
-    position:absolute;top:-13px;left:10px;background:var(--tag-bg);color:var(--tag-ink);
-    font-size:12px;font-weight:800;border-radius:6px;padding:2px 12px;max-width:75%;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    position:relative;top:auto;left:auto;display:inline-block;vertical-align:top;
+    background:var(--tag-bg);color:var(--tag-ink);
+    font-size:12.5px;font-weight:800;border-radius:6px;padding:3px 12px;margin:0 0 7px;
+    max-width:100%;white-space:normal;overflow:visible;text-overflow:clip;
+    overflow-wrap:anywhere;line-height:1.45;
   }
   .dlg-name.me{background:var(--cta)}
   .dlg-text{font-size:15px;line-height:1.65;min-height:52px;font-weight:600}
@@ -1954,7 +1961,8 @@
   .personpop .pp-head .pic[data-rel="red"]{border-color:var(--bad);color:var(--bad)}
   .personpop .pp-head .pic[data-rel="blue"]{border-color:var(--contract);color:var(--contract)}
   .personpop .pp-head .pic[data-rel="black"]{border-color:var(--ink);color:var(--ink)}
-  .personpop .pp-name{font-weight:800;font-size:14.5px}
+  .personpop .pp-name{font-weight:800;font-size:14.5px;overflow-wrap:anywhere}
+  .personpop .pp-head>span{min-width:0}
   .personpop .pp-sub{font-size:11px;color:var(--ink-soft)}
   .personpop table{width:100%;border-collapse:collapse}
   .personpop td{padding:2.5px 4px;vertical-align:top}
@@ -2078,13 +2086,21 @@
     background-image:linear-gradient(to right, color-mix(in srgb,var(--ink) 22%,transparent) 1px, transparent 1px);
     background-size:20% 100%;overflow:hidden}
   #qcdHud .qcdbar i{display:block;height:100%;border-radius:4px;transition:width .6s ease}
-  #gl3dCap{display:none;position:absolute;right:8px;bottom:8px;z-index:32;width:min(330px,86%);
-    background:var(--card);border:2px solid var(--card-border);border-radius:8px;padding:10px 30px 10px 12px;
+  /* 部材ポップアップ：情報は見出し＋施工方法1〜3行＋現在の作業1行だけに絞る。
+     閉じるボタンは絶対配置で本文に重ねず、見出し行の中に置く（本文が長く
+     なっても／狭幅でも見切れない）。万一はみ出す場合はポップアップ内部で
+     スクロールし、ステージ外へは伸びない */
+  #gl3dCap{display:none;position:absolute;right:8px;bottom:8px;z-index:32;width:min(330px,calc(100% - 16px));
+    max-height:calc(100% - 76px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+    background:var(--card);border:2px solid var(--card-border);border-radius:8px;padding:10px 12px 11px;
     font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.25)}
   #gl3dCap.show{display:block}
-  #gl3dCap h4{margin:0 0 3px;font-size:13px}
-  #gl3dCap .g3row{display:flex;justify-content:space-between;gap:8px;padding:1.5px 0;border-top:1px dashed var(--line)}
-  #gl3dCap .g3close{position:absolute;top:4px;right:4px;width:26px !important;height:26px;margin:0 !important;padding:0 !important;text-align:center !important;font-size:15px;line-height:1}
+  #gl3dCap .g3head{display:flex;align-items:flex-start;gap:8px;margin:0 0 4px}
+  #gl3dCap .g3head h4{flex:1;min-width:0;margin:2px 0 0;font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+  #gl3dCap .g3desc{margin:0;font-size:12.5px;line-height:1.6}
+  #gl3dCap .g3stat{margin:6px 0 0;padding-top:6px;border-top:1px dashed var(--line);font-size:11.5px;line-height:1.5;color:var(--ink-soft)}
+  #gl3dCap .g3stat b{color:var(--ink)}
+  #gl3dCap .g3close{position:static;flex:none;width:32px !important;height:32px;margin:0 !important;padding:0 !important;display:flex !important;align-items:center;justify-content:center;text-align:center !important;font-size:17px;line-height:1;border-radius:8px}
   /* 3Dの＋／−ボタン：ステージ右端のオーバーレイ（縦積み・大きめのタップ領域）。
      3D表示中だけ出す。操作レーンに入れると電話幅ではみ出して押せなくなる */
   .g3ctl{display:none;position:absolute;right:8px;top:56px;z-index:31;flex-direction:column;gap:5px}
@@ -2467,7 +2483,8 @@
        凡例と重ねない。キャプションは幅いっぱいで読みやすくする */
     #gl3dLegend{font-size:9.5px;bottom:5px;left:5px;max-width:calc(100% - 10px)}
     #isoLegend{max-width:calc(100% - 10px)}
-    #gl3dCap{top:70px;bottom:auto;right:6px;left:6px;width:auto;font-size:11.5px}
+    #gl3dCap{top:70px;bottom:auto;right:6px;left:6px;width:auto;max-height:calc(100% - 78px);font-size:11.5px}
+    #gl3dCap .g3desc{font-size:12px}
     /* 会話UI：名前・本文・選択肢が電話幅でも収まるように詰める。
        セリフ履歴の見出しは折り返してページャと閉じるを押せるままにする */
     .dlg-window{margin:0 5px 5px;padding:13px 10px 8px;min-height:104px}
@@ -6224,6 +6241,7 @@ function nextDay(){
   }
   S.day++;
   repairFinished(S.day - 1); /* 前日までに完了へ届いたタスクの完了日を補う（後続が翌日から動けるように） */
+  if(typeof repairStaleWaits === 'function') repairStaleWaits(); /* 対話が処理済みなのに残った待ちフラグを畳む（見えない待ちの防止） */
   /* 閉所日程：その日の閉所実績を確定し、連続作業日数を数える。
      閉所が少ないまま連続作業が続くと、監督の疲労が抜けずに蓄積する */
   S.closeHist[S.day] = closedByLv(S.closeLv, S.day);
@@ -6734,6 +6752,7 @@ function renderPlanGuide(){
     '<span>① 置き場をタップ</span>' +
     '<span>② 業者を選ぶだけ（常時割当）— 問題が起きるまで置きっぱなしでOK</span>' +
     '<span>③ 足場の帯をタップ</span>' +
+    '<span>④ 終わったら「計画を終わる」を押す（Enterでも終了できます）— 朝の自動開始が再開します</span>' +
     '<button type="button" data-planact="exit">計画を終わる ✓</button>';
   var h = '';
   if(PLAN_SPOT){
@@ -11948,6 +11967,87 @@ function g3BuildDynamic(now){
     g3Worker(a, evHX, G3GY, evLane - 9, G3TRADE.tobi, now / 200); /* 荷下ろしの合図 */
     g3Worker(a, evHX - 5, G3GY, evLane - 9, G3TRADE.doboku, now / 215 + 2); /* 荷さばき */
   }
+  /* ===== 人物の出現・退場経路（見せ方のみ：人数・担当・進捗は変えない） =====
+     作業員・監督は持ち場に突然現れない。地上の者は現場ゲート（南東）から、
+     仮設事務所が立っていれば一部の者は事務所から入り、南側レーンを通って
+     持ち場へ向かう。2F以上は階段（コアの階段シャフト）から出てきて、
+     階段がまだ使えない建方中は、鉄骨柱に架けたはしご（下で描画）を登る。
+     朝礼の集合・夕礼への移動・持ち場替えも同じ経路をたどる */
+  var WR = (G3.wr = G3.wr || {});
+  var wrFrame = (G3.wrFrame = (G3.wrFrame || 0) + 1);
+  var laneZ = g3Z(foot2.y0) + 14;
+  var gatePt = {x:g3X(foot2.x1) + 12, y:G3GY, z:laneZ};
+  var offPt = null;
+  if(g3Started('prepOff')) offPt = {x:g3X(foot2.x0 - 26000 + 2000) + 3.5, y:G3GY, z:g3Z(foot2.y1 + 30000 - 2000) - 13.5};
+  var wrLadders = {};
+  function wrEntry(key, preferOffice){
+    if(offPt && (preferOffice || hashOf(key) % 3 === 0)) return {x:offPt.x, y:G3GY, z:offPt.z};
+    return {x:gatePt.x, y:G3GY, z:gatePt.z};
+  }
+  /* 昇降路の選択：その階へ届く階段（所属工区の打設が済んだ階段シャフト）が
+     あれば階段、無ければ南面の柱に架けるはしご */
+  function wrAccess(fl, z){
+    if(!z || fl < 2) return null;
+    var L = null; try{ L = g3CoreLayout(); }catch(e){}
+    if(L && L.stairs && L.stairs.length){
+      var best = null, bd = 1e18;
+      L.stairs.forEach(function(st){
+        var zkSt = st.zone[Math.max(1, fl - 1)];
+        if(!zkSt || !(g3Done(zkSt + '_pour') || g3Done('structDone'))) return;
+        var sx = st.x + st.w / 2, sy = st.y + st.d / 2;
+        var dx = sx - (z.x0 + z.x1) / 2, dy = sy - (z.y0 + z.y1) / 2, dd = dx * dx + dy * dy;
+        if(dd < bd){ bd = dd; best = {sx:sx, sy:sy}; }
+      });
+      if(best) return {kind:'stair', bx:g3X(best.sx), bz:g3Z(best.sy), tx:g3X(best.sx), tz:g3Z(best.sy)};
+    }
+    var lx = g3X((z.x0 + z.x1) / 2), lz = g3Z(z.y0) + 0.4;
+    return {kind:'ladder', bx:lx, bz:lz + 1.1, tx:lx, tz:lz + 0.1, lx:lx, lz:lz};
+  }
+  /* key ごとの現在位置を経路に沿って進める。目標（フェーズ・日・持ち場）が
+     変わったら、前位置（同日内）または入口から経路を組み直す */
+  function wrPos(key, tx, ty, tz, fl, z, preferOffice, fromHint){
+    var sig = S.day + '|' + S.phase + '|' + Math.round(tx) + ',' + Math.round(ty * 2) + ',' + Math.round(tz);
+    var e = WR[key];
+    if(!e || e.sig !== sig){
+      var fresh = !(e && S.day === e.day);
+      var from = fresh ? (fromHint ? {x:fromHint.x, y:fromHint.y, z:fromHint.z} : wrEntry(key, preferOffice)) : {x:e.x, y:e.y, z:e.z};
+      var elevated = ty > 1.0;
+      var acc = elevated ? wrAccess(fl, z) : null;
+      var pts = [{x:from.x, y:from.y, z:from.z}];
+      var priorAcc = e ? e.acc : (fromHint ? fromHint.acc : null);
+      if(priorAcc && from.y > 1.0){ /* 前の持ち場が高所なら同じ昇降路で降りる */
+        pts.push({x:priorAcc.tx, y:from.y, z:priorAcc.tz});
+        pts.push({x:priorAcc.bx, y:G3GY, z:priorAcc.bz});
+      }
+      if(elevated && acc){
+        pts.push({x:acc.bx, y:G3GY, z:acc.bz});
+        pts.push({x:acc.tx, y:ty, z:acc.tz});
+      } else if(elevated){
+        pts.push({x:tx, y:G3GY, z:tz}); /* 足場の昇降設備などで真下まで来て上がる */
+      } else if(Math.abs(tx - from.x) > 8){
+        pts.push({x:tx, y:G3GY, z:laneZ});
+      }
+      pts.push({x:tx, y:ty, z:tz});
+      var len = 0;
+      for(var i2 = 1; i2 < pts.length; i2++){ var dx2 = pts[i2].x - pts[i2 - 1].x, dy2 = pts[i2].y - pts[i2 - 1].y, dz2 = pts[i2].z - pts[i2 - 1].z; len += Math.sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2); }
+      var dur = Math.max(1.2, Math.min(9, len / 8));
+      e = WR[key] = {sig:sig, day:S.day, pts:pts, len:Math.max(0.001, len), t0:now + (fresh && !fromHint ? (hashOf(key) % 5) * 300 : 0), dur:dur * 1000, acc:acc, x:from.x, y:from.y, z:from.z, seen:wrFrame};
+    }
+    e.seen = wrFrame;
+    if(e.acc && e.acc.kind === 'ladder' && ty > 1.0) wrLadders[(z ? (Math.round(e.acc.lx * 2) + '|' + fl) : key)] = {lx:e.acc.lx, lz:e.acc.lz, topY:ty};
+    var u = (now - e.t0) / e.dur;
+    if(u >= 1){ e.x = tx; e.y = ty; e.z = tz; return {x:tx, y:ty, z:tz, arrived:true}; }
+    if(u <= 0) return {x:e.x, y:e.y, z:e.z, arrived:false};
+    var dist = u * e.len, acc2 = 0, px = e.pts[0].x, py = e.pts[0].y, pz = e.pts[0].z;
+    for(var i3 = 1; i3 < e.pts.length; i3++){
+      var q = e.pts[i3], p = e.pts[i3 - 1];
+      var sx2 = q.x - p.x, sy2 = q.y - p.y, sz2 = q.z - p.z, sl = Math.sqrt(sx2 * sx2 + sy2 * sy2 + sz2 * sz2);
+      if(acc2 + sl >= dist){ var f3 = sl > 0 ? (dist - acc2) / sl : 0; px = p.x + sx2 * f3; py = p.y + sy2 * f3; pz = p.z + sz2 * f3; break; }
+      acc2 += sl; px = q.x; py = q.y; pz = q.z;
+    }
+    e.x = px; e.y = py; e.z = pz;
+    return {x:px, y:py, z:pz, arrived:false};
+  }
   /* 作業員：進行中タスクの場所に、その工種の出面ぶん（上限つき）。
      建物に隠れる人物は描かない（D-02）：屋外（地上・外壁面）か、フォーカス階 VF の作業だけ */
   var supSeen = {};
@@ -12002,18 +12102,41 @@ function g3BuildDynamic(now){
     if(S.phase !== 'work'){ /* 朝礼・夕礼の間は持ち場ではなく南ヤードに集まる（下の集団表示に任せる） */ return; }
     var colr = g3TradeColor(t);
     var n = crewN(t);
+    /* 経路用の階・所属矩形：工区作業はその工区、外壁は足場の真下から、
+       屋上は階段／はしごで屋上まで */
+    var flR = z ? parseInt(t.zone.charAt(1), 10) : (extM ? parseInt(extM[2], 10) : 1);
+    var zR = z || (/^(roof|rf|lps)/.test(t.id) ? foot2 : null);
+    var kFor = null; try{ kFor = (typeof foremanOf === 'function') ? foremanOf(t) : null; }catch(e){}
     for(var w = 0; w < n; w++){
       /* 持ち場の中を歩き回る（往来）：以前は全員が置いた座標に立ち続けており、
-         ボブも小さく「人が動いていない」絵になっていた */
+         ボブも小さく「人が動いていない」絵になっていた。到着後の往来は
+         経路の終点に重ね、移動中は経路そのものが歩行になる */
       var wob = Math.sin(now / 3400 + h * 1.93 + w * 2.39) * 3.1;
-      g3Worker(a, cx2 + (w - (n - 1) / 2) * 2.7 + (wax === 'x' ? wob : 0), cy2, cz2 + ((w % 2) ? 1.7 : -1.4) + (wax === 'z' ? wob : 0), colr, now / 170 + w * 2 + h);
-      if(w === 0 && !G3.spk.work) G3.spk.work = {x:cx2, y:cy2 + 3.4, z:cz2};
-      if(w === 1 && !G3.spk.fore) G3.spk.fore = {x:cx2 + 2.7, y:cy2 + 3.4, z:cz2 - 1.4};
+      var hint = (kFor && WR['am:' + kFor + ':' + w] && WR['am:' + kFor + ':' + w].day === S.day) ? WR['am:' + kFor + ':' + w] : null;
+      var rp = wrPos(t.id + ':' + w, cx2 + (w - (n - 1) / 2) * 2.7, cy2, cz2 + ((w % 2) ? 1.7 : -1.4), flR, zR, false, hint);
+      var wx2 = rp.x + (rp.arrived && wax === 'x' ? wob : 0), wz2 = rp.z + (rp.arrived && wax === 'z' ? wob : 0);
+      g3Worker(a, wx2, rp.y, wz2, colr, now / 170 + w * 2 + h);
+      if(w === 0 && !G3.spk.work) G3.spk.work = {x:wx2, y:rp.y + 3.4, z:wz2};
+      if(w === 1 && !G3.spk.fore) G3.spk.fore = {x:wx2, y:rp.y + 3.4, z:wz2};
     }
     /* 監督（白ヘルメット・紺）は工区ごとに1人 */
     var skey = t.zone || t.id;
-    if(sup && !supSeen[skey]){ supSeen[skey] = 1; g3Worker(a, cx2 + 4.6, cy2, cz2 + 5.2, [0.16,0.23,0.38], now / 420); if(!G3.spk.sup) G3.spk.sup = {x:cx2 + 4.6, y:cy2 + 3.4, z:cz2 + 5.2}; }
+    if(sup && !supSeen[skey]){ supSeen[skey] = 1; var rsp = wrPos('sup:' + skey, cx2 + 4.6, cy2, cz2 + 5.2, flR, zR, true, WR['pmsup']); g3Worker(a, rsp.x, rsp.y, rsp.z, [0.16,0.23,0.38], now / 420); if(!G3.spk.sup) G3.spk.sup = {x:rsp.x, y:rsp.y + 3.4, z:rsp.z}; }
   });
+  /* はしごの描画：階段がまだ使えない工区では、南面の鉄骨柱に架けたはしごで
+     昇降する（支柱2本＋段＋上部の柱への取り付けバンド）。その持ち場で
+     働く者がいる間は出し続ける */
+  Object.keys(wrLadders).forEach(function(k){
+    var Ld = wrLadders[k], topY = Math.max(Ld.topY, FH) + 0.35, cL = [0.80, 0.58, 0.10];
+    [-0.34, 0.34].forEach(function(off){ g3Seg(a, Ld.lx + off, G3GY, Ld.lz + 1.1, Ld.lx + off, topY, Ld.lz + 0.12, 0.05, 0.05, cL); });
+    var nR = Math.max(2, Math.floor((topY - G3GY) / 0.8));
+    for(var ri = 1; ri < nR; ri++){
+      var fr = ri / nR, ry2 = G3GY + (topY - G3GY) * fr, rz2 = (Ld.lz + 1.1) + ((Ld.lz + 0.12) - (Ld.lz + 1.1)) * fr;
+      g3Box(a, Ld.lx - 0.34, ry2 - 0.04, rz2 - 0.04, Ld.lx + 0.34, ry2 + 0.04, rz2 + 0.04, cL);
+    }
+    g3Box(a, Ld.lx - 0.52, topY - 0.55, Ld.lz - 0.12, Ld.lx + 0.52, topY - 0.38, Ld.lz + 0.3, [0.30, 0.30, 0.32]);
+  });
+  Object.keys(WR).forEach(function(k){ if(WR[k].day !== S.day && WR[k].seen < wrFrame - 1) delete WR[k]; }); /* 経路の記憶は当日中は保持（夕礼への移動で朝・作業中の位置から継ぐため） */
   /* 担当者の巡回：作業中は建物の周りを一周して回る（全工区巡回が仕事の基本。
      往来の要として、止まっている監督とは別に歩く姿を常時出す） */
   if(workPhase){
@@ -12037,19 +12160,29 @@ function g3BuildDynamic(now){
       var colr = null; try{ var n2 = parseInt(TRADES[k].color.slice(1), 16); colr = [((n2 >> 16) & 255) / 255, ((n2 >> 8) & 255) / 255, (n2 & 255) / 255]; }catch(e){ colr = [0.4,0.4,0.4]; }
       var baseX = g3X(foot2.x0 + 16000) + (ki % 3) * 34, baseZ = ry + Math.floor(ki / 3) * 6;
       var nw = Math.min(6, tc.count);
-      for(var w2 = 0; w2 < nw; w2++) g3Worker(a, baseX + w2 * 2.7, G3GY, baseZ, colr, now / 500 + ki * 7 + w2);
-      if(ki === 0){ G3.spk.fore = {x:baseX + 2.7, y:G3GY + 3.4, z:baseZ}; G3.spk.work = {x:baseX, y:G3GY + 3.4, z:baseZ}; }
+      for(var w2 = 0; w2 < nw; w2++){
+        /* 朝の登場も経路つき：ゲート／仮設事務所から入って整列位置まで歩く */
+        var rpa = wrPos('am:' + k + ':' + w2, baseX + w2 * 2.7, G3GY, baseZ, 1, null, false);
+        g3Worker(a, rpa.x, rpa.y, rpa.z, colr, now / 500 + ki * 7 + w2);
+        if(ki === 0 && w2 === 0) G3.spk.work = {x:rpa.x, y:rpa.y + 3.4, z:rpa.z};
+        if(ki === 0 && w2 === 1) G3.spk.fore = {x:rpa.x, y:rpa.y + 3.4, z:rpa.z};
+      }
       ki++;
     });
-    if(ki){ g3Worker(a, g3X(foot2.x0 + 16000) + 12, G3GY, ry - 6.5, [0.16,0.23,0.38], now / 420); G3.spk.sup = {x:g3X(foot2.x0 + 16000) + 12, y:G3GY + 3.4, z:ry - 6.5}; } /* 担当者（列の前） */
+    if(ki){ var rpm = wrPos('pmsup', g3X(foot2.x0 + 16000) + 12, G3GY, ry - 6.5, 1, null, true); g3Worker(a, rpm.x, rpm.y, rpm.z, [0.16,0.23,0.38], now / 420); G3.spk.sup = {x:rpm.x, y:rpm.y + 3.4, z:rpm.z}; } /* 担当者（列の前） */
   } else if(S.phase === 'evening'){
     var ey = g3Z(foot2.y0) + 14, ex0 = g3X(foot2.x0 + 20000);
-    g3Worker(a, ex0, G3GY, ey, [0.16,0.23,0.38], now / 420);
-    G3.spk.sup = {x:ex0, y:G3GY + 3.4, z:ey}; G3.spk.fore = {x:ex0 + 4, y:G3GY + 3.4, z:ey + 2.6};
+    /* 夕礼への移動も経路つき：担当者は朝礼位置／持ち場から、職長は
+       持ち場（高所なら階段／はしごを降りて）から集まってくる */
+    var rpe = wrPos('pmsup', ex0, G3GY, ey, 1, null, true);
+    g3Worker(a, rpe.x, rpe.y, rpe.z, [0.16,0.23,0.38], now / 420);
+    G3.spk.sup = {x:rpe.x, y:G3GY + 3.4, z:rpe.z}; G3.spk.fore = {x:ex0 + 4, y:G3GY + 3.4, z:ey + 2.6};
     var ek = 0;
     act.forEach(function(t){ if(ek >= 3) return; var k2 = null; try{ k2 = foremanOf(t); }catch(e){}
       if(!k2 || supSeen['eve' + k2]) return; supSeen['eve' + k2] = 1;
-      g3Worker(a, ex0 + 4 + ek * 3.4, G3GY, ey + 2.6, g3TradeColor(t), now / 500 + ek * 3); ek++; });
+      var hintE = WR[t.id + ':0'] || WR['am:' + k2 + ':0'];
+      var rpf = wrPos('ev:' + k2, ex0 + 4 + ek * 3.4, G3GY, ey + 2.6, 1, null, false, hintE);
+      g3Worker(a, rpf.x, rpf.y, rpf.z, g3TradeColor(t), now / 500 + ek * 3); ek++; });
   }
   /* 未確認先行の琥珀マーカーは静的側で面表現済み。ここでは追加しない */
   return new Float32Array(a);
@@ -12268,61 +12401,71 @@ function g3PickAt(cx, cy){
   if(!cap) return;
   if(!best){ g3CloseCap(); return; }
   G3.selInfo = best.key;
+  /* 表示は「施工方法など1〜3行＋現在の作業1行」だけ。全タスクの進捗表は
+     出さない（詳細は工程表で見る）。閉じるボタンは見出し行の中に置く */
+  function g3Stat(ids){
+    var pick = null, last = null;
+    for(var i = 0; i < ids.length; i++){ var t0 = T(ids[i]); if(!t0) continue; last = ids[i]; if(!g3Done(ids[i])){ pick = ids[i]; break; } }
+    var id = pick || last; if(!id) return '';
+    var t = T(id);
+    return '<p class="g3stat">いま：<b>' + t.name + '</b> ― ' + g3StateTxt(id) + ' ' + Math.round(g3TL(id) * 100) + '%</p>';
+  }
+  function g3CapHtml(title, desc, ids){
+    return '<div class="g3head"><h4>' + title + '</h4>' +
+      '<button type="button" class="g3close" id="g3CapClose" aria-label="閉じる">×</button></div>' +
+      '<p class="g3desc">' + desc + '</p>' + g3Stat(ids);
+  }
   var h = '';
-  function row(id){ var t = T(id); if(!t) return ''; var pct = Math.round(g3TL(id) * 100);
-    return '<div class="g3row"><span>' + t.name + '</span><b>' + g3StateTxt(id) + ' ' + pct + '%</b></div>'; }
   if(best.key === 'found'){
     var fi = G3.zoneInfo.found || {piles:0, pilesTot:0};
-    h = '<h4>' + best.label + '</h4>' +
-      '<p class="small" style="margin:2px 0">部材：杭 ' + fi.piles + '／' + fi.pilesTot + ' 本（基礎系タスクの進捗へ按分）・地下ピット壁・基礎配筋／打設フロント</p>' +
-      row('earth1') + row('earth2') + row('foundR') + row('insF') + row('foundP');
+    h = g3CapHtml(best.label,
+      '掘削・山留めをして残土を搬出し、杭（' + fi.piles + '／' + fi.pilesTot + '本）と地下ピットを造る。基礎は型枠・配筋を組み、配筋検査を受けてからコンクリートを打設する。',
+      ['earth1','earth2','foundR','insF','foundP']);
     try{ S.sel = g3Done('foundP') ? 'foundP' : (g3Started('foundR') ? 'foundR' : 'earth1'); }catch(e){}
   } else if(best.key.indexOf('ext') === 0){
     var F2 = best.key.slice(3);
-    h = '<h4>' + best.label + '</h4>' +
-      '<p class="small" style="margin:2px 0">外装のレーン：ALCパネル（1枚ずつ）→サッシ→シーリング→仕上げ／養生。足場は必要な面だけに立ち、解体した面がその面の外装完了</p>' +
-      row('scup' + F2);
-    for(var pf2 = 1; pf2 <= NF; pf2++) h += row('ext' + F2 + pf2 + '_alc') + row('ext' + F2 + pf2 + '_sash') + row('ext' + F2 + pf2 + '_seal') + row('insSeal' + pf2) + row('ext' + F2 + pf2 + '_fin');
-    h += row('scaf' + F2);
+    var extIds = ['scup' + F2];
+    for(var pf2 = 1; pf2 <= NF; pf2++) extIds.push('ext' + F2 + pf2 + '_alc', 'ext' + F2 + pf2 + '_sash', 'ext' + F2 + pf2 + '_seal', 'insSeal' + pf2, 'ext' + F2 + pf2 + '_fin');
+    extIds.push('scaf' + F2);
+    h = g3CapHtml(best.label,
+      '外部足場からALCパネルを1枚ずつ建て込み、サッシを取り付ける。目地をシーリングして止水し、仕上げ・養生してその面を完了する。',
+      extIds);
     try{ S.sel = 'scup' + F2; }catch(e){}
   } else if(best.key === 'roof'){
-    h = '<h4>' + best.label + '</h4>' +
-      '<p class="small" style="margin:2px 0">防水の順序：下地→立上り・平場の防水→保護コンクリート→笠木→ドレン通水確認（ゲート）。室外機は基礎→据付→配管→試運転（受電後）</p>' +
-      row('roof0') + row('roofDr') + row('roof1') + row('roof2') + row('roofKasa') + row('roofFlow') +
-      row('rfBase') + row('rfSet') + row('rfPipe') + row('rfTest') + row('lpsTest') + row('roofRail') + row('roofDone');
+    h = g3CapHtml(best.label,
+      '下地を整え、立上りから平場へ防水層を重ね、保護コンクリートと笠木で仕上げる。ドレンの通水を確認し、室外機は据付・配管後に試運転する。',
+      ['roof0','roofDr','roof1','roof2','roofKasa','roofFlow','rfBase','rfSet','rfPipe','rfTest','lpsTest','roofRail','roofDone']);
     try{ S.sel = 'roof0'; }catch(e){}
   } else if(best.key === 'pw'){
-    h = '<h4>' + best.label + '</h4>' +
-      '<p class="small" style="margin:2px 0">申請→発注（納期）→基礎→キュービクル据付→配線・接地→自主検査→受電。受電がゲート：空調の試運転・EV試運転・器具の点灯は受電後だけ動く</p>' +
-      row('pwApply') + row('pwOrder') + row('pwFound') + row('pwSet') + row('pwWire') + row('pwSelf') + row('power');
+    h = g3CapHtml(best.label,
+      '基礎の上にキュービクルを据え付け、高圧ケーブルを配線・接地する。自主検査を経て電力会社の立会いで受電し、以降の試運転や点灯が可能になる。',
+      ['pwApply','pwOrder','pwFound','pwSet','pwWire','pwSelf','power']);
     try{ S.sel = 'pwSet'; }catch(e){}
   } else if(best.key === 'ev'){
-    h = '<h4>' + best.label + '</h4>' +
-      '<p class="small" style="margin:2px 0">シャフト（躯体完了後）→ガイドレール・機器搬入→据付・配線（受電後）→検査→試運転・調整→養生して引き渡し</p>' +
-      row('ev1') + row('ev2') + row('ev3') + row('ev4') + row('insEV') + row('ev5');
+    h = g3CapHtml(best.label,
+      '昇降路内にガイドレールを立て、かご・巻上機・制御盤を据え付ける。受電後に配線・試運転し、落成検査を受けてから養生して引き渡す。',
+      ['ev1','ev2','ev3','ev4','insEV','ev5']);
     try{ S.sel = 'ev1'; }catch(e){}
   } else if(best.key === 'gk'){
-    h = '<h4>' + best.label + '</h4>' +
-      '<p class="small" style="margin:2px 0">地面の推移：造成（土）→埋設（配管・桝／必ず舗装より前）→路盤→舗装→区画線・フェンス・照明・サイン・植栽。受水槽は基礎→FRP組立→引込→水質検査→給水開始</p>' +
-      row('gkSurv') + row('gkGrade') + row('gkDrain') + row('gkPipe') + row('gkBase') + row('gkAsph') + row('gkLine') + row('gkFence') + row('gkLight') + row('gkPlant') +
-      row('insGk') + row('wtFound') + row('wtTank') + row('wtConn') + row('wtQual') + row('gkClean') + row('gkDone');
+    h = g3CapHtml(best.label,
+      '埋設配管・桝は舗装より先に施工し、路盤→舗装→区画線・フェンス・植栽の順に仕上げる。受水槽は基礎上にFRPタンクを組み立て、給水を接続して水質検査を受ける。',
+      ['gkSurv','gkGrade','gkDrain','gkPipe','gkBase','gkAsph','gkLine','gkFence','gkLight','gkPlant','insGk','wtFound','wtTank','wtConn','wtQual','gkClean','gkDone']);
     try{ S.sel = 'gkGrade'; }catch(e){}
   } else {
     var zk = best.key, info = G3.zoneInfo[zk] || {cols:0, colsTot:0, beams:0, beamsTot:0};
     var zo = ZONES.find(function(z){ return z.zk === zk; });
-    h = '<h4>' + (zo ? zo.label : zk) + ' — 躯体</h4>' +
-      '<p class="small" style="margin:2px 0">部材：柱 ' + info.cols + '／' + info.colsTot + ' 本・梁 ' + info.beams + '／' + info.beamsTot + ' 本・デッキ／床配筋／スラブ打設フロント</p>' +
-      (info.stairs ? '<p class="small" style="margin:2px 0">階段コア：この工区に ' + info.stairs + ' 箇所（正式モデル：段・踊り場は打設進捗で組み上がり、スラブに開口が開く）</p>' : '') +
-      row(zk + '_frame') + row(zk + '_hon') + row(zk + '_deck') + row(zk + '_rebar') + row('ins' + zk + 'R') + row(zk + '_pour');
-    if(['_fit','_hvac','_plu','_ele','_board','_fin','_fix'].some(function(s){ return g3Started(zk + s); })){
-      h += '<p class="small" style="margin:5px 0 2px">内装・設備（天井裏の順序：ダクト→配管・ラック→室内機→下地→ボード。寄りズームで天井裏が見える）</p>' +
-        row(zk + '_fit') + row(zk + '_hvac') + row(zk + '_plu') + row(zk + '_ele') + row('ins' + zk + 'W') + row('ins' + zk + 'C') +
-        row(zk + '_board') + row(zk + '_fin') + row(zk + '_fix') +
-        '<p class="small" style="margin:2px 0">高所作業車：' + (g3Done('liftOut' + zo.f) ? '搬出済み' : g3Done('liftIn' + zo.f) ? 'この階に搬入済み' : g3Started('liftIn' + zo.f) ? '搬入中' : '未搬入') + '／器具の点灯は' + (g3Done('power') ? '受電済み（点灯）' : '受電前（消灯）') + '</p>';
-    }
+    var interior = ['_fit','_hvac','_plu','_ele','_board','_fin','_fix'].some(function(s){ return g3Started(zk + s); });
+    var counts = '（柱 ' + info.cols + '／' + info.colsTot + '本・梁 ' + info.beams + '／' + info.beamsTot + '本' + (info.stairs ? '・階段コア ' + info.stairs + '箇所' : '') + '）';
+    h = g3CapHtml((zo ? zo.label : zk) + (interior ? ' — 躯体・内装' : ' — 躯体'),
+      interior
+        ? '天井裏はダクト→配管・ラック→室内機の順に仕込み、検査後に天井を閉じる。LGS下地にボードを張って仕上げ、器具付け・試験を行う。' + counts
+        : '柱・梁をクレーンで建て込み本締めし、デッキプレートを敷く。床配筋とスリーブを仕込み、配筋検査を受けてからスラブを打設する。' + counts,
+      [zk + '_frame', zk + '_hon', zk + '_deck', zk + '_rebar', 'ins' + zk + 'R', zk + '_pour',
+       zk + '_fit', zk + '_hvac', zk + '_plu', zk + '_ele', 'ins' + zk + 'W', 'ins' + zk + 'C',
+       zk + '_board', zk + '_fin', zk + '_fix']);
     try{ S.sel = [zk + '_frame', zk + '_hon', zk + '_deck', zk + '_rebar', zk + '_pour'].find(function(id){ return !g3Done(id); }) || (zk + '_pour'); }catch(e){}
   }
-  cap.innerHTML = h + '<button type="button" class="g3close" id="g3CapClose" aria-label="閉じる">×</button>';
+  cap.innerHTML = h;
   cap.classList.add('show');
   var cb = document.getElementById('g3CapClose');
   if(cb) cb.addEventListener('click', function(){ g3CloseCap(); });
@@ -16437,6 +16580,15 @@ function openEnding(title, cap, bad){
    タイマーが消費されて二度と張り直されず、「Enter（＝すぐ作業開始ボタン）を
    押すまで進まない」状態になっていた。見張りは朝フェーズの間だけ生き、
    条件が揃わない間はカード側に理由（関係修復など）が出る */
+/* 残留した待ちフラグの修復：対応する対話が既に処理済み（巡回の停止判断は
+   済んだ／クレームは対象作業も原因も無い）なのにフラグだけ残ると、
+   dockPauseNeed 経由で朝の自動開始が永久に止まり、画面には何の待ちも
+   出ていない「見えない待ち」になる。実害のない残留だけをここで畳む */
+function repairStaleWaits(){
+  if(!S || DLG) return;
+  if(S.patrolCrit && S._patrolDlgDone) S.patrolCrit = false;
+  if(S.claimActive && !S.claimTask && !S.claimCause) S.claimActive = false;
+}
 function armMorningStart(day){
   var now = Date.now();
   if(S._asArmDay === day && S._asArmBeat && now - S._asArmBeat < 12000) return; /* 見張りは生きている */
@@ -16445,6 +16597,7 @@ function armMorningStart(day){
     if(!S || S._asArmDay !== day) return;
     S._asArmBeat = Date.now();
     if(S.phase !== 'morning' || S.day !== day){ S._asArmDay = 0; return; }
+    repairStaleWaits();
     if(!DLG && !PLANMODE && !S.shock && !S.deferredShock && !pendingGreetings().length && !S.estPending && !S.celebOpen && !(S.celebQueue && S.celebQueue.length) && !timePaused()){
       S._asArmDay = 0; startWork(); return;
     }
@@ -18584,11 +18737,21 @@ function kbEnter(){
     return true;
   }
   if(typeof S === 'undefined' || !S) return false;
-  if(typeof PLANMODE !== 'undefined' && PLANMODE) return false; /* 計画モードは図面タップ専用 */
+  /* 計画モード中は Enter を「計画を終わる」に充てる。旧来は Enter が無反応で、
+     朝の自動開始も計画モードで止まったままになるため、計画を終える操作が
+     分からないと「止まって見える」状態になっていた */
+  if(typeof PLANMODE !== 'undefined' && PLANMODE){
+    var px = document.querySelector('[data-planact="exit"]');
+    if(px){ px.click(); return true; }
+    PLANMODE = false; PLAN_SPOT = null; PLAN_FACE = null; render();
+    return true;
+  }
+  /* 未対応クレームは #game の候補ボタンより先に受ける。作業中のカードに
+     別のボタン（選択解除など）があると、そちらが Enter を消費してしまい、
+     本来の待ち（クレーム対応）に Enter が届かなかった */
+  if(S.claimPending && !S.claimActive){ S.claimActive = true; openClaimDialog(); return true; }
   /* 6) アクションパネル：ハイライト中の候補（初期＝主アクション）を実行 */
   if(kbActivate()) return true;
-  /* 7) パネルに手がない場面の受け皿：未対応クレームは対応を開く */
-  if(S.claimPending && !S.claimActive){ S.claimActive = true; openClaimDialog(); return true; }
   /* 8) 検査の立会い警告バナー（強い警告が出ている時だけ、その主ボタンを押す） */
   var iw = document.querySelector('.inswarn.on #insWarnBtn');
   if(iw){ iw.click(); return true; }
